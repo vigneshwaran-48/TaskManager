@@ -48,7 +48,7 @@ public class UtilityController {
         calendar.setIconClassNames("fa fa-solid fa-calendar");
 
         SideNav stickyWall = new SideNav();
-        stickyWall.setId("side-nav-3");
+        stickyWall.setId("side-nav-4");
         stickyWall.setName("Sticky Wall");
         stickyWall.setIconClassNames("bi bi-sticky");
 
