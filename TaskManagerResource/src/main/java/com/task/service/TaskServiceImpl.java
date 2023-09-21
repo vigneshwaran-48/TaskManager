@@ -165,6 +165,13 @@ public class TaskServiceImpl implements TaskService {
 			return Optional.empty();
 		}
 		List<TaskDTO> taskDTOS = tasks.get().stream().map(this::toTaskDTO).toList();
+
+		try {
+			Thread.sleep(2000);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+
 		return Optional.of(taskDTOS);
 	}
 
@@ -181,6 +188,13 @@ public class TaskServiceImpl implements TaskService {
 		}
 		System.out.println(tasks.get());
 		List<TaskDTO> taskDTOS = tasks.get().stream().map(this::toTaskDTO).toList();
+
+		try {
+			Thread.sleep(2000);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+
 		return Optional.of(taskDTOS);
 	}
 

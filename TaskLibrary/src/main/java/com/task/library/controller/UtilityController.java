@@ -53,15 +53,10 @@ public class UtilityController {
         stickyWall.setIconClassNames("bi bi-sticky");
 
         Optional<List<TaskDTO>> tasks = taskService.findByDate(userId, LocalDate.now());
-        if(tasks.isPresent()) {
-            today.setCount(tasks.get().size());
-        }
+        tasks.ifPresent(taskDTOS -> today.setCount(taskDTOS.size()));
 
         Optional<List<TaskDTO>> upcomingTasks = taskService.getUpcomingTasks(userId);
-        System.out.println(upcomingTasks);
-        if(upcomingTasks.isPresent()) {
-            upComing.setCount(upcomingTasks.get().size());
-        }
+        upcomingTasks.ifPresent(taskDTOS -> upComing.setCount(taskDTOS.size()));
 
         SideNavResponse response = new SideNavResponse();
         response.setSideNavList(List.of(upComing, today, calendar, stickyWall));
