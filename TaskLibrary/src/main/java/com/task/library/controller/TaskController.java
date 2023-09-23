@@ -185,11 +185,32 @@ public class TaskController {
 
 		return ResponseEntity.ok(response);
 	}
+	@GetMapping("this-week")
+	public ResponseEntity<?> getThisWeekTasks() {
+		//Need to remove this hardcoded after spring sevurity enabled
+		//and get the user id from principal.
+		String userId = "12";
+		Optional<List<TaskDTO>> tasks = taskService.getThisWeekTasks(userId);
+
+		tasks.ifPresent(taskDTOS -> taskDTOS.forEach(this::fillWithLinks));
+
+		TaskListBodyResponse response = new TaskListBodyResponse();
+		response.setMessage("success");
+		response.setStatus(tasks.isPresent() && !tasks.get().isEmpty()
+				? HttpStatus.OK.value() : HttpStatus.NO_CONTENT.value());
+		response.setTasks(tasks.orElse(null));
+		response.setTime(LocalDateTime.now());
+		response.setPath(BASE_PATH + "/this-week");
+
+
+		return ResponseEntity.ok(response);
+	}
 	private void fillWithLinks(TaskDTO taskDTO) {
 		Map<String, Object> links = new HashMap<>();
 		links.put("self", BASE_PATH + "/" + taskDTO.getTaskId());
 		links.put("today", BASE_PATH + "/today");
 		links.put("upcoming", BASE_PATH + "/upcoming");
+		links.put("thisWeek", BASE_PATH + "/this-week");
 		links.put("update", BASE_PATH + "/" + taskDTO.getTaskId());
 		links.put("delete", BASE_PATH + "/" + taskDTO.getTaskId());
 		links.put("allLists", LIST_BASE_PATH + "/bytask/" + taskDTO.getTaskId());

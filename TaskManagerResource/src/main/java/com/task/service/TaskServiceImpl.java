@@ -1,6 +1,8 @@
 package com.task.service;
 
+import java.time.DayOfWeek;
 import java.time.LocalDate;
+import java.time.temporal.TemporalAdjusters;
 import java.util.List;
 import java.util.Optional;
 
@@ -180,13 +182,11 @@ public class TaskServiceImpl implements TaskService {
 		if(userId == null) {
 			throw new IllegalArgumentException("User id is empty");
 		}
-		System.out.println(LocalDate.now());
 		Optional<List<Task>> tasks =
 				taskRepository.findByUserIdAndDueDateGreaterThan(userId, LocalDate.now());
 		if(tasks.isEmpty()) {
 			return Optional.empty();
 		}
-		System.out.println(tasks.get());
 		List<TaskDTO> taskDTOS = tasks.get().stream().map(this::toTaskDTO).toList();
 
 		try {
@@ -195,6 +195,21 @@ public class TaskServiceImpl implements TaskService {
 			e.printStackTrace();
 		}
 
+		return Optional.of(taskDTOS);
+	}
+
+	@Override
+	public Optional<List<TaskDTO>> getThisWeekTasks(String userId) {
+		LocalDate today = LocalDate.now();
+		LocalDate nextSaturday = today.with(TemporalAdjusters.nextOrSame(DayOfWeek.SATURDAY));
+
+		Optional<List<Task>> tasks =
+				taskRepository.findByUserIdAndDueDateGreaterThanEqualAndDueDateLessThanEqual(userId,
+								today, nextSaturday);
+		if(tasks.isEmpty()) {
+			return Optional.empty();
+		}
+		List<TaskDTO> taskDTOS = tasks.get().stream().map(this::toTaskDTO).toList();
 		return Optional.of(taskDTOS);
 	}
 
@@ -265,5 +280,10 @@ public class TaskServiceImpl implements TaskService {
 			taskDTO.setDescription(taskDTO.getDescription().trim());
 			taskDTO.setDescription(HtmlUtils.htmlEscape(taskDTO.getDescription()));
 		}
+	}
+
+	public static void main(String[] args) {
+		TaskService service = new TaskServiceImpl();
+		service.getThisWeekTasks("12");
 	}
 }
