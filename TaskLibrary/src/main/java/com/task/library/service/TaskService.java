@@ -28,4 +28,5 @@ public interface TaskService {
 
 	Optional<List<TaskDTO>> findByDate(String userId, LocalDate date);
 	Optional<List<TaskDTO>> getUpcomingTasks(String userId);
+	Optional<List<TaskDTO>> getThisWeekTasks(String userId);
 }

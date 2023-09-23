@@ -1,9 +1,11 @@
 package com.task.library.controller;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import com.task.library.dto.*;
 import com.task.library.exception.AlreadyExistsException;
@@ -141,9 +143,74 @@ public class TaskController {
 
 		return ResponseEntity.ok(response);
 	}
+
+	@GetMapping("today")
+	public ResponseEntity<?> getTodayTasks() {
+		//Need to remove this hardcoded after spring sevurity enabled
+		//and get the user id from principal.
+		String userId = "12";
+		List<TaskDTO> tasks = taskService.findByDate(userId, LocalDate.now()).orElse(null);
+
+		if(tasks != null) {
+			tasks.forEach(this::fillWithLinks);
+		}
+
+		TaskListBodyResponse response = new TaskListBodyResponse();
+		response.setMessage("success");
+		response.setStatus(tasks != null && !tasks.isEmpty()
+				? HttpStatus.OK.value() : HttpStatus.NO_CONTENT.value());
+		response.setTasks(tasks);
+		response.setTime(LocalDateTime.now());
+		response.setPath(BASE_PATH + "/today");
+
+		return ResponseEntity.ok(response);
+	}
+	@GetMapping("upcoming")
+	public ResponseEntity<?> getUpcomingTasks() {
+		//Need to remove this hardcoded after spring sevurity enabled
+		//and get the user id from principal.
+		String userId = "12";
+		Optional<List<TaskDTO>> tasks = taskService.getUpcomingTasks(userId);
+
+		tasks.ifPresent(taskDTOS -> taskDTOS.forEach(this::fillWithLinks));
+
+		TaskListBodyResponse response = new TaskListBodyResponse();
+		response.setMessage("success");
+		response.setStatus(tasks.isPresent() && !tasks.get().isEmpty()
+				? HttpStatus.OK.value() : HttpStatus.NO_CONTENT.value());
+		response.setTasks(tasks.orElse(null));
+		response.setTime(LocalDateTime.now());
+		response.setPath(BASE_PATH + "/upcoming");
+
+
+		return ResponseEntity.ok(response);
+	}
+	@GetMapping("this-week")
+	public ResponseEntity<?> getThisWeekTasks() {
+		//Need to remove this hardcoded after spring sevurity enabled
+		//and get the user id from principal.
+		String userId = "12";
+		Optional<List<TaskDTO>> tasks = taskService.getThisWeekTasks(userId);
+
+		tasks.ifPresent(taskDTOS -> taskDTOS.forEach(this::fillWithLinks));
+
+		TaskListBodyResponse response = new TaskListBodyResponse();
+		response.setMessage("success");
+		response.setStatus(tasks.isPresent() && !tasks.get().isEmpty()
+				? HttpStatus.OK.value() : HttpStatus.NO_CONTENT.value());
+		response.setTasks(tasks.orElse(null));
+		response.setTime(LocalDateTime.now());
+		response.setPath(BASE_PATH + "/this-week");
+
+
+		return ResponseEntity.ok(response);
+	}
 	private void fillWithLinks(TaskDTO taskDTO) {
 		Map<String, Object> links = new HashMap<>();
 		links.put("self", BASE_PATH + "/" + taskDTO.getTaskId());
+		links.put("today", BASE_PATH + "/today");
+		links.put("upcoming", BASE_PATH + "/upcoming");
+		links.put("thisWeek", BASE_PATH + "/this-week");
 		links.put("update", BASE_PATH + "/" + taskDTO.getTaskId());
 		links.put("delete", BASE_PATH + "/" + taskDTO.getTaskId());
 		links.put("allLists", LIST_BASE_PATH + "/bytask/" + taskDTO.getTaskId());

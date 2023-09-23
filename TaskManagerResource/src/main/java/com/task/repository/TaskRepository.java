@@ -18,7 +18,9 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
 	
 	Optional<List<Task>> findByUserId(String userId);
 	Optional<List<Task>> findByUserIdAndDueDate(String userId, LocalDate dueDate);
-	Optional<List<Task>> findByUserIdAndDueDateLessThan(String userId, LocalDate dueDate);
+	Optional<List<Task>>
+		findByUserIdAndDueDateGreaterThanEqualAndDueDateLessThanEqual(String userId,
+																	  LocalDate from, LocalDate to);
 	Optional<List<Task>> findByUserIdAndDueDateGreaterThan(String userId, LocalDate dueDate);
 
 	Optional<List<Task>> findByUserIdAndParentTask(String userId, Long parentTask);

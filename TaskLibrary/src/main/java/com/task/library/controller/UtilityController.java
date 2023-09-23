@@ -48,20 +48,15 @@ public class UtilityController {
         calendar.setIconClassNames("fa fa-solid fa-calendar");
 
         SideNav stickyWall = new SideNav();
-        stickyWall.setId("side-nav-3");
+        stickyWall.setId("side-nav-4");
         stickyWall.setName("Sticky Wall");
         stickyWall.setIconClassNames("bi bi-sticky");
 
         Optional<List<TaskDTO>> tasks = taskService.findByDate(userId, LocalDate.now());
-        if(tasks.isPresent()) {
-            today.setCount(tasks.get().size());
-        }
+        tasks.ifPresent(taskDTOS -> today.setCount(taskDTOS.size()));
 
         Optional<List<TaskDTO>> upcomingTasks = taskService.getUpcomingTasks(userId);
-        System.out.println(upcomingTasks);
-        if(upcomingTasks.isPresent()) {
-            upComing.setCount(upcomingTasks.get().size());
-        }
+        upcomingTasks.ifPresent(taskDTOS -> upComing.setCount(taskDTOS.size()));
 
         SideNavResponse response = new SideNavResponse();
         response.setSideNavList(List.of(upComing, today, calendar, stickyWall));
