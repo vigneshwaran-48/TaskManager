@@ -1,9 +1,7 @@
 package com.task.model;
 
 import java.time.LocalDate;
-import java.util.Date;
 
-import org.hibernate.annotations.UuidGenerator;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import com.task.library.dto.TaskDTO;

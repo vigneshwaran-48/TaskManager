@@ -3,11 +3,11 @@ package com.task.library.dto.utility;
 import java.time.LocalDateTime;
 import java.util.List;
 
-public class SideNavResponse {
+public class ListSideNavResponse {
     private String message;
     private int status;
     private LocalDateTime time;
-    private List<SideNav> sideNavList;
+    private List<ListSideNav> listSideNavList;
     private String path;
 
     public String getMessage() {
@@ -34,12 +34,12 @@ public class SideNavResponse {
         this.time = time;
     }
 
-    public List<SideNav> getSideNavList() {
-        return sideNavList;
+    public List<ListSideNav> getSideNavList() {
+        return listSideNavList;
     }
 
-    public void setSideNavList(List<SideNav> sideNavList) {
-        this.sideNavList = sideNavList;
+    public void setSideNavList(List<ListSideNav> listSideNavList) {
+        this.listSideNavList = listSideNavList;
     }
 
     public String getPath() {

@@ -66,11 +66,18 @@ public class TaskController {
 	}
 	
 	@GetMapping
-	public ResponseEntity<?> getAllTasksOfUser() {
+	public ResponseEntity<?> getAllTasksOfUser(@RequestParam Optional<LocalDate> dueDate) {
 		//Need to remove this hardcoded after spring sevurity enabled
 		//and get the user id from principal.
 		String userId = "12";
-		List<TaskDTO> tasks = taskService.listTaskOfUser(userId).orElse(null);
+		List<TaskDTO> tasks;
+
+		if(dueDate.isPresent()) {
+			tasks = taskService.findByDate(userId, dueDate.get()).orElse(null);
+		}
+		else {
+			tasks = taskService.listTaskOfUser(userId).orElse(null);
+		}
 		
 		if(tasks != null) {
 			tasks.forEach(this::fillWithLinks);
