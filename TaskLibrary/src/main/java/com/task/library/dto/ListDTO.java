@@ -11,6 +11,7 @@ public class ListDTO {
 	private String listName;
 	private String listColor;
 	private String userId;
+	private int taskCount;
 	private Map<String, Object> links;
 	
 	public Long getListId() {
@@ -42,6 +43,12 @@ public class ListDTO {
 	}
 	public void setLinks(Map<String, Object> links) {
 		this.links = links;
+	}
+	public int getTaskCount() {
+		return taskCount;
+	}
+	public void setTaskCount(int taskCount) {
+		this.taskCount = taskCount;
 	}
 	@Override
 	public String toString() {

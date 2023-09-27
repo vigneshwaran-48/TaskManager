@@ -37,7 +37,13 @@ public class ListServiceImpl implements ListService {
 		if(list.isEmpty()) {
 			return Optional.empty(); 
 		}
-		return Optional.of(toListDTO(list.get()));
+		Optional<java.util.List<TaskList>> taskLists = taskListRepository.findByList(list.get());
+
+		ListDTO listDTO = toListDTO(list.get());
+		if(taskLists.isPresent()) {
+			listDTO.setTaskCount(taskLists.get().size());
+		}
+		return Optional.of(listDTO);
 	}
 
 	@Override
@@ -50,7 +56,15 @@ public class ListServiceImpl implements ListService {
 		fillDefaultLists(lists.get());
 
 		java.util.List<ListDTO> listDTOs = lists.get().stream()
-												.map(this::toListDTO)
+												.map(list -> {
+													ListDTO listDTO = toListDTO(list);
+													Optional<java.util.List<TaskList>> taskLists = 
+														taskListRepository.findByList(list);
+													if(taskLists.isPresent()) {
+														listDTO.setTaskCount(taskLists.get().size());
+													}
+													return listDTO;
+												})
 												.toList();
 		return Optional.of(listDTOs);
 	}
