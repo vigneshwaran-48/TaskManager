@@ -71,5 +71,27 @@ public class List {
 		
 		return list;
 	}
+
+	public static ListDTO toListDTO(List list) {
+		
+		ListDTO listDTO = new ListDTO();
+		listDTO.setListId(list.getListId());
+		listDTO.setUserId(list.getUserId());
+		listDTO.setListName(list.getListName());
+		listDTO.setListColor(list.getListColor());
+		
+		return listDTO;
+	}
+
+	public ListDTO toListDTO() {
+		
+		ListDTO listDTO = new ListDTO();
+		listDTO.setListId(this.getListId());
+		listDTO.setUserId(this.getUserId());
+		listDTO.setListName(this.getListName());
+		listDTO.setListColor(this.getListColor());
+		
+		return listDTO;
+	}
 	
 }

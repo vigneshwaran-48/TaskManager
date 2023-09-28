@@ -15,4 +15,7 @@ public interface TaskListRepository extends JpaRepository<TaskList, Long> {
 	Optional<List<TaskList>> findByList(com.task.model.List list);
 	
 	Optional<List<TaskList>> findByTaskTaskId(Long taskId);
+
+	Optional<TaskList> findByTaskTaskIdAndListListId(Long taskId, Long listId);
+	
 }

@@ -39,7 +39,7 @@ public class ListServiceImpl implements ListService {
 		}
 		Optional<java.util.List<TaskList>> taskLists = taskListRepository.findByList(list.get());
 
-		ListDTO listDTO = toListDTO(list.get());
+		ListDTO listDTO = list.get().toListDTO();
 		if(taskLists.isPresent()) {
 			listDTO.setTaskCount(taskLists.get().size());
 		}
@@ -57,7 +57,7 @@ public class ListServiceImpl implements ListService {
 
 		java.util.List<ListDTO> listDTOs = lists.get().stream()
 												.map(list -> {
-													ListDTO listDTO = toListDTO(list);
+													ListDTO listDTO = list.toListDTO();
 													Optional<java.util.List<TaskList>> taskLists = 
 														taskListRepository.findByList(list);
 													if(taskLists.isPresent()) {
@@ -107,7 +107,7 @@ public class ListServiceImpl implements ListService {
 		checkAndUpdateList(existingList.get(), newList);
 		
 		List updatedList = listRepository.save(newList);
-		return Optional.of(toListDTO(updatedList));
+		return Optional.of(updatedList.toListDTO());
 	}
 
 	@Override
@@ -122,7 +122,7 @@ public class ListServiceImpl implements ListService {
 		}
 		java.util.List<ListDTO> lists = taskList.get()
 												.stream()
-												.map(tList -> toListDTO(tList.getList()))
+												.map(tList -> tList.getList().toListDTO())
 												.toList();
 		return Optional.of(lists);
 	}
@@ -145,17 +145,6 @@ public class ListServiceImpl implements ListService {
 		else {
 			listDTO.setListColor(listDTO.getListColor().trim());
 		}
-	}
-	
-	private ListDTO toListDTO(List list) {
-		
-		ListDTO listDTO = new ListDTO();
-		listDTO.setListId(list.getListId());
-		listDTO.setUserId(list.getUserId());
-		listDTO.setListName(list.getListName());
-		listDTO.setListColor(list.getListColor());
-		
-		return listDTO;
 	}
 	
 	private void checkAndUpdateList(List existingList, List newList) {

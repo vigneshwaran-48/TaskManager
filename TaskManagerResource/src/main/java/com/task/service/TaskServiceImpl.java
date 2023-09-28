@@ -6,6 +6,8 @@ import java.time.temporal.TemporalAdjusters;
 import java.util.List;
 import java.util.Optional;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.util.HtmlUtils;
@@ -15,19 +17,26 @@ import com.task.library.dto.TaskDTO;
 import com.task.library.exception.AlreadyExistsException;
 import com.task.library.exception.TaskNotFoundException;
 import com.task.library.service.ListService;
+import com.task.library.service.TaskListService;
 import com.task.library.service.TaskService;
 import com.task.model.Task;
+import com.task.model.TaskList;
+import com.task.repository.TaskListRepository;
 import com.task.repository.TaskRepository;
 
 @Service
 public class TaskServiceImpl implements TaskService {
+
+	private static final Logger LOGGER = LoggerFactory.getLogger(TaskServiceImpl.class);
 
 	@Autowired
 	private TaskRepository taskRepository;
 	
 	@Autowired
 	private ListService listService;
-	
+
+	@Autowired
+	private TaskListService taskListService;
 	
 	@Override
 	public Optional<TaskDTO> findTaskById(String userId, Long taskId) {
@@ -99,8 +108,19 @@ public class TaskServiceImpl implements TaskService {
 			checkSameTaskName(newTask);
 		}
 		Task task = taskRepository.save(newTask);
+		LOGGER.info("Updated task => " + task.getTaskId());
+
+		List<ListDTO> lists = taskDTO.getLists();
+		TaskDTO updatedTask = toTaskDTO(task);
 		
-		return toTaskDTO(task);
+		if(!lists.isEmpty()) {
+			List<ListDTO> updatedLists = taskListService.addListsToTask(updatedTask, lists);
+		
+			updatedTask.setLists(updatedLists);
+			LOGGER.info("Saved Lists related to task => " + updatedTask.getTaskId());
+		}
+		
+		return updatedTask;
 	}
 
 	@Override
@@ -280,10 +300,5 @@ public class TaskServiceImpl implements TaskService {
 			taskDTO.setDescription(taskDTO.getDescription().trim());
 			taskDTO.setDescription(HtmlUtils.htmlEscape(taskDTO.getDescription()));
 		}
-	}
-
-	public static void main(String[] args) {
-		TaskService service = new TaskServiceImpl();
-		service.getThisWeekTasks("12");
 	}
 }
