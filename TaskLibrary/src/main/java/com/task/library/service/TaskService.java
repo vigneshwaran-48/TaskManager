@@ -18,7 +18,7 @@ public interface TaskService {
 	
 	Long createTask(TaskDTO taskDTO) throws Exception;
 	
-	TaskDTO updateTask(TaskDTO taskDTO) throws TaskNotFoundException, AlreadyExistsException;
+	TaskDTO updateTask(TaskDTO taskDTO, boolean removeList) throws TaskNotFoundException, AlreadyExistsException;
 	
 	Long deleteTask(String userId, Long taskId);
 	

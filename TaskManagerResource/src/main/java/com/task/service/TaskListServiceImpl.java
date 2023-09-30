@@ -1,7 +1,9 @@
 package com.task.service;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -20,7 +22,11 @@ public class TaskListServiceImpl implements TaskListService {
 	private TaskListRepository taskListRepository;
 
     @Override
-    public List<ListDTO> addListsToTask(TaskDTO task, List<ListDTO> lists) {
+    public List<ListDTO> addListsToTask(TaskDTO task, List<ListDTO> lists, boolean removeListsNotIncluded) {
+
+        if(removeListsNotIncluded) {
+            checkAndRemoveLists(task.getTaskId(), lists);
+        }
         
         lists = getUniqueLists(task.getTaskId(), lists);
         List<TaskList> taskLists = lists
@@ -35,7 +41,11 @@ public class TaskListServiceImpl implements TaskListService {
         if(!taskLists.isEmpty()) {
             taskListRepository.saveAll(taskLists);
         }
-        return lists;
+        List<ListDTO> returnLists = null;
+        Optional<List<TaskList>> finalTaskLists = taskListRepository.findByTask(Task.toTask(task));
+
+        returnLists = finalTaskLists.get().stream().map(taskList -> taskList.getList().toListDTO()).toList();
+        return returnLists;
     }
 
     @Override
@@ -57,6 +67,25 @@ public class TaskListServiceImpl implements TaskListService {
             }
         }
         return filteredLists;
+    }
+
+    private void checkAndRemoveLists(Long taskId, List<ListDTO> lists) {
+
+        List<Long> listsToAdd = lists.stream().map(list -> list.getListId()).toList();
+
+        Optional<List<TaskList>> taskLists = taskListRepository.findByTaskTaskId(taskId);
+        List<Long> listsToRemove = new LinkedList<>();
+
+        if(taskLists.isPresent()) {
+            taskLists.get().forEach(list -> {
+                if(!listsToAdd.contains(list.getList().getListId())) {
+                    listsToRemove.add(list.getList().getListId());
+                }
+            });
+        }
+        if(!listsToRemove.isEmpty()) {
+            deleteTaskListsRelation(taskId, listsToRemove);
+        }
     }
     
 }

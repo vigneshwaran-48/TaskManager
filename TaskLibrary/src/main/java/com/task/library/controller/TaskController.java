@@ -112,7 +112,11 @@ public class TaskController {
 	}
 	
 	@PatchMapping("{taskId}")
-	public ResponseEntity<?> patchUpdateTask(@PathVariable Long taskId, @RequestBody TaskDTO task)
+	public ResponseEntity<?> patchUpdateTask(@PathVariable Long taskId, @RequestBody TaskDTO task, 
+											 @RequestParam(
+												defaultValue = "false", 
+												required = false
+											 ) String removeListNotIncluded)
 			throws TaskNotFoundException, AlreadyExistsException {
 		//Need to remove this hardcoded after spring sevurity enabled
 		//and get the user id from principal.
@@ -120,7 +124,7 @@ public class TaskController {
 		task.setUserId(userId);
 		task.setTaskId(taskId);
 		
-		TaskDTO updatedTask = taskService.updateTask(task);
+		TaskDTO updatedTask = taskService.updateTask(task, Boolean.parseBoolean(removeListNotIncluded));
 		
 		TaskBodyResponse response = new TaskBodyResponse();
 		response.setMessage("Updated task successfully!");

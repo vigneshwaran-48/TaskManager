@@ -85,7 +85,7 @@ public class TaskServiceImpl implements TaskService {
 	}
 
 	@Override
-	public TaskDTO updateTask(TaskDTO taskDTO)
+	public TaskDTO updateTask(TaskDTO taskDTO, boolean removeList)
 			throws TaskNotFoundException, AlreadyExistsException {
 		Optional<Task> existingTask = taskRepository
 									  .findByTaskIdAndUserId(taskDTO.getTaskId(),
@@ -106,8 +106,8 @@ public class TaskServiceImpl implements TaskService {
 		List<ListDTO> lists = taskDTO.getLists();
 		TaskDTO updatedTask = toTaskDTO(task);
 		
-		if(!lists.isEmpty()) {
-			List<ListDTO> updatedLists = taskListService.addListsToTask(updatedTask, lists);
+		if(removeList || !lists.isEmpty()) {
+			List<ListDTO> updatedLists = taskListService.addListsToTask(updatedTask, lists, removeList);
 		
 			updatedTask.setLists(updatedLists);
 			LOGGER.info("Saved Lists related to task => " + updatedTask.getTaskId());

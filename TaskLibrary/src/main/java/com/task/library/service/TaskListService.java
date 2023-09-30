@@ -10,7 +10,7 @@ public interface TaskListService {
     /**
      * @return Returns the added lists to the task.
      */
-    List<ListDTO> addListsToTask(TaskDTO task, List<ListDTO> lists);
+    List<ListDTO> addListsToTask(TaskDTO task, List<ListDTO> lists, boolean removeListsNotIncluded);
 
     void deleteTaskListsRelation(Long taskId, List<Long> listIds);
 
