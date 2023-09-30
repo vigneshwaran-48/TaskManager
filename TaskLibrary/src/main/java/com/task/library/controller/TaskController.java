@@ -9,6 +9,8 @@ import java.util.Optional;
 
 import com.task.library.dto.*;
 import com.task.library.exception.AlreadyExistsException;
+import com.task.library.exception.AppException;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -66,11 +68,18 @@ public class TaskController {
 	}
 	
 	@GetMapping
-	public ResponseEntity<?> getAllTasksOfUser() {
+	public ResponseEntity<?> getAllTasksOfUser(@RequestParam Optional<LocalDate> dueDate) {
 		//Need to remove this hardcoded after spring sevurity enabled
 		//and get the user id from principal.
 		String userId = "12";
-		List<TaskDTO> tasks = taskService.listTaskOfUser(userId).orElse(null);
+		List<TaskDTO> tasks;
+
+		if(dueDate.isPresent()) {
+			tasks = taskService.findByDate(userId, dueDate.get()).orElse(null);
+		}
+		else {
+			tasks = taskService.listTaskOfUser(userId).orElse(null);
+		}
 		
 		if(tasks != null) {
 			tasks.forEach(this::fillWithLinks);
@@ -105,7 +114,11 @@ public class TaskController {
 	}
 	
 	@PatchMapping("{taskId}")
-	public ResponseEntity<?> patchUpdateTask(@PathVariable Long taskId, @RequestBody TaskDTO task)
+	public ResponseEntity<?> patchUpdateTask(@PathVariable Long taskId, @RequestBody TaskDTO task, 
+											 @RequestParam(
+												defaultValue = "false", 
+												required = false
+											 ) String removeListNotIncluded)
 			throws TaskNotFoundException, AlreadyExistsException {
 		//Need to remove this hardcoded after spring sevurity enabled
 		//and get the user id from principal.
@@ -113,7 +126,7 @@ public class TaskController {
 		task.setUserId(userId);
 		task.setTaskId(taskId);
 		
-		TaskDTO updatedTask = taskService.updateTask(task);
+		TaskDTO updatedTask = taskService.updateTask(task, Boolean.parseBoolean(removeListNotIncluded));
 		
 		TaskBodyResponse response = new TaskBodyResponse();
 		response.setMessage("Updated task successfully!");
@@ -163,6 +176,12 @@ public class TaskController {
 		response.setTime(LocalDateTime.now());
 		response.setPath(BASE_PATH + "/today");
 
+		try {
+			Thread.sleep(2000);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+
 		return ResponseEntity.ok(response);
 	}
 	@GetMapping("upcoming")
@@ -202,6 +221,36 @@ public class TaskController {
 		response.setTime(LocalDateTime.now());
 		response.setPath(BASE_PATH + "/this-week");
 
+
+		return ResponseEntity.ok(response);
+	}
+
+	@GetMapping("list/{listId}")
+	public ResponseEntity<?> getAllTasksOfList(@PathVariable Long listId) throws AppException {
+
+		//Need to remove this hardcoded after spring sevurity enabled
+		//and get the user id from principal.
+		String userId = "12";
+
+		List<TaskDTO> tasks = taskService.getTasksOfList(userId, listId).orElse(null);
+
+		if(tasks != null) {
+			tasks.forEach(this::fillWithLinks);
+		}
+
+		TaskListBodyResponse response = new TaskListBodyResponse();
+		response.setMessage("success");
+		response.setStatus(tasks != null && !tasks.isEmpty()
+				? HttpStatus.OK.value() : HttpStatus.NO_CONTENT.value());
+		response.setTasks(tasks);
+		response.setTime(LocalDateTime.now());
+		response.setPath(BASE_PATH + "/list/" + listId);
+
+		try {
+			Thread.sleep(2000);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
 
 		return ResponseEntity.ok(response);
 	}

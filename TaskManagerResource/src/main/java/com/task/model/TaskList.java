@@ -1,5 +1,8 @@
 package com.task.model;
 
+import com.task.library.dto.TaskDTO;
+import com.task.library.dto.TaskListDTO;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -53,4 +56,14 @@ public class TaskList {
 		return "TaskList [taskListId=" + id + ", task=" + task + ", list=" + list + "]";
 	}
 	
+	public TaskListDTO toTaskListDTO() {
+		
+		TaskListDTO taskListDTO = new TaskListDTO();
+		taskListDTO.setId(this.id);
+		taskListDTO.setListDTO(this.list.toListDTO());
+		taskListDTO.setTaskDTO(this.task.toTaskDTO());
+		
+		return taskListDTO;
+	}
+
 }

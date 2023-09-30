@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.util.HtmlUtils;
 
 import com.task.library.dto.ListDTO;
+import com.task.library.exception.AlreadyExistsException;
 import com.task.library.service.ListService;
 import com.task.library.service.TaskService;
 import com.task.model.List;
@@ -18,6 +19,7 @@ import com.task.repository.TaskListRepository;
 public class ListServiceImpl implements ListService {
 
 	private final static String DEFAULT_COLOR = "#A8DF8E";
+	private final static String DEFAULT_USER = "-1";
 	
 	@Autowired
 	private ListRepository listRepository;
@@ -33,9 +35,20 @@ public class ListServiceImpl implements ListService {
 		Optional<List> list = listRepository.findByListIdAndUserId(listId, userId);
 		
 		if(list.isEmpty()) {
-			return Optional.empty(); 
+			/**
+			 * This is for handling get request for default Personal, Work lists.
+			 */
+			list = listRepository.findByListIdAndUserId(listId, DEFAULT_USER);
+
+			if(list.isEmpty()) return Optional.empty(); 
 		}
-		return Optional.of(toListDTO(list.get()));
+		Optional<java.util.List<TaskList>> taskLists = taskListRepository.findByList(list.get());
+
+		ListDTO listDTO = list.get().toListDTO();
+		if(taskLists.isPresent()) {
+			listDTO.setTaskCount(taskLists.get().size());
+		}
+		return Optional.of(listDTO);
 	}
 
 	@Override
@@ -45,8 +58,18 @@ public class ListServiceImpl implements ListService {
 		if(lists.isEmpty()) {
 			return Optional.empty();
 		}
+		fillDefaultLists(lists.get());
+
 		java.util.List<ListDTO> listDTOs = lists.get().stream()
-												.map(this::toListDTO)
+												.map(list -> {
+													ListDTO listDTO = list.toListDTO();
+													Optional<java.util.List<TaskList>> taskLists = 
+														taskListRepository.findByList(list);
+													if(taskLists.isPresent()) {
+														listDTO.setTaskCount(taskLists.get().size());
+													}
+													return listDTO;
+												})
 												.toList();
 		return Optional.of(listDTOs);
 	}
@@ -55,6 +78,9 @@ public class ListServiceImpl implements ListService {
 	public Long createList(ListDTO listDTO) throws Exception {
 		sanitizeInput(listDTO);
 		
+		if(listRepository.findByListName(listDTO.getListName()).isPresent()) {
+			throw new AlreadyExistsException("List name already exists", 400);
+		}
 		List list =  List.toList(listDTO);
 		List createdList = listRepository.save(list);
 		
@@ -86,7 +112,7 @@ public class ListServiceImpl implements ListService {
 		checkAndUpdateList(existingList.get(), newList);
 		
 		List updatedList = listRepository.save(newList);
-		return Optional.of(toListDTO(updatedList));
+		return Optional.of(updatedList.toListDTO());
 	}
 
 	@Override
@@ -101,7 +127,7 @@ public class ListServiceImpl implements ListService {
 		}
 		java.util.List<ListDTO> lists = taskList.get()
 												.stream()
-												.map(tList -> toListDTO(tList.getList()))
+												.map(tList -> tList.getList().toListDTO())
 												.toList();
 		return Optional.of(lists);
 	}
@@ -126,17 +152,6 @@ public class ListServiceImpl implements ListService {
 		}
 	}
 	
-	private ListDTO toListDTO(List list) {
-		
-		ListDTO listDTO = new ListDTO();
-		listDTO.setListId(list.getListId());
-		listDTO.setUserId(list.getUserId());
-		listDTO.setListName(list.getListName());
-		listDTO.setListColor(list.getListColor());
-		
-		return listDTO;
-	}
-	
 	private void checkAndUpdateList(List existingList, List newList) {
 		if(newList.getListColor() == null) {
 			//Not checking for color check in existing list
@@ -146,5 +161,11 @@ public class ListServiceImpl implements ListService {
 		if(newList.getListName() == null) {
 			newList.setListName(existingList.getListName());
 		}
+	}
+
+	private void fillDefaultLists(java.util.List<List> lists) {
+		Optional<java.util.List<List>> defaultLists =  listRepository.findByUserId(DEFAULT_USER);
+
+		lists.addAll(0, defaultLists.get());
 	}
 }

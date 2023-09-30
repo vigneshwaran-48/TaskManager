@@ -1,9 +1,7 @@
 package com.task.model;
 
 import java.time.LocalDate;
-import java.util.Date;
 
-import org.hibernate.annotations.UuidGenerator;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import com.task.library.dto.TaskDTO;
@@ -115,4 +113,18 @@ public class Task {
 		return task;
 	}
 	
+	public TaskDTO toTaskDTO() {
+
+		TaskDTO taskDTO = new TaskDTO();
+		
+		taskDTO.setUserId(this.getUserId());
+		taskDTO.setDescription(this.getDescription());
+		taskDTO.setTaskId(this.getTaskId());
+		taskDTO.setTaskName(this.getTaskName());
+		taskDTO.setDueDate(this.getDueDate());
+		taskDTO.setParentTaskId(this.getParentTask());
+		taskDTO.setIsCompleted(this.isCompleted());
+
+		return taskDTO;
+	}
 }

@@ -6,15 +6,21 @@ import java.time.temporal.TemporalAdjusters;
 import java.util.List;
 import java.util.Optional;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.util.HtmlUtils;
 
 import com.task.library.dto.ListDTO;
 import com.task.library.dto.TaskDTO;
+import com.task.library.dto.TaskListDTO;
 import com.task.library.exception.AlreadyExistsException;
+import com.task.library.exception.AppException;
 import com.task.library.exception.TaskNotFoundException;
 import com.task.library.service.ListService;
+import com.task.library.service.TaskListService;
 import com.task.library.service.TaskService;
 import com.task.model.Task;
 import com.task.repository.TaskRepository;
@@ -22,12 +28,16 @@ import com.task.repository.TaskRepository;
 @Service
 public class TaskServiceImpl implements TaskService {
 
+	private static final Logger LOGGER = LoggerFactory.getLogger(TaskServiceImpl.class);
+
 	@Autowired
 	private TaskRepository taskRepository;
 	
 	@Autowired
 	private ListService listService;
-	
+
+	@Autowired
+	private TaskListService taskListService;
 	
 	@Override
 	public Optional<TaskDTO> findTaskById(String userId, Long taskId) {
@@ -51,11 +61,6 @@ public class TaskServiceImpl implements TaskService {
 									.stream()
 									.map(this::toTaskDTO)
 									.toList();
-		try {
-			Thread.sleep(2000);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
 		return Optional.of(taskDTOs);
 	}
 
@@ -83,7 +88,7 @@ public class TaskServiceImpl implements TaskService {
 	}
 
 	@Override
-	public TaskDTO updateTask(TaskDTO taskDTO)
+	public TaskDTO updateTask(TaskDTO taskDTO, boolean removeList)
 			throws TaskNotFoundException, AlreadyExistsException {
 		Optional<Task> existingTask = taskRepository
 									  .findByTaskIdAndUserId(taskDTO.getTaskId(),
@@ -99,12 +104,24 @@ public class TaskServiceImpl implements TaskService {
 			checkSameTaskName(newTask);
 		}
 		Task task = taskRepository.save(newTask);
+		LOGGER.info("Updated task => " + task.getTaskId());
+
+		List<ListDTO> lists = taskDTO.getLists();
+		TaskDTO updatedTask = toTaskDTO(task);
 		
-		return toTaskDTO(task);
+		if(removeList || !lists.isEmpty()) {
+			List<ListDTO> updatedLists = taskListService.addListsToTask(updatedTask, lists, removeList);
+		
+			updatedTask.setLists(updatedLists);
+			LOGGER.info("Saved Lists related to task => " + updatedTask.getTaskId());
+		}
+		
+		return updatedTask;
 	}
 
 	@Override
 	public Long deleteTask(String userId, Long taskId) {
+		taskListService.deleteAllRelationOfTask(taskId);
 		List<Task> task = taskRepository.deleteByUserIdAndTaskId(userId, taskId);
 		
 		if(task != null && task.size() > 0) {
@@ -168,12 +185,6 @@ public class TaskServiceImpl implements TaskService {
 		}
 		List<TaskDTO> taskDTOS = tasks.get().stream().map(this::toTaskDTO).toList();
 
-		try {
-			Thread.sleep(2000);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
-
 		return Optional.of(taskDTOS);
 	}
 
@@ -188,12 +199,6 @@ public class TaskServiceImpl implements TaskService {
 			return Optional.empty();
 		}
 		List<TaskDTO> taskDTOS = tasks.get().stream().map(this::toTaskDTO).toList();
-
-		try {
-			Thread.sleep(2000);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
 
 		return Optional.of(taskDTOS);
 	}
@@ -211,6 +216,26 @@ public class TaskServiceImpl implements TaskService {
 		}
 		List<TaskDTO> taskDTOS = tasks.get().stream().map(this::toTaskDTO).toList();
 		return Optional.of(taskDTOS);
+	}
+
+	@Override
+	public Optional<List<TaskDTO>> getTasksOfList(String userId, Long listId) throws AppException {
+
+		Optional<ListDTO> list = listService.findByListId(userId, listId);
+		if(list.isEmpty()) {
+			throw new AppException("List not found", HttpStatus.BAD_REQUEST.value());
+		}
+		Optional<List<TaskListDTO>> taskLists = taskListService.findByList(list.get());
+		if(taskLists.isPresent()) {
+			List<TaskDTO> tasks = taskLists.get()
+											.stream()
+											.map(taskList -> {
+												return findTaskById(userId, taskList.getTaskDTO().getTaskId()).orElse(null);
+											})
+											.toList();
+			return Optional.of(tasks);
+		}
+		return Optional.empty();
 	}
 
 	private TaskDTO toTaskDTO(Task task) {
@@ -280,10 +305,5 @@ public class TaskServiceImpl implements TaskService {
 			taskDTO.setDescription(taskDTO.getDescription().trim());
 			taskDTO.setDescription(HtmlUtils.htmlEscape(taskDTO.getDescription()));
 		}
-	}
-
-	public static void main(String[] args) {
-		TaskService service = new TaskServiceImpl();
-		service.getThisWeekTasks("12");
 	}
 }

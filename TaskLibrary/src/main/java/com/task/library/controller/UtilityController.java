@@ -1,8 +1,12 @@
 package com.task.library.controller;
 
+import com.task.library.dto.ListDTO;
 import com.task.library.dto.TaskDTO;
+import com.task.library.dto.utility.ListSideNav;
+import com.task.library.dto.utility.ListSideNavResponse;
 import com.task.library.dto.utility.SideNav;
 import com.task.library.dto.utility.SideNavResponse;
+import com.task.library.service.ListService;
 import com.task.library.service.TaskService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -15,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.security.Principal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 
@@ -25,6 +30,9 @@ public class UtilityController {
 
     @Autowired
     private TaskService taskService;
+
+    @Autowired
+    private ListService listService;
 
     @GetMapping("side-nav")
     public ResponseEntity<?> getSideNav(Principal principal) {
@@ -64,6 +72,46 @@ public class UtilityController {
         response.setMessage("success");
         response.setStatus(HttpStatus.OK.value());
         response.setTime(LocalDateTime.now());
+
+        try {
+			Thread.sleep(2000);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("list-side-nav")
+    public ResponseEntity<?> getListSideNavs(Principal principal) {
+
+        //Need to remove this hardcoded after spring security enabled
+        //and get the user id from principal.
+        String userId = "12";
+
+        Optional<List<ListDTO>> lists = listService.listAllListsOfUser(userId);
+
+        List<ListSideNav> listSideNavs = new LinkedList<>();
+
+        if(lists.isPresent() && lists.get().size() > 0) {
+            lists.get().forEach(listDTO -> {
+                ListSideNav sideNav = new ListSideNav();
+                sideNav.setColor(listDTO.getListColor());
+                sideNav.setName(listDTO.getListName());
+                sideNav.setId("list-sidenav-" + listDTO.getListId());
+
+                listSideNavs.add(sideNav);
+            });
+        }
+
+        ListSideNavResponse response = new ListSideNavResponse();
+        response.setSideNavList(listSideNavs);
+        response.setPath("/api/v1/utility/list-side-nav");
+        response.setMessage("success");
+        response.setStatus(HttpStatus.OK.value());
+        response.setTime(LocalDateTime.now());
+
+
 
         return ResponseEntity.ok(response);
     }
