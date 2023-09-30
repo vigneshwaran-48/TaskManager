@@ -73,6 +73,12 @@ public class UtilityController {
         response.setStatus(HttpStatus.OK.value());
         response.setTime(LocalDateTime.now());
 
+        try {
+			Thread.sleep(2000);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+
         return ResponseEntity.ok(response);
     }
 
@@ -104,6 +110,8 @@ public class UtilityController {
         response.setMessage("success");
         response.setStatus(HttpStatus.OK.value());
         response.setTime(LocalDateTime.now());
+
+
 
         return ResponseEntity.ok(response);
     }

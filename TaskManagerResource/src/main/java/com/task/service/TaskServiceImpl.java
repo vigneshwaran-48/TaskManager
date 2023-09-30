@@ -20,8 +20,6 @@ import com.task.library.service.ListService;
 import com.task.library.service.TaskListService;
 import com.task.library.service.TaskService;
 import com.task.model.Task;
-import com.task.model.TaskList;
-import com.task.repository.TaskListRepository;
 import com.task.repository.TaskRepository;
 
 @Service
@@ -60,11 +58,6 @@ public class TaskServiceImpl implements TaskService {
 									.stream()
 									.map(this::toTaskDTO)
 									.toList();
-		try {
-			Thread.sleep(2000);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
 		return Optional.of(taskDTOs);
 	}
 
@@ -125,6 +118,7 @@ public class TaskServiceImpl implements TaskService {
 
 	@Override
 	public Long deleteTask(String userId, Long taskId) {
+		taskListService.deleteAllRelationOfTask(taskId);
 		List<Task> task = taskRepository.deleteByUserIdAndTaskId(userId, taskId);
 		
 		if(task != null && task.size() > 0) {
@@ -188,12 +182,6 @@ public class TaskServiceImpl implements TaskService {
 		}
 		List<TaskDTO> taskDTOS = tasks.get().stream().map(this::toTaskDTO).toList();
 
-		try {
-			Thread.sleep(2000);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
-
 		return Optional.of(taskDTOS);
 	}
 
@@ -208,12 +196,6 @@ public class TaskServiceImpl implements TaskService {
 			return Optional.empty();
 		}
 		List<TaskDTO> taskDTOS = tasks.get().stream().map(this::toTaskDTO).toList();
-
-		try {
-			Thread.sleep(2000);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
 
 		return Optional.of(taskDTOS);
 	}

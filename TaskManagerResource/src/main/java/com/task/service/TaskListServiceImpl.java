@@ -38,6 +38,16 @@ public class TaskListServiceImpl implements TaskListService {
         return lists;
     }
 
+    @Override
+    public void deleteTaskListsRelation(Long taskId, List<Long> listIds) {
+        taskListRepository.deleteByTaskTaskIdAndListListIdIn(taskId, listIds);
+    }  
+
+    @Override
+    public void deleteAllRelationOfTask(Long taskId) {
+        taskListRepository.deleteByTaskTaskId(taskId);
+    }
+
     private List<ListDTO> getUniqueLists(Long taskId, List<ListDTO> lists) {
         List<ListDTO> filteredLists = new ArrayList<>();
 
@@ -47,6 +57,6 @@ public class TaskListServiceImpl implements TaskListService {
             }
         }
         return filteredLists;
-    } 
+    }
     
 }

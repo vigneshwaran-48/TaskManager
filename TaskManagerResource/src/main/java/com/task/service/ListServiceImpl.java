@@ -35,7 +35,12 @@ public class ListServiceImpl implements ListService {
 		Optional<List> list = listRepository.findByListIdAndUserId(listId, userId);
 		
 		if(list.isEmpty()) {
-			return Optional.empty(); 
+			/**
+			 * This is for handling get request for default Personal, Work lists.
+			 */
+			list = listRepository.findByListIdAndUserId(listId, DEFAULT_USER);
+
+			if(list.isEmpty()) return Optional.empty(); 
 		}
 		Optional<java.util.List<TaskList>> taskLists = taskListRepository.findByList(list.get());
 

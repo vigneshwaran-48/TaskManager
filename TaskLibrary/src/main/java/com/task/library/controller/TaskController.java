@@ -170,6 +170,12 @@ public class TaskController {
 		response.setTime(LocalDateTime.now());
 		response.setPath(BASE_PATH + "/today");
 
+		try {
+			Thread.sleep(2000);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+
 		return ResponseEntity.ok(response);
 	}
 	@GetMapping("upcoming")
