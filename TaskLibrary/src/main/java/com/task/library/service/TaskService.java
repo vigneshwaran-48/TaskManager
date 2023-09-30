@@ -6,6 +6,7 @@ import java.util.Optional;
 
 import com.task.library.dto.TaskDTO;
 import com.task.library.exception.AlreadyExistsException;
+import com.task.library.exception.AppException;
 import com.task.library.exception.TaskNotFoundException;
 
 public interface TaskService {
@@ -27,6 +28,10 @@ public interface TaskService {
 	boolean toggleTask(String userId, Long taskId) throws TaskNotFoundException;
 
 	Optional<List<TaskDTO>> findByDate(String userId, LocalDate date);
+
 	Optional<List<TaskDTO>> getUpcomingTasks(String userId);
+
 	Optional<List<TaskDTO>> getThisWeekTasks(String userId);
+
+	Optional<List<TaskDTO>> getTasksOfList(String userId, Long listId) throws AppException;
 }

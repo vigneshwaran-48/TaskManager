@@ -9,12 +9,15 @@ import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.util.HtmlUtils;
 
 import com.task.library.dto.ListDTO;
 import com.task.library.dto.TaskDTO;
+import com.task.library.dto.TaskListDTO;
 import com.task.library.exception.AlreadyExistsException;
+import com.task.library.exception.AppException;
 import com.task.library.exception.TaskNotFoundException;
 import com.task.library.service.ListService;
 import com.task.library.service.TaskListService;
@@ -213,6 +216,26 @@ public class TaskServiceImpl implements TaskService {
 		}
 		List<TaskDTO> taskDTOS = tasks.get().stream().map(this::toTaskDTO).toList();
 		return Optional.of(taskDTOS);
+	}
+
+	@Override
+	public Optional<List<TaskDTO>> getTasksOfList(String userId, Long listId) throws AppException {
+
+		Optional<ListDTO> list = listService.findByListId(userId, listId);
+		if(list.isEmpty()) {
+			throw new AppException("List not found", HttpStatus.BAD_REQUEST.value());
+		}
+		Optional<List<TaskListDTO>> taskLists = taskListService.findByList(list.get());
+		if(taskLists.isPresent()) {
+			List<TaskDTO> tasks = taskLists.get()
+											.stream()
+											.map(taskList -> {
+												return findTaskById(userId, taskList.getTaskDTO().getTaskId()).orElse(null);
+											})
+											.toList();
+			return Optional.of(tasks);
+		}
+		return Optional.empty();
 	}
 
 	private TaskDTO toTaskDTO(Task task) {

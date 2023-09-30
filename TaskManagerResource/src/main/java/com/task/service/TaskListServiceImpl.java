@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import com.task.library.dto.ListDTO;
 import com.task.library.dto.TaskDTO;
+import com.task.library.dto.TaskListDTO;
 import com.task.library.service.TaskListService;
 import com.task.model.Task;
 import com.task.model.TaskList;
@@ -56,6 +57,19 @@ public class TaskListServiceImpl implements TaskListService {
     @Override
     public void deleteAllRelationOfTask(Long taskId) {
         taskListRepository.deleteByTaskTaskId(taskId);
+    }
+
+    @Override
+    public Optional<List<TaskListDTO>> findByList(ListDTO listDTO) {
+
+        Optional<List<TaskList>> taskLists = taskListRepository.findByList(com.task.model.List.toList(listDTO));
+        if(taskLists.isEmpty()) {
+            return Optional.empty();
+        }
+        return Optional.of(taskLists.get()
+                                    .stream()
+                                    .map(taskList -> taskList.toTaskListDTO())
+                                    .toList());
     }
 
     private List<ListDTO> getUniqueLists(Long taskId, List<ListDTO> lists) {
