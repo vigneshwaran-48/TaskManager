@@ -99,6 +99,12 @@ public class ListController {
 		response.setLists(lists);
 		response.setTime(LocalDateTime.now());
 		response.setPath(BASE_PATH + "/list");
+
+		try {
+			Thread.sleep(2000);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
 		
 		return ResponseEntity.ok(response);
 	}
