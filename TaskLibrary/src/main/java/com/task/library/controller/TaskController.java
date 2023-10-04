@@ -242,15 +242,18 @@ public class TaskController {
 		//Need to remove this hardcoded after spring sevurity enabled
 		//and get the user id from principal.
 		String userId = "12";
-		Optional<List<TaskDTO>> tasks = taskService.getTasksLessThanDate(userId, LocalDate.now().minusDays(1));
+		List<TaskDTO> tasks = taskService.getTasksLessThanDate(userId, LocalDate.now().minusDays(1)).orElse(null);
 
-		tasks.ifPresent(taskDTOS -> taskDTOS.forEach(this::fillWithLinks));
+		if(tasks != null) {
+			tasks = tasks.stream().filter(task -> !task.isCompleted()).toList();
+			tasks.forEach(this::fillWithLinks);
+		}
 
 		TaskListBodyResponse response = new TaskListBodyResponse();
 		response.setMessage("success");
-		response.setStatus(tasks.isPresent() && !tasks.get().isEmpty()
+		response.setStatus(tasks != null && !tasks.isEmpty()
 				? HttpStatus.OK.value() : HttpStatus.NO_CONTENT.value());
-		response.setTasks(tasks.orElse(null));
+		response.setTasks(tasks);
 		response.setTime(LocalDateTime.now());
 		response.setPath(BASE_PATH + "/overdue");
 
