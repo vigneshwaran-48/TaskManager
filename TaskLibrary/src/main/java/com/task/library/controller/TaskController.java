@@ -17,6 +17,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import com.task.library.exception.TaskNotFoundException;
+import com.task.library.service.ListService;
 import com.task.library.service.TaskService;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -29,13 +30,24 @@ public class TaskController {
 
 	private final static String BASE_PATH = "/api/v1/task";
 	private final static String LIST_BASE_PATH = "/api/v1/list";
+
 	@Autowired
 	private TaskService taskService;
+
+	@Autowired
+	private ListService listService;
 	
 	@PostMapping
-	public ResponseEntity<?> createTask(@Valid @RequestBody TaskDTO task, HttpServletRequest request) throws Exception {
+	public ResponseEntity<?> createTask(@Valid @RequestBody TaskCreationPayload task, HttpServletRequest request) throws Exception {
 		
-		Long taskId = taskService.createTask(task);
+		List<ListDTO> lists = task.getLists().stream().map(list -> {
+			return listService.findByListId(task.getUserId(), list).get();
+		}).toList();
+
+		TaskDTO taskDTO = task.toTaskDTO();
+		taskDTO.setLists(lists);
+
+		Long taskId = taskService.createTask(taskDTO);
 		
 		TaskCreationResponse response = new TaskCreationResponse();
 		response.setMessage("Task created!");
@@ -220,6 +232,27 @@ public class TaskController {
 		response.setTasks(tasks.orElse(null));
 		response.setTime(LocalDateTime.now());
 		response.setPath(BASE_PATH + "/this-week");
+
+
+		return ResponseEntity.ok(response);
+	}
+
+	@GetMapping("overdue")
+	public ResponseEntity<?> getOverduedTasks() {
+		//Need to remove this hardcoded after spring sevurity enabled
+		//and get the user id from principal.
+		String userId = "12";
+		Optional<List<TaskDTO>> tasks = taskService.getTasksLessThanDate(userId, LocalDate.now().minusDays(1));
+
+		tasks.ifPresent(taskDTOS -> taskDTOS.forEach(this::fillWithLinks));
+
+		TaskListBodyResponse response = new TaskListBodyResponse();
+		response.setMessage("success");
+		response.setStatus(tasks.isPresent() && !tasks.get().isEmpty()
+				? HttpStatus.OK.value() : HttpStatus.NO_CONTENT.value());
+		response.setTasks(tasks.orElse(null));
+		response.setTime(LocalDateTime.now());
+		response.setPath(BASE_PATH + "/overdue");
 
 
 		return ResponseEntity.ok(response);

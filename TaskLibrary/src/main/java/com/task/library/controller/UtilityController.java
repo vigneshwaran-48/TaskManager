@@ -52,8 +52,8 @@ public class UtilityController {
 
         SideNav calendar = new SideNav();
         calendar.setId("side-nav-3");
-        calendar.setName("Calendar");
-        calendar.setIconClassNames("fa fa-solid fa-calendar");
+        calendar.setName("Overdue");
+        calendar.setIconClassNames("fa fa-solid fa-hourglass-end");
 
         SideNav stickyWall = new SideNav();
         stickyWall.setId("side-nav-4");

@@ -80,6 +80,12 @@ public class TaskServiceImpl implements TaskService {
 		}
 		
 		Task createdTask = taskRepository.save(taskPayload);
+
+		if(!taskDTO.getLists().isEmpty()) {
+			taskListService.addListsToTask(createdTask.toTaskDTO(), taskDTO.getLists(), false);
+		
+			LOGGER.info("Saved Lists related to task => " + createdTask.getTaskId());
+		}
 		
 		if(createdTask != null) {
 			return createdTask.getTaskId();
@@ -236,6 +242,16 @@ public class TaskServiceImpl implements TaskService {
 			return Optional.of(tasks);
 		}
 		return Optional.empty();
+	}
+
+	@Override
+	public Optional<List<TaskDTO>> getTasksLessThanDate(String userId, LocalDate date) {
+		Optional<List<Task>> tasks = taskRepository.findByUserIdAndDueDateLessThan(userId, date);
+		if(tasks.isEmpty()) {
+			return Optional.empty();
+		}
+		List<TaskDTO> taskDTOs = tasks.get().stream().map(this::toTaskDTO).toList();
+		return Optional.of(taskDTOs);
 	}
 
 	private TaskDTO toTaskDTO(Task task) {
