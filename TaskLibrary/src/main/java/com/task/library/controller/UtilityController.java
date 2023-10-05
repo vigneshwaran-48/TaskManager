@@ -50,10 +50,15 @@ public class UtilityController {
         today.setName("Today");
         today.setIconClassNames("bi bi-list-task");
 
-        SideNav calendar = new SideNav();
-        calendar.setId("side-nav-3");
-        calendar.setName("Overdue");
-        calendar.setIconClassNames("fa fa-solid fa-hourglass-end");
+        SideNav overdue = new SideNav();
+        overdue.setId("side-nav-3");
+        overdue.setName("Overdue");
+        overdue.setIconClassNames("fa fa-solid fa-hourglass-end");
+        Optional<List<TaskDTO>> overdueTasks = taskService.getTasksLessThanDate(userId, LocalDate.now().minusDays(1));
+        overdueTasks.ifPresent(overdueTask -> {
+            overdueTask = overdueTask.stream().filter(task -> !task.isCompleted()).toList();
+            overdue.setCount(overdueTask.size());
+        });
 
         SideNav stickyWall = new SideNav();
         stickyWall.setId("side-nav-4");
@@ -67,7 +72,7 @@ public class UtilityController {
         upcomingTasks.ifPresent(taskDTOS -> upComing.setCount(taskDTOS.size()));
 
         SideNavResponse response = new SideNavResponse();
-        response.setSideNavList(List.of(upComing, today, calendar, stickyWall));
+        response.setSideNavList(List.of(upComing, today, overdue, stickyWall));
         response.setPath("/api/v1/utility/side-nav");
         response.setMessage("success");
         response.setStatus(HttpStatus.OK.value());
