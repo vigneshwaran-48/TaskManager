@@ -81,7 +81,7 @@ public class TaskServiceImpl implements TaskService {
 		
 		Task createdTask = taskRepository.save(taskPayload);
 
-		if(!taskDTO.getLists().isEmpty()) {
+		if(taskDTO.getLists() != null && !taskDTO.getLists().isEmpty()) {
 			taskListService.addListsToTask(createdTask.toTaskDTO(), taskDTO.getLists(), false);
 		
 			LOGGER.info("Saved Lists related to task => " + createdTask.getTaskId());

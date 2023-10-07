@@ -3,6 +3,7 @@ package com.task.library.controller;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -40,12 +41,16 @@ public class TaskController {
 	@PostMapping
 	public ResponseEntity<?> createTask(@Valid @RequestBody TaskCreationPayload task, HttpServletRequest request) throws Exception {
 		
-		List<ListDTO> lists = task.getLists().stream().map(list -> {
-			return listService.findByListId(task.getUserId(), list).get();
-		}).toList();
-
 		TaskDTO taskDTO = task.toTaskDTO();
-		taskDTO.setLists(lists);
+
+		if(task.getLists() != null) {
+			
+			List<ListDTO> lists = task.getLists().stream().map(list -> {
+				return listService.findByListId(task.getUserId(), list).get();
+			}).toList();
+
+			taskDTO.setLists(lists);
+		}
 
 		Long taskId = taskService.createTask(taskDTO);
 		
@@ -290,6 +295,33 @@ public class TaskController {
 
 		return ResponseEntity.ok(response);
 	}
+
+	@GetMapping("search")
+	public ResponseEntity<?> searchTask(@RequestParam String taskName) {
+		//Need to remove this hardcoded after spring sevurity enabled
+		//and get the user id from principal.
+		String userId = "12";
+
+		List<TaskDTO> filteredTasks = new LinkedList<>();
+
+		Optional<List<TaskDTO>> tasksOptional = taskService.listTaskOfUser(userId);
+		tasksOptional.ifPresent(tasks -> {
+			tasks.forEach(task -> {
+				if(task.getTaskName().toLowerCase().contains(taskName.toLowerCase())) {
+					filteredTasks.add(task);
+				}
+			});
+		});
+		TaskListBodyResponse response = new TaskListBodyResponse();
+		response.setMessage("success");
+		response.setStatus(filteredTasks != null && !filteredTasks.isEmpty()
+				? HttpStatus.OK.value() : HttpStatus.NO_CONTENT.value());
+		response.setTasks(filteredTasks);
+		response.setTime(LocalDateTime.now());
+		response.setPath(BASE_PATH + "/search");
+		
+		return ResponseEntity.ok(response);
+	}
 	private void fillWithLinks(TaskDTO taskDTO) {
 		Map<String, Object> links = new HashMap<>();
 		links.put("self", BASE_PATH + "/" + taskDTO.getTaskId());
@@ -299,6 +331,7 @@ public class TaskController {
 		links.put("update", BASE_PATH + "/" + taskDTO.getTaskId());
 		links.put("delete", BASE_PATH + "/" + taskDTO.getTaskId());
 		links.put("allLists", LIST_BASE_PATH + "/bytask/" + taskDTO.getTaskId());
+		links.put("search", BASE_PATH + "/search");
 		links.put("all", BASE_PATH);
 		
 		taskDTO.setLinks(links);
