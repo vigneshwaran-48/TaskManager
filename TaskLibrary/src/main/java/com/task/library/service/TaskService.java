@@ -34,4 +34,6 @@ public interface TaskService {
 	Optional<List<TaskDTO>> getThisWeekTasks(String userId);
 
 	Optional<List<TaskDTO>> getTasksOfList(String userId, Long listId) throws AppException;
+
+	Optional<List<TaskDTO>> getTasksLessThanDate(String userId, LocalDate date);
 }

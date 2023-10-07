@@ -6,7 +6,7 @@ import java.util.Map;
 
 import jakarta.validation.constraints.NotBlank;
 
-public class TaskDTO {
+public class TaskCreationPayload {
 	
 	private Long taskId;
 	private String userId;
@@ -18,8 +18,7 @@ public class TaskDTO {
 	private Long parentTaskId;
 	private LocalDate dueDate;
 	private boolean isCompleted;
-	private List<TaskDTO> subTasks;
-	private List<ListDTO> lists;
+	private List<Long> lists;
 	private Map<String, Object> links;
 
 	public Map<String, Object> getLinks() {
@@ -59,16 +58,10 @@ public class TaskDTO {
 	public void setDueDate(LocalDate dueDate) {
 		this.dueDate = dueDate;
 	}
-	public List<TaskDTO> getSubTasks() {
-		return subTasks;
-	}
-	public void setSubTasks(List<TaskDTO> subTasks) {
-		this.subTasks = subTasks;
-	}
-	public List<ListDTO> getLists() {
+	public List<Long> getLists() {
 		return lists;
 	}
-	public void setLists(List<ListDTO> lists) {
+	public void setLists(List<Long> lists) {
 		this.lists = lists;
 	}
 	public String getDescription() {
@@ -86,6 +79,19 @@ public class TaskDTO {
 	@Override
 	public String toString() {
 		return "TaskDTO [taskId=" + taskId + ", taskName=" + taskName + ", parentTaskId=" + parentTaskId
-				+ ", dueDate=" + dueDate + ", subTasks=" + subTasks + "]";
+				+ ", dueDate=" + dueDate + "]";
 	}
+    public TaskDTO toTaskDTO() {
+        
+        TaskDTO taskDTO = new TaskDTO();
+        taskDTO.setDescription(this.getDescription());
+        taskDTO.setDueDate(this.getDueDate());
+        taskDTO.setTaskId(this.getTaskId());
+        taskDTO.setIsCompleted(this.isCompleted());
+        taskDTO.setParentTaskId(this.getParentTaskId());
+        taskDTO.setTaskName(this.getTaskName());
+        taskDTO.setUserId(this.getUserId());
+
+        return taskDTO;
+    }
 }

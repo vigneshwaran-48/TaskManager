@@ -3,6 +3,7 @@ package com.task.library.controller;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -17,6 +18,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import com.task.library.exception.TaskNotFoundException;
+import com.task.library.service.ListService;
 import com.task.library.service.TaskService;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -29,13 +31,28 @@ public class TaskController {
 
 	private final static String BASE_PATH = "/api/v1/task";
 	private final static String LIST_BASE_PATH = "/api/v1/list";
+
 	@Autowired
 	private TaskService taskService;
+
+	@Autowired
+	private ListService listService;
 	
 	@PostMapping
-	public ResponseEntity<?> createTask(@Valid @RequestBody TaskDTO task, HttpServletRequest request) throws Exception {
+	public ResponseEntity<?> createTask(@Valid @RequestBody TaskCreationPayload task, HttpServletRequest request) throws Exception {
 		
-		Long taskId = taskService.createTask(task);
+		TaskDTO taskDTO = task.toTaskDTO();
+
+		if(task.getLists() != null) {
+			
+			List<ListDTO> lists = task.getLists().stream().map(list -> {
+				return listService.findByListId(task.getUserId(), list).get();
+			}).toList();
+
+			taskDTO.setLists(lists);
+		}
+
+		Long taskId = taskService.createTask(taskDTO);
 		
 		TaskCreationResponse response = new TaskCreationResponse();
 		response.setMessage("Task created!");
@@ -225,6 +242,30 @@ public class TaskController {
 		return ResponseEntity.ok(response);
 	}
 
+	@GetMapping("overdue")
+	public ResponseEntity<?> getOverduedTasks() {
+		//Need to remove this hardcoded after spring sevurity enabled
+		//and get the user id from principal.
+		String userId = "12";
+		List<TaskDTO> tasks = taskService.getTasksLessThanDate(userId, LocalDate.now().minusDays(1)).orElse(null);
+
+		if(tasks != null) {
+			tasks = tasks.stream().filter(task -> !task.isCompleted()).toList();
+			tasks.forEach(this::fillWithLinks);
+		}
+
+		TaskListBodyResponse response = new TaskListBodyResponse();
+		response.setMessage("success");
+		response.setStatus(tasks != null && !tasks.isEmpty()
+				? HttpStatus.OK.value() : HttpStatus.NO_CONTENT.value());
+		response.setTasks(tasks);
+		response.setTime(LocalDateTime.now());
+		response.setPath(BASE_PATH + "/overdue");
+
+
+		return ResponseEntity.ok(response);
+	}
+
 	@GetMapping("list/{listId}")
 	public ResponseEntity<?> getAllTasksOfList(@PathVariable Long listId) throws AppException {
 
@@ -254,6 +295,33 @@ public class TaskController {
 
 		return ResponseEntity.ok(response);
 	}
+
+	@GetMapping("search")
+	public ResponseEntity<?> searchTask(@RequestParam String taskName) {
+		//Need to remove this hardcoded after spring sevurity enabled
+		//and get the user id from principal.
+		String userId = "12";
+
+		List<TaskDTO> filteredTasks = new LinkedList<>();
+
+		Optional<List<TaskDTO>> tasksOptional = taskService.listTaskOfUser(userId);
+		tasksOptional.ifPresent(tasks -> {
+			tasks.forEach(task -> {
+				if(task.getTaskName().toLowerCase().contains(taskName.toLowerCase())) {
+					filteredTasks.add(task);
+				}
+			});
+		});
+		TaskListBodyResponse response = new TaskListBodyResponse();
+		response.setMessage("success");
+		response.setStatus(filteredTasks != null && !filteredTasks.isEmpty()
+				? HttpStatus.OK.value() : HttpStatus.NO_CONTENT.value());
+		response.setTasks(filteredTasks);
+		response.setTime(LocalDateTime.now());
+		response.setPath(BASE_PATH + "/search");
+		
+		return ResponseEntity.ok(response);
+	}
 	private void fillWithLinks(TaskDTO taskDTO) {
 		Map<String, Object> links = new HashMap<>();
 		links.put("self", BASE_PATH + "/" + taskDTO.getTaskId());
@@ -263,6 +331,7 @@ public class TaskController {
 		links.put("update", BASE_PATH + "/" + taskDTO.getTaskId());
 		links.put("delete", BASE_PATH + "/" + taskDTO.getTaskId());
 		links.put("allLists", LIST_BASE_PATH + "/bytask/" + taskDTO.getTaskId());
+		links.put("search", BASE_PATH + "/search");
 		links.put("all", BASE_PATH);
 		
 		taskDTO.setLinks(links);

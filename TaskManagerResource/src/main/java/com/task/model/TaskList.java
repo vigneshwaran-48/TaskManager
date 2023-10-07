@@ -1,6 +1,5 @@
 package com.task.model;
 
-import com.task.library.dto.TaskDTO;
 import com.task.library.dto.TaskListDTO;
 
 import jakarta.persistence.Column;
