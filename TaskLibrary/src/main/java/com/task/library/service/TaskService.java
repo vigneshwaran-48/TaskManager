@@ -11,7 +11,7 @@ import com.task.library.exception.TaskNotFoundException;
 
 public interface TaskService {
 
-	Optional<TaskDTO> findTaskById(String userId, Long taskId);
+	Optional<TaskDTO> findTaskById(String userId, Long taskId) throws AppException;
 	
 	Optional<List<TaskDTO>> listTaskOfUser(String userId);
 	

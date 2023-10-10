@@ -65,7 +65,7 @@ public class TaskController {
 	}
 	
 	@GetMapping("{taskId}")
-	public ResponseEntity<?> getTaskById(@PathVariable Long taskId) {
+	public ResponseEntity<?> getTaskById(@PathVariable Long taskId) throws AppException {
 		
 		//Need to remove this hardcoded after spring sevurity enabled
 		//and get the user id from principal.
