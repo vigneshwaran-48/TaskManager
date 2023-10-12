@@ -5,14 +5,18 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import com.task.library.dto.TaskBodyResponse;
+import com.task.library.dto.TaskCreationPayload;
+import com.task.library.dto.TaskCreationResponse;
 import com.task.library.dto.TaskDTO;
-import com.task.library.exception.AlreadyExistsException;
+import com.task.library.dto.TaskDeletionResponse;
+import com.task.library.dto.TaskListBodyResponse;
+import com.task.library.dto.TaskToggleResponse;
 import com.task.library.exception.AppException;
-import com.task.library.exception.TaskNotFoundException;
 import com.task.library.service.TaskService;
 
 import reactor.core.publisher.Mono;
@@ -35,19 +39,39 @@ public class TaskServiceImpl implements TaskService {
                                     .bodyToMono(TaskBodyResponse.class);
         
         TaskBodyResponse taskBodyResponse = response.block();
-        if(taskBodyResponse.getStatus() != 200) {
+
+        if(taskBodyResponse.getStatus() == HttpStatus.NO_CONTENT.value()) {
+            return Optional.empty();
+        }
+        if(taskBodyResponse.getStatus() != HttpStatus.OK.value()) {
             throw new AppException(taskBodyResponse.getMessage(), taskBodyResponse.getStatus());
         }
+
         return Optional.of(taskBodyResponse.getTask());
     }
 
     @Override
-    public Optional<List<TaskDTO>> listTaskOfUser(String userId) {
-        // TODO Auto-generated method stub
-        System.out.println("Get tasks ....");
-        return Optional.empty();
+    public Optional<List<TaskDTO>> listTaskOfUser(String userId) throws AppException {
+        
+        Mono<TaskListBodyResponse> response = webClient.get()
+                                                 .uri(BASE_URL)
+                                                 .retrieve()
+                                                 .bodyToMono(TaskListBodyResponse.class);
+        
+        TaskListBodyResponse taskListBodyResponse = response.block();
+
+        if(taskListBodyResponse.getStatus() == HttpStatus.NO_CONTENT.value()) {
+            return Optional.empty();
+        }
+        if(taskListBodyResponse.getStatus() != HttpStatus.OK.value()) {
+            throw new AppException(taskListBodyResponse.getMessage(), taskListBodyResponse.getStatus());
+        }
+        return Optional.of(taskListBodyResponse.getTasks());
     }
 
+    /**
+     * Until finishing endpoint for sub tasks this can't be implemented.
+     */
     @Override
     public Optional<List<TaskDTO>> getAllSubTasks(String userId, Long parentTaskId) {
         // TODO Auto-generated method stub
@@ -56,39 +80,108 @@ public class TaskServiceImpl implements TaskService {
 
     @Override
     public Long createTask(TaskDTO taskDTO) throws Exception {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'createTask'");
+
+        TaskCreationPayload payload = new TaskCreationPayload();
+        payload.setTaskName(taskDTO.getTaskName());
+        payload.setParentTaskId(taskDTO.getParentTaskId());
+        payload.setDescription(taskDTO.getDescription());
+        payload.setDueDate(taskDTO.getDueDate());
+        payload.setIsCompleted(taskDTO.isCompleted());
+        
+        if(taskDTO.getLists() != null && !taskDTO.getLists().isEmpty()) {
+            payload.setLists(taskDTO.getLists()
+                                    .stream()
+                                    .map(list -> list.getListId())
+                                    .toList());
+        }
+        payload.setUserId(taskDTO.getUserId());
+        Mono<TaskCreationResponse> response = webClient.post()
+                                                        .uri(BASE_URL)
+                                                        .body(payload, TaskCreationPayload.class)
+                                                        .retrieve()
+                                                        .bodyToMono(TaskCreationResponse.class);
+        TaskCreationResponse taskCreationResponse = response.block();
+        if(taskCreationResponse.getStatus() != HttpStatus.CREATED.value()) {
+            throw new AppException(taskCreationResponse.getMessage(), taskCreationResponse.getStatus());
+        }       
+        return taskCreationResponse.getTaskId();                                             
     }
 
     @Override
     public TaskDTO updateTask(TaskDTO taskDTO, boolean removeList)
-            throws TaskNotFoundException, AlreadyExistsException {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'updateTask'");
+            throws AppException {
+
+        StringBuffer urlBuffer = new StringBuffer(BASE_URL);
+        urlBuffer.append(SLASH).append("?")
+                 .append("removeListNotIncluded").append("=").append(removeList);
+
+        Mono<TaskBodyResponse> response = webClient.patch()
+                                                    .uri(urlBuffer.toString())
+                                                    .body(taskDTO, TaskDTO.class)
+                                                    .retrieve()
+                                                    .bodyToMono(TaskBodyResponse.class);
+        TaskBodyResponse taskBodyResponse = response.block();
+        if(taskBodyResponse.getStatus() == HttpStatus.NO_CONTENT.value()) {
+            return null;
+        }
+        else if(taskBodyResponse.getStatus() != HttpStatus.OK.value()) {
+            throw new AppException(taskBodyResponse.getMessage(), taskBodyResponse.getStatus());
+        }
+        return taskBodyResponse.getTask();
     }
 
     @Override
-    public Long deleteTask(String userId, Long taskId) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'deleteTask'");
+    public Long deleteTask(String userId, Long taskId) throws AppException {
+        TaskDeletionResponse response = webClient.delete()
+                                                 .uri(BASE_URL + SLASH + taskId)
+                                                 .retrieve()
+                                                 .bodyToMono(TaskDeletionResponse.class)
+                                                 .block();
+        if(response.getStatus() == HttpStatus.NO_CONTENT.value()) {
+            return null;
+        }
+        else if (response.getStatus() != HttpStatus.OK.value()) {
+            throw new AppException(response.getMessage(), response.getStatus());
+        }
+        return response.getDeletedTasks().get(0);
     }
 
     @Override
-    public boolean isTaskExists(String userId, Long taskId) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'isTaskExists'");
+    public boolean isTaskExists(String userId, Long taskId) throws AppException {
+        Optional<TaskDTO> task = findTaskById(userId, taskId);
+        return task.isPresent();
     }
 
     @Override
-    public boolean toggleTask(String userId, Long taskId) throws TaskNotFoundException {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'toggleTask'");
+    public boolean toggleTask(String userId, Long taskId) throws AppException {
+        TaskToggleResponse response = webClient.patch()
+                                                .uri(BASE_URL + SLASH + taskId + SLASH + "toggle")
+                                                .retrieve()
+                                                .bodyToMono(TaskToggleResponse.class)
+                                                .block();
+        if(response.getStatus() != HttpStatus.OK.value()) {
+            throw new AppException(response.getMessage(), response.getStatus());
+        }
+        return response.isCompleted();
     }
 
     @Override
-    public Optional<List<TaskDTO>> findByDate(String userId, LocalDate date) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'findByDate'");
+    public Optional<List<TaskDTO>> findByDate(String userId, LocalDate date) throws AppException {
+        StringBuffer urlBuffer = new StringBuffer(BASE_URL);
+        urlBuffer.append("?dueDate=").append(date.toString());
+        TaskListBodyResponse response = webClient.get()
+                                                 .uri(urlBuffer.toString())
+                                                 .retrieve()
+                                                 .bodyToMono(TaskListBodyResponse.class)
+                                                 .block();
+        if(response.getStatus() == HttpStatus.NO_CONTENT.value()) {
+            return Optional.empty();
+        }
+        if(response.getStatus() != HttpStatus.OK.value()) {
+            throw new AppException(response.getMessage(), response.getStatus());
+        }
+
+        return Optional.of(response.getTasks());
     }
 
     @Override

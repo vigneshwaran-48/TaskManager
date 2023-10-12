@@ -85,7 +85,7 @@ public class TaskController {
 	}
 	
 	@GetMapping
-	public ResponseEntity<?> getAllTasksOfUser(@RequestParam Optional<LocalDate> dueDate) {
+	public ResponseEntity<?> getAllTasksOfUser(@RequestParam Optional<LocalDate> dueDate) throws AppException {
 		//Need to remove this hardcoded after spring sevurity enabled
 		//and get the user id from principal.
 		String userId = "12";
@@ -114,7 +114,7 @@ public class TaskController {
 	}
 	
 	@DeleteMapping("{taskId}")
-	public ResponseEntity<?> deleteTaskById(@PathVariable Long taskId) {
+	public ResponseEntity<?> deleteTaskById(@PathVariable Long taskId) throws AppException {
 		//Need to remove this hardcoded after spring sevurity enabled
 		//and get the user id from principal.
 		String userId = "12";
@@ -136,7 +136,7 @@ public class TaskController {
 												defaultValue = "false", 
 												required = false
 											 ) String removeListNotIncluded)
-			throws TaskNotFoundException, AlreadyExistsException {
+			throws AppException {
 		//Need to remove this hardcoded after spring sevurity enabled
 		//and get the user id from principal.
 		String userId = "12";
@@ -156,7 +156,7 @@ public class TaskController {
 	}
 	@PatchMapping("{taskId}/toggle")
 	public ResponseEntity<?> toggleTaskCompleted(@PathVariable Long taskId)
-			throws TaskNotFoundException {
+			throws AppException {
 		//Need to remove this hardcoded after spring sevurity enabled
 		//and get the user id from principal.
 		String userId = "12";
@@ -175,7 +175,7 @@ public class TaskController {
 	}
 
 	@GetMapping("today")
-	public ResponseEntity<?> getTodayTasks() {
+	public ResponseEntity<?> getTodayTasks() throws AppException {
 		//Need to remove this hardcoded after spring sevurity enabled
 		//and get the user id from principal.
 		String userId = "12";
@@ -297,7 +297,7 @@ public class TaskController {
 	}
 
 	@GetMapping("search")
-	public ResponseEntity<?> searchTask(@RequestParam String taskName) {
+	public ResponseEntity<?> searchTask(@RequestParam String taskName) throws AppException {
 		//Need to remove this hardcoded after spring sevurity enabled
 		//and get the user id from principal.
 		String userId = "12";

@@ -11,8 +11,13 @@ import org.springframework.security.oauth2.client.web.DefaultOAuth2AuthorizedCli
 import org.springframework.security.oauth2.client.web.OAuth2AuthorizedClientRepository;
 import org.springframework.security.oauth2.client.web.reactive.function.client
         .ServletOAuth2AuthorizedClientExchangeFilterFunction;
+import org.springframework.web.reactive.function.client.ExchangeFilterFunction;
 import org.springframework.web.reactive.function.client.ExchangeStrategies;
 import org.springframework.web.reactive.function.client.WebClient;
+
+import com.task.library.exception.AppException;
+
+import reactor.core.publisher.Mono;
 
 @Configuration
 public class AppConfig {
@@ -35,6 +40,7 @@ public class AppConfig {
         oauth2Client.setDefaultOAuth2AuthorizedClient(true);
         return WebClient.builder()
         		.filter(oauth2Client)
+                        .filter(oauth2Client)
         		.exchangeStrategies(strategies)
                 .build();
     }
@@ -54,5 +60,19 @@ public class AppConfig {
         authorizedClientManager.setAuthorizedClientProvider(authorizedClientProvider);
 
         return authorizedClientManager;
+    }
+
+    static ExchangeFilterFunction errorHandler() {
+        return ExchangeFilterFunction.ofResponseProcessor(response -> {
+                if(response.statusCode().is4xxClientError() || response.statusCode().is5xxServerError()) {
+                        return response.bodyToMono(String.class)
+                                        .flatMap(errorBody -> Mono.error(
+                                                new AppException("Error in API call", 
+                                                                response.statusCode().value())));
+                }
+                else {
+                        return Mono.just(response);
+                }
+        });
     }
 }

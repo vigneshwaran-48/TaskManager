@@ -6,6 +6,7 @@ import com.task.library.dto.utility.ListSideNav;
 import com.task.library.dto.utility.ListSideNavResponse;
 import com.task.library.dto.utility.SideNav;
 import com.task.library.dto.utility.SideNavResponse;
+import com.task.library.exception.AppException;
 import com.task.library.service.ListService;
 import com.task.library.service.TaskService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,7 +36,7 @@ public class UtilityController {
     private ListService listService;
 
     @GetMapping("side-nav")
-    public ResponseEntity<?> getSideNav(Principal principal) {
+    public ResponseEntity<?> getSideNav(Principal principal) throws AppException {
         //Need to remove this hardcoded after spring security enabled
         //and get the user id from principal.
         String userId = "12";

@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Optional;
 
 import com.task.library.dto.ListDTO;
+import com.task.library.exception.AppException;
 
 public interface ListService {
 
@@ -17,5 +18,5 @@ public interface ListService {
 	
 	Optional<ListDTO> updateList(ListDTO listDTO);
 	
-	Optional<List<ListDTO>> getListsOfTask(String userId, Long taskId);
+	Optional<List<ListDTO>> getListsOfTask(String userId, Long taskId) throws AppException;
 }

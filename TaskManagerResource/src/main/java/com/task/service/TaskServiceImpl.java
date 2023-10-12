@@ -51,7 +51,7 @@ public class TaskServiceImpl implements TaskService {
 	}
 
 	@Override
-	public Optional<List<TaskDTO>> listTaskOfUser(String userId) {
+	public Optional<List<TaskDTO>> listTaskOfUser(String userId) throws AppException {
 		List<Task> tasks = taskRepository.findByUserId(userId).orElse(null);
 		
 		if(tasks == null) {
@@ -267,9 +267,14 @@ public class TaskServiceImpl implements TaskService {
 		Optional<List<TaskDTO>> subTasks = getAllSubTasks(task.getUserId(), task.getTaskId());
 		taskDTO.setSubTasks(subTasks.isPresent() ? subTasks.get() : null);
 		
-		Optional<List<ListDTO>> lists = listService.getListsOfTask(task.getUserId(),
-																	task.getTaskId());
-		taskDTO.setLists(lists.isPresent() ? lists.get() : null);
+		try {
+			Optional<List<ListDTO>> lists = listService.getListsOfTask(task.getUserId(),
+																		task.getTaskId());
+			taskDTO.setLists(lists.isPresent() ? lists.get() : null);
+		} 
+		catch (AppException e) {
+			e.printStackTrace();
+		}
 		
 		return taskDTO;
 	}

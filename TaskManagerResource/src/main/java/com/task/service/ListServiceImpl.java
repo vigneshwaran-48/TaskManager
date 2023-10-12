@@ -8,6 +8,7 @@ import org.springframework.web.util.HtmlUtils;
 
 import com.task.library.dto.ListDTO;
 import com.task.library.exception.AlreadyExistsException;
+import com.task.library.exception.AppException;
 import com.task.library.service.ListService;
 import com.task.library.service.TaskService;
 import com.task.model.List;
@@ -116,7 +117,7 @@ public class ListServiceImpl implements ListService {
 	}
 
 	@Override
-	public Optional<java.util.List<ListDTO>> getListsOfTask(String userId, Long taskId) {
+	public Optional<java.util.List<ListDTO>> getListsOfTask(String userId, Long taskId) throws AppException {
 		if(!taskService.isTaskExists(userId, taskId)) {
 			throw new IllegalArgumentException("No task found with the given taskId => " + taskId);
 		}

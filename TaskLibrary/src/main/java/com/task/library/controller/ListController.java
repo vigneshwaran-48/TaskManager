@@ -23,6 +23,7 @@ import com.task.library.dto.list.ListBodyListResponse;
 import com.task.library.dto.list.ListBodyResponse;
 import com.task.library.dto.list.ListCreationResponse;
 import com.task.library.dto.list.ListDeletionResponse;
+import com.task.library.exception.AppException;
 import com.task.library.service.ListService;
 
 import jakarta.validation.Valid;
@@ -127,7 +128,7 @@ public class ListController {
 	}
 	
 	@GetMapping("/bytask/{taskId}")
-	public ResponseEntity<?> getListsByTaskId(@PathVariable Long taskId) {
+	public ResponseEntity<?> getListsByTaskId(@PathVariable Long taskId) throws AppException {
 		
 		//Need to remove this hardcoded value after spring sevurity enabled
 		//and get the user id from principal.
