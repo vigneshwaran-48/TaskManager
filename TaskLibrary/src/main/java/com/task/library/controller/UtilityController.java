@@ -57,7 +57,7 @@ public class UtilityController {
         overdue.setIconClassNames("fa fa-solid fa-hourglass-end");
         Optional<List<TaskDTO>> overdueTasks = taskService.getTasksLessThanDate(userId, LocalDate.now().minusDays(1));
         overdueTasks.ifPresent(overdueTask -> {
-            overdueTask = overdueTask.stream().filter(task -> !task.isCompleted()).toList();
+            overdueTask = overdueTask.stream().filter(task -> !task.getIsCompleted()).toList();
             overdue.setCount(overdueTask.size());
         });
 

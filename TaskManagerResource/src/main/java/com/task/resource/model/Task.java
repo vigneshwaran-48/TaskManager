@@ -87,12 +87,12 @@ public class Task {
 		this.userId = userId;
 	}
 
-	public boolean isCompleted() {
+	public boolean getIsCompleted() {
 		return isCompleted;
 	}
 
-	public void setCompleted(boolean completed) {
-		isCompleted = completed;
+	public void setIsCompleted(boolean isCompleted) {
+		this.isCompleted = isCompleted;
 	}
 
 	@Override
@@ -123,7 +123,7 @@ public class Task {
 		taskDTO.setTaskName(this.getTaskName());
 		taskDTO.setDueDate(this.getDueDate());
 		taskDTO.setParentTaskId(this.getParentTask());
-		taskDTO.setIsCompleted(this.isCompleted());
+		taskDTO.setIsCompleted(this.getIsCompleted());
 
 		return taskDTO;
 	}

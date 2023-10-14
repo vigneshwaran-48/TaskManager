@@ -29,11 +29,11 @@ public class TaskDTO {
 	public void setLinks(Map<String, Object> links) {
 		this.links = links;
 	}
-	public boolean isCompleted() {
+	public boolean getIsCompleted() {
 		return isCompleted;
 	}
-	public void setIsCompleted(boolean completed) {
-		isCompleted = completed;
+	public void setIsCompleted(boolean isCompleted) {
+		this.isCompleted = isCompleted;
 	}
 	public Long getTaskId() {
 		return taskId;

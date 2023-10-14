@@ -10,7 +10,6 @@ import java.util.Map;
 import java.util.Optional;
 
 import com.task.library.dto.*;
-import com.task.library.exception.AlreadyExistsException;
 import com.task.library.exception.AppException;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -109,11 +108,10 @@ public class TaskController {
 		List<TaskDTO> tasks;
 
 		if(dueDate.isPresent()) {
-
 			if(lessThan.isPresent() && lessThan.get()) {
 				tasks = taskService.getTasksLessThanDate(
 										userId.toString(), 
-										dueDate.get().minusDays(1)
+										dueDate.get()
 									).orElse(null);
 			}
 			else {
@@ -292,7 +290,7 @@ public class TaskController {
 													LocalDate.now().minusDays(1)).orElse(null);
 
 		if(tasks != null) {
-			tasks = tasks.stream().filter(task -> !task.isCompleted()).toList();
+			tasks = tasks.stream().filter(task -> !task.getIsCompleted()).toList();
 			tasks.forEach(this::fillWithLinks);
 		}
 

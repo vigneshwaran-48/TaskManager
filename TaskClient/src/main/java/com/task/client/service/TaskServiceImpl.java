@@ -91,7 +91,7 @@ public class TaskServiceImpl implements TaskService {
         payload.setParentTaskId(taskDTO.getParentTaskId());
         payload.setDescription(taskDTO.getDescription());
         payload.setDueDate(taskDTO.getDueDate());
-        payload.setIsCompleted(taskDTO.isCompleted());
+        payload.setIsCompleted(taskDTO.getIsCompleted());
         
         if(taskDTO.getLists() != null && !taskDTO.getLists().isEmpty()) {
             payload.setLists(taskDTO.getLists()

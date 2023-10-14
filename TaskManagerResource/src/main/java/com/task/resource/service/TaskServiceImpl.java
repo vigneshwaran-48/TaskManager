@@ -181,13 +181,13 @@ public class TaskServiceImpl implements TaskService {
 		Optional<Task> existingTask = taskRepository
 				.findByTaskIdAndUserId(taskId, userId);
 		if(existingTask.isEmpty()) {
-			throw new TaskNotFoundException("Not task found with the given taskId");
+			throw new TaskNotFoundException("No task found with the given taskId");
 		}
 
-		existingTask.get().setCompleted(!existingTask.get().isCompleted());
+		existingTask.get().setIsCompleted(!existingTask.get().getIsCompleted());
 		Task task = taskRepository.save(existingTask.get());
 
-		return task.isCompleted();
+		return task.getIsCompleted();
 	}
 
 	@Override
@@ -277,7 +277,7 @@ public class TaskServiceImpl implements TaskService {
 		taskDTO.setTaskName(task.getTaskName());
 		taskDTO.setDueDate(task.getDueDate());
 		taskDTO.setParentTaskId(task.getParentTask());
-		taskDTO.setIsCompleted(task.isCompleted());
+		taskDTO.setIsCompleted(task.getIsCompleted());
 		
 		Optional<List<TaskDTO>> subTasks = getAllSubTasks(task.getUserId(), task.getTaskId());
 		taskDTO.setSubTasks(subTasks.isPresent() ? subTasks.get() : null);
