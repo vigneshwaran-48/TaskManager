@@ -11,29 +11,29 @@ import com.task.library.exception.TaskNotFoundException;
 
 public interface TaskService {
 
-	Optional<TaskDTO> findTaskById(String userId, Long taskId);
+	Optional<TaskDTO> findTaskById(String userId, Long taskId) throws AppException;
 	
-	Optional<List<TaskDTO>> listTaskOfUser(String userId);
+	Optional<List<TaskDTO>> listTaskOfUser(String userId) throws AppException;
 	
 	Optional<List<TaskDTO>> getAllSubTasks(String userId, Long parentTaskId);
 	
 	Long createTask(TaskDTO taskDTO) throws Exception;
 	
-	TaskDTO updateTask(TaskDTO taskDTO, boolean removeList) throws TaskNotFoundException, AlreadyExistsException;
+	TaskDTO updateTask(TaskDTO taskDTO, boolean removeList) throws TaskNotFoundException, AlreadyExistsException, AppException;
 	
-	Long deleteTask(String userId, Long taskId);
+	Long deleteTask(String userId, Long taskId) throws AppException;
 	
-	boolean isTaskExists(String userId, Long taskId);
+	boolean isTaskExists(String userId, Long taskId) throws AppException;
 
-	boolean toggleTask(String userId, Long taskId) throws TaskNotFoundException;
+	boolean toggleTask(String userId, Long taskId) throws TaskNotFoundException, AppException;
 
-	Optional<List<TaskDTO>> findByDate(String userId, LocalDate date);
+	Optional<List<TaskDTO>> findByDate(String userId, LocalDate date) throws AppException;
 
-	Optional<List<TaskDTO>> getUpcomingTasks(String userId);
+	Optional<List<TaskDTO>> getUpcomingTasks(String userId) throws AppException;
 
-	Optional<List<TaskDTO>> getThisWeekTasks(String userId);
+	Optional<List<TaskDTO>> getThisWeekTasks(String userId) throws AppException;
 
 	Optional<List<TaskDTO>> getTasksOfList(String userId, Long listId) throws AppException;
 
-	Optional<List<TaskDTO>> getTasksLessThanDate(String userId, LocalDate date);
+	Optional<List<TaskDTO>> getTasksLessThanDate(String userId, LocalDate date) throws AppException;
 }

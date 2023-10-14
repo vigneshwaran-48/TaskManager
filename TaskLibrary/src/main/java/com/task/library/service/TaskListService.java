@@ -12,11 +12,11 @@ public interface TaskListService {
     /**
      * @return Returns the added lists to the task.
      */
-    List<ListDTO> addListsToTask(TaskDTO task, List<ListDTO> lists, boolean removeListsNotIncluded);
+    List<ListDTO> addListsToTask(String userId, TaskDTO task, List<ListDTO> lists, boolean removeListsNotIncluded);
 
-    void deleteTaskListsRelation(Long taskId, List<Long> listIds);
+    void deleteTaskListsRelation(String userId, Long taskId, List<Long> listIds);
 
-    void deleteAllRelationOfTask(Long taskId);
+    void deleteAllRelationOfTask(String userId, Long taskId);
 
-    Optional<List<TaskListDTO>> findByList(ListDTO listDTO);
+    Optional<List<TaskListDTO>> findByList(String userId, ListDTO listDTO);
 }

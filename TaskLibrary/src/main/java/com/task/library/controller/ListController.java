@@ -1,5 +1,6 @@
 package com.task.library.controller;
 
+import java.security.Principal;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
@@ -23,7 +24,9 @@ import com.task.library.dto.list.ListBodyListResponse;
 import com.task.library.dto.list.ListBodyResponse;
 import com.task.library.dto.list.ListCreationResponse;
 import com.task.library.dto.list.ListDeletionResponse;
+import com.task.library.exception.AppException;
 import com.task.library.service.ListService;
+import com.task.library.util.AuthUtil;
 
 import jakarta.validation.Valid;
 
@@ -33,17 +36,19 @@ import jakarta.validation.Valid;
 public class ListController {
 
 	private final static String BASE_PATH = "/api/v1/list";
+	private final static String NOT_AUTHENTICATED = "Not Authenticated";
 	
 	@Autowired
 	private ListService listService;
 	
 	@PostMapping
-	public ResponseEntity<?> createList(@Valid @RequestBody ListDTO listDTO) throws Exception {
+	public ResponseEntity<?> createList(@Valid @RequestBody ListDTO listDTO, Principal principal) throws Exception {
 		
-		//Need to remove this hardcoded value after spring sevurity enabled
-		//and get the user id from principal.
-		String userId = "12";
-		listDTO.setUserId(userId);
+		StringBuffer userId = new StringBuffer(principal.getName());
+		if(!AuthUtil.getInstance().isValidUserId(userId)) {
+			throw new AppException(NOT_AUTHENTICATED, HttpStatus.BAD_REQUEST.value());
+		}
+		listDTO.setUserId(userId.toString());
 		Long listId = listService.createList(listDTO);
 		
 		ListCreationResponse response = new ListCreationResponse();
@@ -59,13 +64,14 @@ public class ListController {
 	}
 	
 	@GetMapping("{listId}")
-	public ResponseEntity<?> getListById(@PathVariable Long listId) {
+	public ResponseEntity<?> getListById(@PathVariable Long listId, Principal principal) {
 		
-		//Need to remove this hardcoded value after spring sevurity enabled
-		//and get the user id from principal.
-		String userId = "12";
+		StringBuffer userId = new StringBuffer(principal.getName());
+		if(!AuthUtil.getInstance().isValidUserId(userId)) {
+			throw new AppException(NOT_AUTHENTICATED, HttpStatus.BAD_REQUEST.value());
+		}
 		
-		ListDTO listDTO = listService.findByListId(userId, listId).orElse(null);
+		ListDTO listDTO = listService.findByListId(userId.toString(), listId).orElse(null);
 		if(listDTO != null) {
 			fillWithLinks(listDTO);
 		}
@@ -80,13 +86,14 @@ public class ListController {
 	}
 	
 	@GetMapping
-	public ResponseEntity<?> getAllListsOfUser() {
+	public ResponseEntity<?> getAllListsOfUser(Principal principal) {
 		
-		//Need to remove this hardcoded value after spring sevurity enabled
-		//and get the user id from principal.
-		String userId = "12";
+		StringBuffer userId = new StringBuffer(principal.getName());
+		if(!AuthUtil.getInstance().isValidUserId(userId)) {
+			throw new AppException(NOT_AUTHENTICATED, HttpStatus.BAD_REQUEST.value());
+		}
 		
-		List<ListDTO> lists = listService.listAllListsOfUser(userId).orElse(null);
+		List<ListDTO> lists = listService.listAllListsOfUser(userId.toString()).orElse(null);
 		
 		if(lists != null) {
 			lists.forEach(this::fillWithLinks);
@@ -110,13 +117,14 @@ public class ListController {
 	}
 	
 	@DeleteMapping("{listId}")
-	public ResponseEntity<?> deleteByListId(@PathVariable Long listId) {
+	public ResponseEntity<?> deleteByListId(@PathVariable Long listId, Principal principal) {
 		
-		//Need to remove this hardcoded value after spring sevurity enabled
-		//and get the user id from principal.
-		String userId = "12";
+		StringBuffer userId = new StringBuffer(principal.getName());
+		if(!AuthUtil.getInstance().isValidUserId(userId)) {
+			throw new AppException(NOT_AUTHENTICATED, HttpStatus.BAD_REQUEST.value());
+		}
 		
-		Long removedList = listService.removeList(userId, listId);
+		Long removedList = listService.removeList(userId.toString(), listId);
 		ListDeletionResponse response = new ListDeletionResponse();
 		response.setMessage("success");
 		response.setStatus(removedList != null ? HttpStatus.OK.value() : HttpStatus.NO_CONTENT.value());
@@ -127,13 +135,14 @@ public class ListController {
 	}
 	
 	@GetMapping("/bytask/{taskId}")
-	public ResponseEntity<?> getListsByTaskId(@PathVariable Long taskId) {
+	public ResponseEntity<?> getListsByTaskId(@PathVariable Long taskId, Principal principal) throws AppException {
 		
-		//Need to remove this hardcoded value after spring sevurity enabled
-		//and get the user id from principal.
-		String userId = "12";
+		StringBuffer userId = new StringBuffer(principal.getName());
+		if(!AuthUtil.getInstance().isValidUserId(userId)) {
+			throw new AppException(NOT_AUTHENTICATED, HttpStatus.BAD_REQUEST.value());
+		}
 		
-		List<ListDTO> lists = listService.getListsOfTask(userId, taskId).orElse(null);
+		List<ListDTO> lists = listService.getListsOfTask(userId.toString(), taskId).orElse(null);
 		
 		if(lists != null) {
 			lists.forEach(this::fillWithLinks);
@@ -150,13 +159,15 @@ public class ListController {
 	}
 	
 	@PatchMapping("{listId}")
-	public ResponseEntity<?> patchUpdateList(@PathVariable Long listId, @RequestBody ListDTO listDTO) {
+	public ResponseEntity<?> patchUpdateList(@PathVariable Long listId, 
+											 @RequestBody ListDTO listDTO, Principal principal) {
 		
-		//Need to remove this hardcoded value after spring sevurity enabled
-		//and get the user id from principal.
-		String userId = "12";
+		StringBuffer userId = new StringBuffer(principal.getName());
+		if(!AuthUtil.getInstance().isValidUserId(userId)) {
+			throw new AppException(NOT_AUTHENTICATED, HttpStatus.BAD_REQUEST.value());
+		}
 		listDTO.setListId(listId);
-		listDTO.setUserId(userId);
+		listDTO.setUserId(userId.toString());
 		
 		ListDTO updatedList = listService.updateList(listDTO).orElse(null);
 		if(updatedList != null) {

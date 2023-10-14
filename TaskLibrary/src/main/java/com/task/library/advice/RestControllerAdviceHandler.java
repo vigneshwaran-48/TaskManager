@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
+import com.task.library.dto.AppErrorResponse;
 import com.task.library.exception.AppException;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -21,7 +22,7 @@ public class RestControllerAdviceHandler {
 	@ExceptionHandler(IllegalArgumentException.class)
 	public ResponseEntity<?> handleException(IllegalArgumentException ex, HttpServletRequest request) {
 		
-		ErrorResponse errorResponse = new ErrorResponse(400, 
+		AppErrorResponse errorResponse = new AppErrorResponse(400, 
 												ex.getMessage(), 
 												LocalDateTime.now(),
 												request.getServletPath());
@@ -39,7 +40,7 @@ public class RestControllerAdviceHandler {
 		//To delete the extra comma at last
 		errorMessage.delete(errorMessage.length() - 2, errorMessage.length());
 		
-		ErrorResponse errorResponse = new ErrorResponse(400, 
+		AppErrorResponse errorResponse = new AppErrorResponse(400, 
 												errorMessage.toString(), 
 												LocalDateTime.now(),
 												request.getServletPath());
@@ -49,7 +50,7 @@ public class RestControllerAdviceHandler {
 	@ExceptionHandler(Exception.class)
 	public ResponseEntity<?> handleException(Exception ex, HttpServletRequest request) {
 		ex.printStackTrace();
-		ErrorResponse errorResponse = new ErrorResponse(500, 
+		AppErrorResponse errorResponse = new AppErrorResponse(500, 
 												"Internal Server Error", 
 												LocalDateTime.now(),
 												request.getServletPath());
@@ -58,32 +59,29 @@ public class RestControllerAdviceHandler {
 	@ExceptionHandler(AppException.class)
 	public ResponseEntity<?> handleException(AppException ex, HttpServletRequest request) {
 		
-		ErrorResponse errorResponse = new ErrorResponse(ex.getStatus(), 
+		AppErrorResponse errorResponse = new AppErrorResponse(ex.getStatus(), 
 												ex.getMessage(), 
 												LocalDateTime.now(),
 												request.getServletPath());
-		return new ResponseEntity<ErrorResponse>(errorResponse, 
+		return new ResponseEntity<AppErrorResponse>(errorResponse, 
 				HttpStatusCode.valueOf(ex.getStatus()));
 	}
 	@ExceptionHandler(HttpRequestMethodNotSupportedException.class)
 	public ResponseEntity<?> handleException(HttpRequestMethodNotSupportedException ex, HttpServletRequest request) {
 		
-		ErrorResponse errorResponse = new ErrorResponse(HttpStatus.NOT_FOUND.value(), 
+		AppErrorResponse errorResponse = new AppErrorResponse(HttpStatus.NOT_FOUND.value(), 
 												ex.getMessage(), 
 												LocalDateTime.now(),
 												request.getServletPath());
-		return new ResponseEntity<ErrorResponse>(errorResponse, HttpStatus.NOT_FOUND);
+		return new ResponseEntity<AppErrorResponse>(errorResponse, HttpStatus.NOT_FOUND);
 	}
 	@ExceptionHandler(MethodArgumentTypeMismatchException.class)
 	public ResponseEntity<?> handleException(MethodArgumentTypeMismatchException ex, HttpServletRequest request) {
 		
-		ErrorResponse errorResponse = new ErrorResponse(HttpStatus.BAD_REQUEST.value(), 
+		AppErrorResponse errorResponse = new AppErrorResponse(HttpStatus.BAD_REQUEST.value(), 
 												"Invalid Input", 
 												LocalDateTime.now(),
 												request.getServletPath());
-		return new ResponseEntity<ErrorResponse>(errorResponse, HttpStatus.BAD_REQUEST);
+		return new ResponseEntity<AppErrorResponse>(errorResponse, HttpStatus.BAD_REQUEST);
 	}
-	
-	
-	record ErrorResponse(int status, String error, LocalDateTime timestamp, String path) {}
 }

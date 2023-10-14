@@ -1,0 +1,35 @@
+server:
+  port: 8282
+
+spring:
+  security:
+    oauth2:
+      client:
+        registration:
+          taskmanager:
+            client-id: proapp-edd7ec4a-7d61-45f7-a393-c9c00426a436
+            client-secret: "task@123"
+            scope: "openid, TaskManager.ALL"
+        provider:
+          taskmanager:
+            issuer-uri: "http://localhost:9090"
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
+  main:
+    allow-circular-references: true
+
+logging:
+  level:
+    org:
+      springframework:
+        security: trace
+
+app:
+  resource:
+    server:
+      baseurl: http://127.0.0.1:8383
+  flag:
+    isSinglUserFlow: false
+  singleUserId: "12"
