@@ -1,6 +1,6 @@
 package com.task.library.exception;
 
-public class AppException extends Exception {
+public class AppException extends RuntimeException {
 
 	private static final long serialVersionUID = 1L;
 	private int status;

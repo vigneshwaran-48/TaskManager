@@ -1,5 +1,6 @@
 package com.task.client.config;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -15,12 +16,21 @@ import org.springframework.web.reactive.function.client.ExchangeFilterFunction;
 import org.springframework.web.reactive.function.client.ExchangeStrategies;
 import org.springframework.web.reactive.function.client.WebClient;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.task.library.dto.AppErrorResponse;
 import com.task.library.exception.AppException;
 
+import net.minidev.json.JSONObject;
+import net.minidev.json.JSONValue;
+import net.minidev.json.parser.JSONParser;
+import net.minidev.json.parser.ParseException;
 import reactor.core.publisher.Mono;
 
 @Configuration
 public class AppConfig {
+
+        @Autowired
+        private ObjectMapper objectMapper;
     
         @Bean
         BCryptPasswordEncoder passwordEncoder() {
@@ -40,7 +50,7 @@ public class AppConfig {
         oauth2Client.setDefaultOAuth2AuthorizedClient(true);
         return WebClient.builder()
         		.filter(oauth2Client)
-                        .filter(oauth2Client)
+                        .filter(errorHandler())
         		.exchangeStrategies(strategies)
                 .build();
     }
@@ -66,9 +76,14 @@ public class AppConfig {
         return ExchangeFilterFunction.ofResponseProcessor(response -> {
                 if(response.statusCode().is4xxClientError() || response.statusCode().is5xxServerError()) {
                         return response.bodyToMono(String.class)
-                                        .flatMap(errorBody -> Mono.error(
-                                                new AppException("Error in API call", 
-                                                                response.statusCode().value())));
+                                        .flatMap(errorBody -> {
+                                                System.out.println(errorBody);
+                                                JSONObject errorResp = (JSONObject) JSONValue.parse(errorBody);
+                                                
+                                                return Mono.error(
+                                                        new AppException(errorResp.getAsString("error"), 
+                                                                response.statusCode().value()));
+                                        });
                 }
                 else {
                         return Mono.just(response);

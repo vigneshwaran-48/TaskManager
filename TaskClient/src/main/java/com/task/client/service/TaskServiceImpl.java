@@ -97,14 +97,14 @@ public class TaskServiceImpl implements TaskService {
         payload.setUserId(taskDTO.getUserId());
         Mono<TaskCreationResponse> response = webClient.post()
                                                         .uri(BASE_URL)
-                                                        .body(payload, TaskCreationPayload.class)
+                                                        .body(Mono.just(payload), TaskCreationPayload.class)
                                                         .retrieve()
                                                         .bodyToMono(TaskCreationResponse.class);
         TaskCreationResponse taskCreationResponse = response.block();
         if(taskCreationResponse.getStatus() != HttpStatus.CREATED.value()) {
             throw new AppException(taskCreationResponse.getMessage(), taskCreationResponse.getStatus());
         }       
-        return taskCreationResponse.getTaskId();                                             
+        return taskCreationResponse.getTaskId();                                       
     }
 
     @Override
@@ -117,7 +117,7 @@ public class TaskServiceImpl implements TaskService {
 
         Mono<TaskBodyResponse> response = webClient.patch()
                                                     .uri(urlBuffer.toString())
-                                                    .body(taskDTO, TaskDTO.class)
+                                                    .body(Mono.just(taskDTO), TaskDTO.class)
                                                     .retrieve()
                                                     .bodyToMono(TaskBodyResponse.class);
         TaskBodyResponse taskBodyResponse = response.block();
