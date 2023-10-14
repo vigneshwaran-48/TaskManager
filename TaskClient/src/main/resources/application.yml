@@ -25,3 +25,7 @@ logging:
     org:
       springframework:
         security: trace
+
+resource:
+  server:
+    baseurl: http://127.0.0.1:8383

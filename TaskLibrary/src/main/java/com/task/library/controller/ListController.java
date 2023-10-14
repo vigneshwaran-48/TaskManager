@@ -88,6 +88,8 @@ public class ListController {
 		String userId = "12";
 		
 		List<ListDTO> lists = listService.listAllListsOfUser(userId).orElse(null);
+
+		System.out.println("Lists in controller => " + lists);
 		
 		if(lists != null) {
 			lists.forEach(this::fillWithLinks);

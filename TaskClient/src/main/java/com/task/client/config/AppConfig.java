@@ -17,21 +17,15 @@ import org.springframework.web.reactive.function.client.ExchangeStrategies;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.task.library.dto.AppErrorResponse;
 import com.task.library.exception.AppException;
 
 import net.minidev.json.JSONObject;
 import net.minidev.json.JSONValue;
-import net.minidev.json.parser.JSONParser;
-import net.minidev.json.parser.ParseException;
 import reactor.core.publisher.Mono;
 
 @Configuration
 public class AppConfig {
 
-        @Autowired
-        private ObjectMapper objectMapper;
-    
         @Bean
         BCryptPasswordEncoder passwordEncoder() {
         	return new BCryptPasswordEncoder();

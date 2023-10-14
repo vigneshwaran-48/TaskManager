@@ -1,7 +1,10 @@
 package com.task.resource.service;
 
+import java.util.ArrayList;
 import java.util.Optional;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.util.HtmlUtils;
@@ -11,6 +14,7 @@ import com.task.library.exception.AlreadyExistsException;
 import com.task.library.exception.AppException;
 import com.task.library.service.ListService;
 import com.task.library.service.TaskService;
+import com.task.resource.annotation.TimeLogger;
 import com.task.resource.model.List;
 import com.task.resource.model.TaskList;
 import com.task.resource.repository.ListRepository;
@@ -21,6 +25,7 @@ public class ListServiceImpl implements ListService {
 
 	private final static String DEFAULT_COLOR = "#A8DF8E";
 	private final static String DEFAULT_USER = "-1";
+	private static final Logger LOGGER = LoggerFactory.getLogger(ListServiceImpl.class);
 	
 	@Autowired
 	private ListRepository listRepository;
@@ -32,6 +37,7 @@ public class ListServiceImpl implements ListService {
 	private TaskListRepository taskListRepository;
 	
 	@Override
+	@TimeLogger
 	public Optional<ListDTO> findByListId(String userId, Long listId) {
 		Optional<List> list = listRepository.findByListIdAndUserId(listId, userId);
 		
@@ -53,11 +59,12 @@ public class ListServiceImpl implements ListService {
 	}
 
 	@Override
+	@TimeLogger
 	public Optional<java.util.List<ListDTO>> listAllListsOfUser(String userId) {
 		Optional<java.util.List<List>> lists = listRepository.findByUserId(userId);
 		
 		if(lists.isEmpty()) {
-			return Optional.empty();
+			lists = Optional.of(new ArrayList<>());
 		}
 		fillDefaultLists(lists.get());
 
@@ -76,6 +83,7 @@ public class ListServiceImpl implements ListService {
 	}
 
 	@Override
+	@TimeLogger
 	public Long createList(ListDTO listDTO) throws Exception {
 		sanitizeInput(listDTO);
 		
@@ -93,6 +101,7 @@ public class ListServiceImpl implements ListService {
 	}
 
 	@Override
+	@TimeLogger
 	public Long removeList(String userId, Long listId) {
 		java.util.List<List> deletedLists = listRepository.deleteByUserIdAndListId(userId, listId);
 		
@@ -103,6 +112,7 @@ public class ListServiceImpl implements ListService {
 	}
 
 	@Override
+	@TimeLogger
 	public Optional<ListDTO> updateList(ListDTO listDTO) {
 		Optional<List> existingList = listRepository.findByListIdAndUserId(listDTO.getListId(), listDTO.getUserId());
 		
@@ -117,6 +127,7 @@ public class ListServiceImpl implements ListService {
 	}
 
 	@Override
+	@TimeLogger
 	public Optional<java.util.List<ListDTO>> getListsOfTask(String userId, Long taskId) throws AppException {
 		if(!taskService.isTaskExists(userId, taskId)) {
 			throw new IllegalArgumentException("No task found with the given taskId => " + taskId);

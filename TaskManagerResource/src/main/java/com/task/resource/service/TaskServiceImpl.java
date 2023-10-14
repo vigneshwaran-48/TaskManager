@@ -103,7 +103,8 @@ public class TaskServiceImpl implements TaskService {
 									  .findByTaskIdAndUserId(taskDTO.getTaskId(),
 											  				 taskDTO.getUserId());
 		if(existingTask.isEmpty()) {
-			throw new TaskNotFoundException("Not task found with the given taskId");
+			LOGGER.error("Task Not found with the give taskId {}", taskDTO.getTaskId());
+			throw new TaskNotFoundException("No task found with the given taskId");
 		}
 		sanitizeInputs(taskDTO);
 		Task newTask = Task.toTask(taskDTO);
