@@ -1,5 +1,6 @@
 package com.task.library.controller;
 
+import java.security.Principal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.HashMap;
@@ -17,9 +18,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import com.task.library.exception.TaskNotFoundException;
 import com.task.library.service.ListService;
 import com.task.library.service.TaskService;
+import com.task.library.util.AuthUtil;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
@@ -30,6 +31,7 @@ public class TaskController {
 
 	private final static String BASE_PATH = "/api/v1/task";
 	private final static String LIST_BASE_PATH = "/api/v1/list";
+	private final static String NOT_AUTHENTICATED = "Not Authenticated";
 
 	@Autowired
 	private TaskService taskService;
@@ -39,8 +41,14 @@ public class TaskController {
 	
 	@PostMapping
 	public ResponseEntity<?> createTask(@Valid @RequestBody TaskCreationPayload task, 
-			HttpServletRequest request) throws Exception {
+			HttpServletRequest request, Principal principal) throws Exception {
 		
+		StringBuffer userId = new StringBuffer(principal.getName());
+		if(!AuthUtil.getInstance().isValidUserId(userId)) {
+			throw new AppException(NOT_AUTHENTICATED, HttpStatus.BAD_REQUEST.value());
+		}
+		task.setUserId(userId.toString());
+
 		TaskDTO taskDTO = task.toTaskDTO();
 
 		if(task.getLists() != null) {
@@ -65,11 +73,14 @@ public class TaskController {
 	}
 	
 	@GetMapping("{taskId}")
-	public ResponseEntity<?> getTaskById(@PathVariable Long taskId) throws AppException {
+	public ResponseEntity<?> getTaskById(@PathVariable Long taskId, Principal principal) throws AppException {
 		
-		//Need to remove this hardcoded after spring sevurity enabled
-		//and get the user id from principal.
-		TaskDTO taskDTO = taskService.findTaskById("12", taskId).orElse(null);
+		StringBuffer userId = new StringBuffer(principal.getName());
+		if(!AuthUtil.getInstance().isValidUserId(userId)) {
+			throw new AppException(NOT_AUTHENTICATED, HttpStatus.BAD_REQUEST.value());
+		}
+
+		TaskDTO taskDTO = taskService.findTaskById(userId.toString(), taskId).orElse(null);
 		if(taskDTO != null) {
 			fillWithLinks(taskDTO);
 		}
@@ -87,24 +98,30 @@ public class TaskController {
 	@GetMapping
 	public ResponseEntity<?> getAllTasksOfUser(
 									@RequestParam Optional<LocalDate> dueDate, 
-									@RequestParam Optional<Boolean> lessThan
+									@RequestParam Optional<Boolean> lessThan,
+									Principal principal
 								) throws AppException {
-		//Need to remove this hardcoded after spring sevurity enabled
-		//and get the user id from principal.
-		String userId = "12";
+
+		StringBuffer userId = new StringBuffer(principal.getName());
+		if(!AuthUtil.getInstance().isValidUserId(userId)) {
+			throw new AppException(NOT_AUTHENTICATED, HttpStatus.BAD_REQUEST.value());
+		}
 		List<TaskDTO> tasks;
 
 		if(dueDate.isPresent()) {
 
 			if(lessThan.isPresent() && lessThan.get()) {
-				tasks = taskService.getTasksLessThanDate(userId, dueDate.get()).orElse(null);
+				tasks = taskService.getTasksLessThanDate(
+										userId.toString(), 
+										dueDate.get().minusDays(1)
+									).orElse(null);
 			}
 			else {
-				tasks = taskService.findByDate(userId, dueDate.get()).orElse(null);
+				tasks = taskService.findByDate(userId.toString(), dueDate.get()).orElse(null);
 			}
 		}
 		else {
-			tasks = taskService.listTaskOfUser(userId).orElse(null);
+			tasks = taskService.listTaskOfUser(userId.toString()).orElse(null);
 		}
 		
 		if(tasks != null) {
@@ -123,12 +140,14 @@ public class TaskController {
 	}
 	
 	@DeleteMapping("{taskId}")
-	public ResponseEntity<?> deleteTaskById(@PathVariable Long taskId) throws AppException {
-		//Need to remove this hardcoded after spring sevurity enabled
-		//and get the user id from principal.
-		String userId = "12";
+	public ResponseEntity<?> deleteTaskById(@PathVariable Long taskId, Principal principal) throws AppException {
+
+		StringBuffer userId = new StringBuffer(principal.getName());
+		if(!AuthUtil.getInstance().isValidUserId(userId)) {
+			throw new AppException(NOT_AUTHENTICATED, HttpStatus.BAD_REQUEST.value());
+		}
 		
-		Long deletedTask = taskService.deleteTask(userId, taskId);
+		Long deletedTask = taskService.deleteTask(userId.toString(), taskId);
 		
 		TaskDeletionResponse response = new TaskDeletionResponse();
 		response.setMessage("Deleted Task successfully!");
@@ -144,12 +163,15 @@ public class TaskController {
 											 @RequestParam(
 												defaultValue = "false", 
 												required = false
-											 ) String removeListNotIncluded)
+											 ) String removeListNotIncluded,
+											 Principal principal)
 			throws AppException {
-		//Need to remove this hardcoded after spring sevurity enabled
-		//and get the user id from principal.
-		String userId = "12";
-		task.setUserId(userId);
+
+		StringBuffer userId = new StringBuffer(principal.getName());
+		if(!AuthUtil.getInstance().isValidUserId(userId)) {
+			throw new AppException(NOT_AUTHENTICATED, HttpStatus.BAD_REQUEST.value());
+		}
+		task.setUserId(userId.toString());
 		task.setTaskId(taskId);
 		
 		TaskDTO updatedTask = taskService.updateTask(task, Boolean.parseBoolean(removeListNotIncluded));
@@ -164,13 +186,15 @@ public class TaskController {
 		return ResponseEntity.ok(response);
 	}
 	@PatchMapping("{taskId}/toggle")
-	public ResponseEntity<?> toggleTaskCompleted(@PathVariable Long taskId)
+	public ResponseEntity<?> toggleTaskCompleted(@PathVariable Long taskId, Principal principal)
 			throws AppException {
-		//Need to remove this hardcoded after spring sevurity enabled
-		//and get the user id from principal.
-		String userId = "12";
 
-		boolean isCompleted = taskService.toggleTask(userId, taskId);
+		StringBuffer userId = new StringBuffer(principal.getName());
+		if(!AuthUtil.getInstance().isValidUserId(userId)) {
+			throw new AppException(NOT_AUTHENTICATED, HttpStatus.BAD_REQUEST.value());
+		}
+
+		boolean isCompleted = taskService.toggleTask(userId.toString(), taskId);
 
 		TaskToggleResponse response = new TaskToggleResponse();
 		response.setMessage(isCompleted
@@ -184,11 +208,13 @@ public class TaskController {
 	}
 
 	@GetMapping("today")
-	public ResponseEntity<?> getTodayTasks() throws AppException {
-		//Need to remove this hardcoded after spring sevurity enabled
-		//and get the user id from principal.
-		String userId = "12";
-		List<TaskDTO> tasks = taskService.findByDate(userId, LocalDate.now()).orElse(null);
+	public ResponseEntity<?> getTodayTasks(Principal principal) throws AppException {
+
+		StringBuffer userId = new StringBuffer(principal.getName());
+		if(!AuthUtil.getInstance().isValidUserId(userId)) {
+			throw new AppException(NOT_AUTHENTICATED, HttpStatus.BAD_REQUEST.value());
+		}
+		List<TaskDTO> tasks = taskService.findByDate(userId.toString(), LocalDate.now()).orElse(null);
 
 		if(tasks != null) {
 			tasks.forEach(this::fillWithLinks);
@@ -211,11 +237,13 @@ public class TaskController {
 		return ResponseEntity.ok(response);
 	}
 	@GetMapping("upcoming")
-	public ResponseEntity<?> getUpcomingTasks() throws AppException {
-		//Need to remove this hardcoded after spring sevurity enabled
-		//and get the user id from principal.
-		String userId = "12";
-		Optional<List<TaskDTO>> tasks = taskService.getUpcomingTasks(userId);
+	public ResponseEntity<?> getUpcomingTasks(Principal principal) throws AppException {
+
+		StringBuffer userId = new StringBuffer(principal.getName());
+		if(!AuthUtil.getInstance().isValidUserId(userId)) {
+			throw new AppException(NOT_AUTHENTICATED, HttpStatus.BAD_REQUEST.value());
+		}
+		Optional<List<TaskDTO>> tasks = taskService.getUpcomingTasks(userId.toString());
 
 		tasks.ifPresent(taskDTOS -> taskDTOS.forEach(this::fillWithLinks));
 
@@ -231,11 +259,13 @@ public class TaskController {
 		return ResponseEntity.ok(response);
 	}
 	@GetMapping("this-week")
-	public ResponseEntity<?> getThisWeekTasks() throws AppException {
-		//Need to remove this hardcoded after spring sevurity enabled
-		//and get the user id from principal.
-		String userId = "12";
-		Optional<List<TaskDTO>> tasks = taskService.getThisWeekTasks(userId);
+	public ResponseEntity<?> getThisWeekTasks(Principal principal) throws AppException {
+
+		StringBuffer userId = new StringBuffer(principal.getName());
+		if(!AuthUtil.getInstance().isValidUserId(userId)) {
+			throw new AppException(NOT_AUTHENTICATED, HttpStatus.BAD_REQUEST.value());
+		}
+		Optional<List<TaskDTO>> tasks = taskService.getThisWeekTasks(userId.toString());
 
 		tasks.ifPresent(taskDTOS -> taskDTOS.forEach(this::fillWithLinks));
 
@@ -252,11 +282,14 @@ public class TaskController {
 	}
 
 	@GetMapping("overdue")
-	public ResponseEntity<?> getOverduedTasks() throws AppException {
-		//Need to remove this hardcoded after spring sevurity enabled
-		//and get the user id from principal.
-		String userId = "12";
-		List<TaskDTO> tasks = taskService.getTasksLessThanDate(userId, LocalDate.now().minusDays(1)).orElse(null);
+	public ResponseEntity<?> getOverduedTasks(Principal principal) throws AppException {
+
+		StringBuffer userId = new StringBuffer(principal.getName());
+		if(!AuthUtil.getInstance().isValidUserId(userId)) {
+			throw new AppException(NOT_AUTHENTICATED, HttpStatus.BAD_REQUEST.value());
+		}
+		List<TaskDTO> tasks = taskService.getTasksLessThanDate(userId.toString(), 
+													LocalDate.now().minusDays(1)).orElse(null);
 
 		if(tasks != null) {
 			tasks = tasks.stream().filter(task -> !task.isCompleted()).toList();
@@ -276,13 +309,14 @@ public class TaskController {
 	}
 
 	@GetMapping("list/{listId}")
-	public ResponseEntity<?> getAllTasksOfList(@PathVariable Long listId) throws AppException {
+	public ResponseEntity<?> getAllTasksOfList(@PathVariable Long listId, Principal principal) throws AppException {
 
-		//Need to remove this hardcoded after spring sevurity enabled
-		//and get the user id from principal.
-		String userId = "12";
+		StringBuffer userId = new StringBuffer(principal.getName());
+		if(!AuthUtil.getInstance().isValidUserId(userId)) {
+			throw new AppException(NOT_AUTHENTICATED, HttpStatus.BAD_REQUEST.value());
+		}
 
-		List<TaskDTO> tasks = taskService.getTasksOfList(userId, listId).orElse(null);
+		List<TaskDTO> tasks = taskService.getTasksOfList(userId.toString(), listId).orElse(null);
 
 		if(tasks != null) {
 			tasks.forEach(this::fillWithLinks);
@@ -306,14 +340,16 @@ public class TaskController {
 	}
 
 	@GetMapping("search")
-	public ResponseEntity<?> searchTask(@RequestParam String taskName) throws AppException {
-		//Need to remove this hardcoded after spring sevurity enabled
-		//and get the user id from principal.
-		String userId = "12";
+	public ResponseEntity<?> searchTask(@RequestParam String taskName, Principal principal) throws AppException {
+		
+		StringBuffer userId = new StringBuffer(principal.getName());
+		if(!AuthUtil.getInstance().isValidUserId(userId)) {
+			throw new AppException(NOT_AUTHENTICATED, HttpStatus.BAD_REQUEST.value());
+		}
 
 		List<TaskDTO> filteredTasks = new LinkedList<>();
 
-		Optional<List<TaskDTO>> tasksOptional = taskService.listTaskOfUser(userId);
+		Optional<List<TaskDTO>> tasksOptional = taskService.listTaskOfUser(userId.toString());
 		tasksOptional.ifPresent(tasks -> {
 			tasks.forEach(task -> {
 				if(task.getTaskName().toLowerCase().contains(taskName.toLowerCase())) {

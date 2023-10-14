@@ -49,7 +49,7 @@ public class ListServiceImpl implements ListService {
 
 			if(list.isEmpty()) return Optional.empty(); 
 		}
-		Optional<java.util.List<TaskList>> taskLists = taskListRepository.findByList(list.get());
+		Optional<java.util.List<TaskList>> taskLists = taskListRepository.findByListAndUserId(list.get(), userId);
 
 		ListDTO listDTO = list.get().toListDTO();
 		if(taskLists.isPresent()) {
@@ -72,7 +72,7 @@ public class ListServiceImpl implements ListService {
 												.map(list -> {
 													ListDTO listDTO = list.toListDTO();
 													Optional<java.util.List<TaskList>> taskLists = 
-														taskListRepository.findByList(list);
+														taskListRepository.findByListAndUserId(list, userId);
 													if(taskLists.isPresent()) {
 														listDTO.setTaskCount(taskLists.get().size());
 													}
@@ -133,7 +133,7 @@ public class ListServiceImpl implements ListService {
 			throw new IllegalArgumentException("No task found with the given taskId => " + taskId);
 		}
 		
-		Optional<java.util.List<TaskList>> taskList = taskListRepository.findByTaskTaskId(taskId);
+		Optional<java.util.List<TaskList>> taskList = taskListRepository.findByTaskTaskIdAndUserId(taskId, userId);
 		if(taskList.isEmpty()) {
 			Optional.empty();
 		}

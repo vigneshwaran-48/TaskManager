@@ -3,6 +3,7 @@ package com.task.library.dto;
 public class TaskListDTO {
     
     private Long id;
+    private String userId;
     private TaskDTO taskDTO;
     private ListDTO listDTO;
     
@@ -11,6 +12,12 @@ public class TaskListDTO {
     }
     public void setId(Long id) {
         this.id = id;
+    }
+    public String getUserId() {
+        return userId;
+    }
+    public void setUserId(String userId) {
+        this.userId = userId;
     }
     public TaskDTO getTaskDTO() {
         return taskDTO;

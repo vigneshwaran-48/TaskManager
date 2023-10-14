@@ -26,6 +26,9 @@ public class TaskList {
 	@JoinColumn(name = "list_id", nullable = false)
 	private List list;
 
+	@Column(name = "user_id", nullable = false)
+	private String userId;
+
 	public Long getId() {
 		return id;
 	}
@@ -50,9 +53,17 @@ public class TaskList {
 		this.list = list;
 	}
 
+	public String getUserId() {
+		return userId;
+	}
+
+	public void setUserId(String userId) {
+		this.userId = userId;
+	}
+
 	@Override
 	public String toString() {
-		return "TaskList [taskListId=" + id + ", task=" + task + ", list=" + list + "]";
+		return "TaskList [taskListId=" + id + ", task=" + task + ", list=" + list + ", userId=" + userId + "]";
 	}
 	
 	public TaskListDTO toTaskListDTO() {
@@ -61,6 +72,7 @@ public class TaskList {
 		taskListDTO.setId(this.id);
 		taskListDTO.setListDTO(this.list.toListDTO());
 		taskListDTO.setTaskDTO(this.task.toTaskDTO());
+		taskListDTO.setUserId(this.userId);
 		
 		return taskListDTO;
 	}

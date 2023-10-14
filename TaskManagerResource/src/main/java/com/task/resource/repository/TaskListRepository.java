@@ -12,18 +12,18 @@ import jakarta.transaction.Transactional;
 
 public interface TaskListRepository extends JpaRepository<TaskList, Long> {
 
-	Optional<List<TaskList>> findByTask(Task task);
+	Optional<List<TaskList>> findByTaskAndUserId(Task task, String userId);
 	
-	Optional<List<TaskList>> findByList(com.task.resource.model.List list);
+	Optional<List<TaskList>> findByListAndUserId(com.task.resource.model.List list, String userId);
 	
-	Optional<List<TaskList>> findByTaskTaskId(Long taskId);
+	Optional<List<TaskList>> findByTaskTaskIdAndUserId(Long taskId, String userId);
 
-	Optional<TaskList> findByTaskTaskIdAndListListId(Long taskId, Long listId);
+	Optional<TaskList> findByTaskTaskIdAndListListIdAndUserId(Long taskId, Long listId, String userId);
 
 	@Transactional
-	void deleteByTaskTaskIdAndListListIdIn(Long taskId, List<Long> listIds);
+	void deleteByTaskTaskIdAndListListIdInAndUserId(Long taskId, List<Long> listIds, String userId);
 
 	@Transactional
-	void deleteByTaskTaskId(Long taskId);
+	void deleteByTaskTaskIdAndUserId(Long taskId, String userId);
 	
 }

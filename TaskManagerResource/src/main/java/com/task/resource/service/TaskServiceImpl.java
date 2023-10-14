@@ -84,7 +84,8 @@ public class TaskServiceImpl implements TaskService {
 		Task createdTask = taskRepository.save(taskPayload);
 
 		if(taskDTO.getLists() != null && !taskDTO.getLists().isEmpty()) {
-			taskListService.addListsToTask(createdTask.toTaskDTO(), taskDTO.getLists(), false);
+			taskListService.addListsToTask(createdTask.getUserId(),
+							 createdTask.toTaskDTO(), taskDTO.getLists(), false);
 		
 			LOGGER.info("Saved Lists related to task => " + createdTask.getTaskId());
 		}
@@ -120,7 +121,8 @@ public class TaskServiceImpl implements TaskService {
 		TaskDTO updatedTask = toTaskDTO(task);
 		
 		if(removeList || !lists.isEmpty()) {
-			List<ListDTO> updatedLists = taskListService.addListsToTask(updatedTask, lists, removeList);
+			List<ListDTO> updatedLists = taskListService.addListsToTask(taskDTO.getUserId(),
+												 updatedTask, lists, removeList);
 		
 			updatedTask.setLists(updatedLists);
 			LOGGER.info("Saved Lists related to task => " + updatedTask.getTaskId());
@@ -132,7 +134,7 @@ public class TaskServiceImpl implements TaskService {
 	@Override
 	@TimeLogger
 	public Long deleteTask(String userId, Long taskId) {
-		taskListService.deleteAllRelationOfTask(taskId);
+		taskListService.deleteAllRelationOfTask(userId, taskId);
 		List<Task> task = taskRepository.deleteByUserIdAndTaskId(userId, taskId);
 		
 		if(task != null && task.size() > 0) {
@@ -243,7 +245,7 @@ public class TaskServiceImpl implements TaskService {
 		if(list.isEmpty()) {
 			throw new AppException("List not found", HttpStatus.BAD_REQUEST.value());
 		}
-		Optional<List<TaskListDTO>> taskLists = taskListService.findByList(list.get());
+		Optional<List<TaskListDTO>> taskLists = taskListService.findByList(userId, list.get());
 		if(taskLists.isPresent()) {
 			List<TaskDTO> tasks = taskLists.get()
 											.stream()

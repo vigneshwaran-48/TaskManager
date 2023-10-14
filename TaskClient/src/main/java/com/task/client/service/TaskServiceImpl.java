@@ -29,7 +29,7 @@ public class TaskServiceImpl implements TaskService {
     @Autowired
     private WebClient webClient;
   
-    @Value("${resource.server.baseurl}")
+    @Value("${app.resource.server.baseurl}")
     private String resourceServerBaseURL;
     
     private final static String BASE_URL = "/api/v1/task";    

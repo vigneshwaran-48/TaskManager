@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import com.task.library.dto.ListDTO;
 import com.task.library.dto.TaskDTO;
 import com.task.library.dto.TaskListDTO;
+import com.task.library.exception.AppException;
 import com.task.library.service.TaskListService;
 import com.task.resource.model.Task;
 import com.task.resource.model.TaskList;
@@ -23,19 +24,24 @@ public class TaskListServiceImpl implements TaskListService {
 	private TaskListRepository taskListRepository;
 
     @Override
-    public List<ListDTO> addListsToTask(TaskDTO task, List<ListDTO> lists, boolean removeListsNotIncluded) {
+    public List<ListDTO> addListsToTask(String userId, TaskDTO task, List<ListDTO> lists, boolean removeListsNotIncluded) {
+
+        if(userId == null) {
+            throw new AppException("UserId not found in task", 400);
+        }
 
         if(removeListsNotIncluded) {
-            checkAndRemoveLists(task.getTaskId(), lists);
+            checkAndRemoveLists(task.getUserId(), task.getTaskId(), lists);
         }
         
-        lists = getUniqueLists(task.getTaskId(), lists);
+        lists = getUniqueLists(task.getUserId(), task.getTaskId(), lists);
         List<TaskList> taskLists = lists
                                     .stream()
                                     .map(list -> {
                                         TaskList taskList = new TaskList();
                                         taskList.setList(com.task.resource.model.List.toList(list));
                                         taskList.setTask(Task.toTask(task));
+                                        taskList.setUserId(userId);
                                         return taskList;
                                     })
                                     .toList();
@@ -43,26 +49,31 @@ public class TaskListServiceImpl implements TaskListService {
             taskListRepository.saveAll(taskLists);
         }
         List<ListDTO> returnLists = null;
-        Optional<List<TaskList>> finalTaskLists = taskListRepository.findByTask(Task.toTask(task));
+        Optional<List<TaskList>> finalTaskLists = taskListRepository.findByTaskAndUserId(Task.toTask(task), task.getUserId());
 
         returnLists = finalTaskLists.get().stream().map(taskList -> taskList.getList().toListDTO()).toList();
         return returnLists;
     }
 
     @Override
-    public void deleteTaskListsRelation(Long taskId, List<Long> listIds) {
-        taskListRepository.deleteByTaskTaskIdAndListListIdIn(taskId, listIds);
+    public void deleteTaskListsRelation(String userId, Long taskId, List<Long> listIds) {
+        taskListRepository.deleteByTaskTaskIdAndListListIdInAndUserId(taskId, listIds, userId);
     }  
 
     @Override
-    public void deleteAllRelationOfTask(Long taskId) {
-        taskListRepository.deleteByTaskTaskId(taskId);
+    public void deleteAllRelationOfTask(String userId, Long taskId) {
+        taskListRepository.deleteByTaskTaskIdAndUserId(taskId, userId);
     }
 
     @Override
-    public Optional<List<TaskListDTO>> findByList(ListDTO listDTO) {
+    public Optional<List<TaskListDTO>> findByList(String userId, ListDTO listDTO) {
 
-        Optional<List<TaskList>> taskLists = taskListRepository.findByList(com.task.resource.model.List.toList(listDTO));
+        if(userId == null) {
+            throw new AppException("UserId not found", 400);
+        }
+
+        Optional<List<TaskList>> taskLists = taskListRepository
+            .findByListAndUserId(com.task.resource.model.List.toList(listDTO), listDTO.getUserId());
         if(taskLists.isEmpty()) {
             return Optional.empty();
         }
@@ -72,22 +83,26 @@ public class TaskListServiceImpl implements TaskListService {
                                     .toList());
     }
 
-    private List<ListDTO> getUniqueLists(Long taskId, List<ListDTO> lists) {
+    private List<ListDTO> getUniqueLists(String userId, Long taskId, List<ListDTO> lists) {
         List<ListDTO> filteredLists = new ArrayList<>();
+        if(userId == null) {
+            throw new AppException("UserId not found", 400);
+        }
 
         for(ListDTO listDTO : lists) {
-            if(taskListRepository.findByTaskTaskIdAndListListId(taskId, listDTO.getListId()).isEmpty()) {
+            if(taskListRepository.findByTaskTaskIdAndListListIdAndUserId(taskId, 
+                                                        listDTO.getListId(), listDTO.getUserId()).isEmpty()) {
                 filteredLists.add(listDTO);
             }
         }
         return filteredLists;
     }
 
-    private void checkAndRemoveLists(Long taskId, List<ListDTO> lists) {
+    private void checkAndRemoveLists(String userId, Long taskId, List<ListDTO> lists) {
 
         List<Long> listsToAdd = lists.stream().map(list -> list.getListId()).toList();
 
-        Optional<List<TaskList>> taskLists = taskListRepository.findByTaskTaskId(taskId);
+        Optional<List<TaskList>> taskLists = taskListRepository.findByTaskTaskIdAndUserId(taskId, userId);
         List<Long> listsToRemove = new LinkedList<>();
 
         if(taskLists.isPresent()) {
@@ -98,7 +113,7 @@ public class TaskListServiceImpl implements TaskListService {
             });
         }
         if(!listsToRemove.isEmpty()) {
-            deleteTaskListsRelation(taskId, listsToRemove);
+            deleteTaskListsRelation(userId, taskId, listsToRemove);
         }
     }
     

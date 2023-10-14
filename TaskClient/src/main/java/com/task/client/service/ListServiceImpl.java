@@ -25,7 +25,7 @@ public class ListServiceImpl implements ListService {
     @Autowired
     private WebClient webClient;
   
-    @Value("${resource.server.baseurl}")
+    @Value("${app.resource.server.baseurl}")
     private String resourceServerBaseURL;
     
     private final static String BASE_URL = "/api/v1/list";    
