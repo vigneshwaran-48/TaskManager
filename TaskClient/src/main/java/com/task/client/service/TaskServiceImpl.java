@@ -185,27 +185,71 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
-    public Optional<List<TaskDTO>> getUpcomingTasks(String userId) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getUpcomingTasks'");
+    public Optional<List<TaskDTO>> getUpcomingTasks(String userId) throws AppException {
+        TaskListBodyResponse response = webClient.get()
+                                                 .uri(BASE_URL + "/upcoming")
+                                                 .retrieve()
+                                                 .bodyToMono(TaskListBodyResponse.class)
+                                                 .block();
+        if(response.getStatus() == HttpStatus.NO_CONTENT.value()) {
+            return Optional.empty();
+        }
+        else if(response.getStatus() != HttpStatus.OK.value()) {
+            throw new AppException(response.getMessage(), response.getStatus());
+        }
+        return Optional.of(response.getTasks());
     }
 
     @Override
-    public Optional<List<TaskDTO>> getThisWeekTasks(String userId) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getThisWeekTasks'");
+    public Optional<List<TaskDTO>> getThisWeekTasks(String userId) throws AppException {
+        TaskListBodyResponse response = webClient.get()
+                                                 .uri(BASE_URL + "/this-week")
+                                                 .retrieve()
+                                                 .bodyToMono(TaskListBodyResponse.class)
+                                                 .block();
+        if(response.getStatus() == HttpStatus.NO_CONTENT.value()) {
+            return Optional.empty();
+        }
+        else if (response.getStatus() != HttpStatus.OK.value()) {
+            throw new AppException(response.getMessage(), response.getStatus());
+        }
+        return Optional.of(response.getTasks());
     }
 
     @Override
     public Optional<List<TaskDTO>> getTasksOfList(String userId, Long listId) throws AppException {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getTasksOfList'");
+        TaskListBodyResponse response = webClient.get()
+                                                 .uri(BASE_URL + "/list/" + listId)
+                                                 .retrieve()
+                                                 .bodyToMono(TaskListBodyResponse.class)
+                                                 .block();
+        if(response.getStatus() == HttpStatus.NO_CONTENT.value()) {
+            return Optional.empty();
+        }
+        else if (response.getStatus() != HttpStatus.OK.value()) {
+            throw new AppException(response.getMessage(), response.getStatus());
+        }
+        return Optional.of(response.getTasks());
     }
 
     @Override
-    public Optional<List<TaskDTO>> getTasksLessThanDate(String userId, LocalDate date) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getTasksLessThanDate'");
+    public Optional<List<TaskDTO>> getTasksLessThanDate(String userId, LocalDate date) throws AppException {
+        StringBuffer urlBuffer = new StringBuffer(BASE_URL);
+        urlBuffer.append("?dueDate=")
+                 .append(date.toString())
+                 .append("&").append("lessThan=").append(true);
+        TaskListBodyResponse response = webClient.get()
+                                                 .uri(BASE_URL)
+                                                 .retrieve()
+                                                 .bodyToMono(TaskListBodyResponse.class)
+                                                 .block();
+        if(response.getStatus() == HttpStatus.NO_CONTENT.value()) {
+            return Optional.empty();
+        }
+        else if (response.getStatus() != HttpStatus.OK.value()) {
+            throw new AppException(response.getMessage(), response.getStatus());
+        }
+        return Optional.of(response.getTasks());
     }
     
 }

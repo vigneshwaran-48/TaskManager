@@ -39,7 +39,8 @@ public class TaskController {
 	private ListService listService;
 	
 	@PostMapping
-	public ResponseEntity<?> createTask(@Valid @RequestBody TaskCreationPayload task, HttpServletRequest request) throws Exception {
+	public ResponseEntity<?> createTask(@Valid @RequestBody TaskCreationPayload task, 
+			HttpServletRequest request) throws Exception {
 		
 		TaskDTO taskDTO = task.toTaskDTO();
 
@@ -85,14 +86,23 @@ public class TaskController {
 	}
 	
 	@GetMapping
-	public ResponseEntity<?> getAllTasksOfUser(@RequestParam Optional<LocalDate> dueDate) throws AppException {
+	public ResponseEntity<?> getAllTasksOfUser(
+									@RequestParam Optional<LocalDate> dueDate, 
+									@RequestParam Optional<Boolean> lessThan
+								) throws AppException {
 		//Need to remove this hardcoded after spring sevurity enabled
 		//and get the user id from principal.
 		String userId = "12";
 		List<TaskDTO> tasks;
 
 		if(dueDate.isPresent()) {
-			tasks = taskService.findByDate(userId, dueDate.get()).orElse(null);
+
+			if(lessThan.isPresent() && lessThan.get()) {
+				tasks = taskService.getTasksLessThanDate(userId, dueDate.get()).orElse(null);
+			}
+			else {
+				tasks = taskService.findByDate(userId, dueDate.get()).orElse(null);
+			}
 		}
 		else {
 			tasks = taskService.listTaskOfUser(userId).orElse(null);
@@ -202,7 +212,7 @@ public class TaskController {
 		return ResponseEntity.ok(response);
 	}
 	@GetMapping("upcoming")
-	public ResponseEntity<?> getUpcomingTasks() {
+	public ResponseEntity<?> getUpcomingTasks() throws AppException {
 		//Need to remove this hardcoded after spring sevurity enabled
 		//and get the user id from principal.
 		String userId = "12";
@@ -222,7 +232,7 @@ public class TaskController {
 		return ResponseEntity.ok(response);
 	}
 	@GetMapping("this-week")
-	public ResponseEntity<?> getThisWeekTasks() {
+	public ResponseEntity<?> getThisWeekTasks() throws AppException {
 		//Need to remove this hardcoded after spring sevurity enabled
 		//and get the user id from principal.
 		String userId = "12";
@@ -243,7 +253,7 @@ public class TaskController {
 	}
 
 	@GetMapping("overdue")
-	public ResponseEntity<?> getOverduedTasks() {
+	public ResponseEntity<?> getOverduedTasks() throws AppException {
 		//Need to remove this hardcoded after spring sevurity enabled
 		//and get the user id from principal.
 		String userId = "12";

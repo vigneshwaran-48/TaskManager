@@ -29,11 +29,11 @@ public interface TaskService {
 
 	Optional<List<TaskDTO>> findByDate(String userId, LocalDate date) throws AppException;
 
-	Optional<List<TaskDTO>> getUpcomingTasks(String userId);
+	Optional<List<TaskDTO>> getUpcomingTasks(String userId) throws AppException;
 
-	Optional<List<TaskDTO>> getThisWeekTasks(String userId);
+	Optional<List<TaskDTO>> getThisWeekTasks(String userId) throws AppException;
 
 	Optional<List<TaskDTO>> getTasksOfList(String userId, Long listId) throws AppException;
 
-	Optional<List<TaskDTO>> getTasksLessThanDate(String userId, LocalDate date);
+	Optional<List<TaskDTO>> getTasksLessThanDate(String userId, LocalDate date) throws AppException;
 }
