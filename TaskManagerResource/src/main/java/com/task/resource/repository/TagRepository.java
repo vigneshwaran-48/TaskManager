@@ -1,11 +1,11 @@
-package com.task.repository;
+package com.task.resource.repository;
 
 import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import com.task.model.Tag;
+import com.task.resource.model.Tag;
 
 public interface TagRepository extends JpaRepository<Tag, Long> {
 

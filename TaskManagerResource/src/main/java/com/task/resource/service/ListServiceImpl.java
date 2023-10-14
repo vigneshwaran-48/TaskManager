@@ -1,4 +1,4 @@
-package com.task.service;
+package com.task.resource.service;
 
 import java.util.Optional;
 
@@ -11,10 +11,10 @@ import com.task.library.exception.AlreadyExistsException;
 import com.task.library.exception.AppException;
 import com.task.library.service.ListService;
 import com.task.library.service.TaskService;
-import com.task.model.List;
-import com.task.model.TaskList;
-import com.task.repository.ListRepository;
-import com.task.repository.TaskListRepository;
+import com.task.resource.model.List;
+import com.task.resource.model.TaskList;
+import com.task.resource.repository.ListRepository;
+import com.task.resource.repository.TaskListRepository;
 
 @Service
 public class ListServiceImpl implements ListService {

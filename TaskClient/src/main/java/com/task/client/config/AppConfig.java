@@ -22,10 +22,10 @@ import reactor.core.publisher.Mono;
 @Configuration
 public class AppConfig {
     
-	@Bean
-	BCryptPasswordEncoder passwordEncoder() {
-		return new BCryptPasswordEncoder();
-	}
+        @Bean
+        BCryptPasswordEncoder passwordEncoder() {
+        	return new BCryptPasswordEncoder();
+        }
 
     @Bean
     WebClient webClient(OAuth2AuthorizedClientManager authorizedClientManager) {

@@ -1,4 +1,4 @@
-package com.task.service;
+package com.task.resource.service;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
@@ -6,7 +6,6 @@ import java.time.temporal.TemporalAdjusters;
 import java.util.List;
 import java.util.Optional;
 
-import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -22,13 +21,14 @@ import com.task.library.exception.TaskNotFoundException;
 import com.task.library.service.ListService;
 import com.task.library.service.TaskListService;
 import com.task.library.service.TaskService;
-import com.task.model.Task;
-import com.task.repository.TaskRepository;
+import com.task.resource.annotation.TimeLogger;
+import com.task.resource.model.Task;
+import com.task.resource.repository.TaskRepository;
 
 @Service
 public class TaskServiceImpl implements TaskService {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(TaskServiceImpl.class);
+	private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(TaskServiceImpl.class);
 
 	@Autowired
 	private TaskRepository taskRepository;
@@ -51,6 +51,7 @@ public class TaskServiceImpl implements TaskService {
 	}
 
 	@Override
+	@TimeLogger
 	public Optional<List<TaskDTO>> listTaskOfUser(String userId) throws AppException {
 		List<Task> tasks = taskRepository.findByUserId(userId).orElse(null);
 		
@@ -65,6 +66,7 @@ public class TaskServiceImpl implements TaskService {
 	}
 
 	@Override
+	@TimeLogger
 	public Long createTask(TaskDTO taskDTO) throws Exception {
 		
 		if(taskRepository.findByTaskNameAndUserId(taskDTO.getTaskName(),
@@ -94,6 +96,7 @@ public class TaskServiceImpl implements TaskService {
 	}
 
 	@Override
+	@TimeLogger
 	public TaskDTO updateTask(TaskDTO taskDTO, boolean removeList)
 			throws TaskNotFoundException, AlreadyExistsException {
 		Optional<Task> existingTask = taskRepository
@@ -126,6 +129,7 @@ public class TaskServiceImpl implements TaskService {
 	}
 
 	@Override
+	@TimeLogger
 	public Long deleteTask(String userId, Long taskId) {
 		taskListService.deleteAllRelationOfTask(taskId);
 		List<Task> task = taskRepository.deleteByUserIdAndTaskId(userId, taskId);
@@ -137,6 +141,7 @@ public class TaskServiceImpl implements TaskService {
 	}
 
 	@Override
+	@TimeLogger
 	public Optional<List<TaskDTO>> getAllSubTasks(String userId, Long parentTaskId) {
 		Optional<List<Task>> subTasks = taskRepository
 									.findByUserIdAndParentTask(userId, parentTaskId);
@@ -156,6 +161,7 @@ public class TaskServiceImpl implements TaskService {
 	}
 	
 	@Override
+	@TimeLogger
 	public boolean isTaskExists(String userId, Long taskId) {
 		if(taskId == null || userId == null) {
 			throw new IllegalArgumentException("Invalid Input");
@@ -164,6 +170,7 @@ public class TaskServiceImpl implements TaskService {
 	}
 
 	@Override
+	@TimeLogger
 	public boolean toggleTask(String userId, Long taskId) throws TaskNotFoundException {
 		if(taskId == null || userId == null) {
 			throw new IllegalArgumentException("Invalid Input");
@@ -181,6 +188,7 @@ public class TaskServiceImpl implements TaskService {
 	}
 
 	@Override
+	@TimeLogger
 	public Optional<List<TaskDTO>> findByDate(String userId, LocalDate date) {
 		if(date == null || userId == null) {
 			throw new IllegalArgumentException("Invalid Input");
@@ -195,6 +203,7 @@ public class TaskServiceImpl implements TaskService {
 	}
 
 	@Override
+	@TimeLogger
 	public Optional<List<TaskDTO>> getUpcomingTasks(String userId) {
 		if(userId == null) {
 			throw new IllegalArgumentException("User id is empty");
@@ -210,6 +219,7 @@ public class TaskServiceImpl implements TaskService {
 	}
 
 	@Override
+	@TimeLogger
 	public Optional<List<TaskDTO>> getThisWeekTasks(String userId) {
 		LocalDate today = LocalDate.now();
 		LocalDate nextSaturday = today.with(TemporalAdjusters.nextOrSame(DayOfWeek.SATURDAY));
@@ -225,6 +235,7 @@ public class TaskServiceImpl implements TaskService {
 	}
 
 	@Override
+	@TimeLogger
 	public Optional<List<TaskDTO>> getTasksOfList(String userId, Long listId) throws AppException {
 
 		Optional<ListDTO> list = listService.findByListId(userId, listId);
@@ -245,6 +256,7 @@ public class TaskServiceImpl implements TaskService {
 	}
 
 	@Override
+	@TimeLogger
 	public Optional<List<TaskDTO>> getTasksLessThanDate(String userId, LocalDate date) {
 		Optional<List<Task>> tasks = taskRepository.findByUserIdAndDueDateLessThan(userId, date);
 		if(tasks.isEmpty()) {

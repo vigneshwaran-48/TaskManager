@@ -1,4 +1,4 @@
-package com.task.repository;
+package com.task.resource.repository;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -6,7 +6,7 @@ import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import com.task.model.Task;
+import com.task.resource.model.Task;
 
 import jakarta.transaction.Transactional;
 

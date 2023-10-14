@@ -1,4 +1,4 @@
-package com.task.service;
+package com.task.resource.service;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -12,9 +12,9 @@ import com.task.library.dto.ListDTO;
 import com.task.library.dto.TaskDTO;
 import com.task.library.dto.TaskListDTO;
 import com.task.library.service.TaskListService;
-import com.task.model.Task;
-import com.task.model.TaskList;
-import com.task.repository.TaskListRepository;
+import com.task.resource.model.Task;
+import com.task.resource.model.TaskList;
+import com.task.resource.repository.TaskListRepository;
 
 @Service
 public class TaskListServiceImpl implements TaskListService {
@@ -34,7 +34,7 @@ public class TaskListServiceImpl implements TaskListService {
                                     .stream()
                                     .map(list -> {
                                         TaskList taskList = new TaskList();
-                                        taskList.setList(com.task.model.List.toList(list));
+                                        taskList.setList(com.task.resource.model.List.toList(list));
                                         taskList.setTask(Task.toTask(task));
                                         return taskList;
                                     })
@@ -62,7 +62,7 @@ public class TaskListServiceImpl implements TaskListService {
     @Override
     public Optional<List<TaskListDTO>> findByList(ListDTO listDTO) {
 
-        Optional<List<TaskList>> taskLists = taskListRepository.findByList(com.task.model.List.toList(listDTO));
+        Optional<List<TaskList>> taskLists = taskListRepository.findByList(com.task.resource.model.List.toList(listDTO));
         if(taskLists.isEmpty()) {
             return Optional.empty();
         }

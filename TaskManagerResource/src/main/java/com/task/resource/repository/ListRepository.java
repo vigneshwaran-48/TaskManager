@@ -1,10 +1,10 @@
-package com.task.repository;
+package com.task.resource.repository;
 
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import com.task.model.List;
+import com.task.resource.model.List;
 
 import jakarta.transaction.Transactional;
 

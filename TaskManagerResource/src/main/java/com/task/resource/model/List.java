@@ -1,4 +1,4 @@
-package com.task.model;
+package com.task.resource.model;
 
 import com.task.library.dto.ListDTO;
 

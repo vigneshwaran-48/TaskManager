@@ -1,4 +1,4 @@
-package com.task.model;
+package com.task.resource.model;
 
 import java.time.LocalDate;
 

@@ -26,7 +26,6 @@ import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api/v1/task")
-@CrossOrigin(value = "*")
 public class TaskController {
 
 	private final static String BASE_PATH = "/api/v1/task";

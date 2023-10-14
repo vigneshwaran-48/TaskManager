@@ -1,64 +1,52 @@
-package com.task.client.config;
+package com.task.resource.config;
 
 import java.util.Arrays;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.oauth2.jwt.JwtDecoder;
+import org.springframework.security.oauth2.jwt.JwtDecoders;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
-import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
-import org.springframework.security.web.csrf.CsrfTokenRequestAttributeHandler;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import com.google.common.net.HttpHeaders;
-import com.task.client.controller.CsrfFilter;
 
-import io.netty.handler.codec.http.HttpMethod;
-
-@Configuration
 @EnableWebSecurity
+@Configuration
 public class SecurityConfig {
     
-    private static final Long MAX_AGE = 3600L;
+    @Value("${authserver.baseurl}")
+	private String authServerUrl;
 
-    @Bean
+    private static final Long MAX_AGE = 3600L;
+	
+	@Bean
 	SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 		return http
-				.cors()
-					.configurationSource(corsConfigurationSource())
-				.and()
-				.csrf((csrf) -> csrf
-		                .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
-		                .csrfTokenRequestHandler(new CsrfTokenRequestAttributeHandler())
-		            )
-				.addFilterAfter(new CsrfFilter(), BasicAuthenticationFilter.class)
+				.csrf()
+				.disable()
 				.authorizeHttpRequests(request -> {
-					try {
-						request
-							.requestMatchers("/static/**",
-			                    "/*.ico", "/*.json", "/*.png", "/ping",
-									"/logout-success")
+					request
+					.requestMatchers("/test").permitAll()
+					.requestMatchers(HttpMethod.POST, "/api/user").permitAll()
+					.requestMatchers(HttpMethod.OPTIONS, "/api/user")
+					.permitAll()
+							.requestMatchers(HttpMethod.GET, "/api/user/{userId}/profile-image")
 							.permitAll()
-							.anyRequest()
-							.authenticated()
-							.and()
-							.oauth2Login()							
-							.permitAll()
-								.and()
-								.logout()
-								.clearAuthentication(true)
-								.deleteCookies()
-								.invalidateHttpSession(true)
-								.logoutSuccessUrl("/logout-success");
-					} catch (Exception e) {
-						e.printStackTrace();
-					}
-			   })				
-			.build();
+					.anyRequest().authenticated();
+				})
+				.oauth2ResourceServer(oauth2 -> oauth2.jwt())
+				.build();
+	}
+	@Bean
+	JwtDecoder jwtDecoder() {
+	    return JwtDecoders.fromIssuerLocation(authServerUrl);
 	}
 
     @Bean
@@ -66,12 +54,11 @@ public class SecurityConfig {
 		UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
 		CorsConfiguration config = new CorsConfiguration();
 		config.setAllowCredentials(true);
-		config.setAllowedOrigins(Arrays.asList("http://localhost:3000", "http://localhost:9090"));
+		config.setAllowedOrigins(Arrays.asList("*"));
 		config.setAllowedHeaders(Arrays.asList(
 					HttpHeaders.AUTHORIZATION,
 					HttpHeaders.CONTENT_TYPE,
-					HttpHeaders.ACCEPT,
-					"X-XSRF-TOKEN"
+					HttpHeaders.ACCEPT
 				));
 		config.setAllowedMethods(Arrays.asList(
 					HttpMethod.GET.name(),

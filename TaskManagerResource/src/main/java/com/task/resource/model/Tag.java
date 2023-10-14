@@ -1,4 +1,4 @@
-package com.task.model;
+package com.task.resource.model;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
