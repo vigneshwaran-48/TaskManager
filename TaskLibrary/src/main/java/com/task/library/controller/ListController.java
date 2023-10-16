@@ -57,8 +57,6 @@ public class ListController {
 		response.setListId(listId);
 		response.setTime(LocalDateTime.now());
 		response.setPath(BASE_PATH + "/" + listId);
-
-		Thread.sleep(2000);
 		
 		return ResponseEntity.ok(response);
 	}
@@ -107,12 +105,6 @@ public class ListController {
 		response.setTime(LocalDateTime.now());
 		response.setPath(BASE_PATH + "/list");
 
-		try {
-			Thread.sleep(2000);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
-		
 		return ResponseEntity.ok(response);
 	}
 	
