@@ -96,8 +96,8 @@ public class TaskController {
 	
 	@GetMapping
 	public ResponseEntity<?> getAllTasksOfUser(
-									@RequestParam Optional<LocalDate> dueDate, 
-									@RequestParam Optional<Boolean> lessThan,
+									@RequestParam(required = false) LocalDate dueDate, 
+									@RequestParam(required = false) boolean lessThan,
 									Principal principal
 								) throws AppException {
 
@@ -107,15 +107,15 @@ public class TaskController {
 		}
 		List<TaskDTO> tasks;
 
-		if(dueDate.isPresent()) {
-			if(lessThan.isPresent() && lessThan.get()) {
+		if(dueDate != null) {
+			if(lessThan) {
 				tasks = taskService.getTasksLessThanDate(
 										userId.toString(), 
-										dueDate.get()
+										dueDate
 									).orElse(null);
 			}
 			else {
-				tasks = taskService.findByDate(userId.toString(), dueDate.get()).orElse(null);
+				tasks = taskService.findByDate(userId.toString(), dueDate).orElse(null);
 			}
 		}
 		else {
