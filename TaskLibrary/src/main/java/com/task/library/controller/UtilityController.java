@@ -72,8 +72,17 @@ public class UtilityController {
         Optional<List<TaskDTO>> upcomingTasks = taskService.getUpcomingTasks(userId);
         upcomingTasks.ifPresent(taskDTOS -> upComing.setCount(taskDTOS.size()));
 
+        SideNav all = new SideNav();
+        all.setId("side-nav-5");
+        all.setName("All");
+        all.setIconClassNames("bi bi-search");
+        Optional<List<TaskDTO>> allTasks = taskService.listTaskOfUser(userId);
+        if(allTasks.isPresent()) {
+            all.setCount(allTasks.get().size());
+        }
+        
         SideNavResponse response = new SideNavResponse();
-        response.setSideNavList(List.of(upComing, today, overdue, stickyWall));
+        response.setSideNavList(List.of(upComing, today, all, overdue, stickyWall));
         response.setPath("/api/v1/utility/side-nav");
         response.setMessage("success");
         response.setStatus(HttpStatus.OK.value());
