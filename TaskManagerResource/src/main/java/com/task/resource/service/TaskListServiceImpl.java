@@ -91,7 +91,7 @@ public class TaskListServiceImpl implements TaskListService {
 
         for(ListDTO listDTO : lists) {
             if(taskListRepository.findByTaskTaskIdAndListListIdAndUserId(taskId, 
-                                                        listDTO.getListId(), listDTO.getUserId()).isEmpty()) {
+                                                        listDTO.getListId(), userId).isEmpty()) {
                 filteredLists.add(listDTO);
             }
         }

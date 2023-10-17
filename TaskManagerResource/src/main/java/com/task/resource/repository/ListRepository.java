@@ -10,7 +10,7 @@ import jakarta.transaction.Transactional;
 
 public interface ListRepository extends JpaRepository<List, Long> {
 
-	Optional<List> findByListName(String listName);
+	Optional<List> findByUserIdAndListName(String userId, String listName);
 	
 	Optional<java.util.List<List>> findByListColor(String listColor);
 	

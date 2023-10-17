@@ -87,7 +87,7 @@ public class ListServiceImpl implements ListService {
 	public Long createList(ListDTO listDTO) throws Exception {
 		sanitizeInput(listDTO);
 		
-		if(listRepository.findByListName(listDTO.getListName()).isPresent()) {
+		if(listRepository.findByUserIdAndListName(listDTO.getUserId(), listDTO.getListName()).isPresent()) {
 			throw new AlreadyExistsException("List name already exists", 400);
 		}
 		List list =  List.toList(listDTO);

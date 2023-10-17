@@ -239,14 +239,7 @@ public class TaskServiceImpl implements TaskService {
 
     @Override
     public Optional<List<TaskDTO>> getTasksLessThanDate(String userId, LocalDate date) throws AppException {
-        // StringBuffer urlBuffer = new StringBuffer(BASE_URL);
-        // urlBuffer
-        // .append("?dueDate=")
-        //          .append(date.toString())
-        //          .append("&")
-        //          .append("lessThan=").append(true);
         TaskListBodyResponse response = webClient.get()
-                                                //  .uri(resourceServerBaseURL + BASE_URL)
                                                 .uri(uriBuilder -> uriBuilder
                                                                         .path(BASE_URL)
                                                                         .queryParam("dueDate", date)
