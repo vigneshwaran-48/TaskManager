@@ -281,7 +281,7 @@ public class TaskController {
 			throw new AppException(NOT_AUTHENTICATED, HttpStatus.BAD_REQUEST.value());
 		}
 		List<TaskDTO> tasks = taskService.getTasksLessThanDate(userId.toString(), 
-													LocalDate.now().minusDays(1)).orElse(null);
+													LocalDate.now()).orElse(null);
 
 		if(tasks != null) {
 			tasks = tasks.stream().filter(task -> !task.getIsCompleted()).toList();

@@ -17,7 +17,7 @@ public class TaskDTO {
 	private String description;
 	private Long parentTaskId;
 	private LocalDate dueDate;
-	private boolean isCompleted;
+	private Boolean isCompleted;
 	private List<TaskDTO> subTasks;
 	private List<ListDTO> lists;
 	private Map<String, Object> links;
@@ -29,7 +29,7 @@ public class TaskDTO {
 	public void setLinks(Map<String, Object> links) {
 		this.links = links;
 	}
-	public boolean getIsCompleted() {
+	public Boolean getIsCompleted() {
 		return isCompleted;
 	}
 	public void setIsCompleted(boolean isCompleted) {

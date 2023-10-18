@@ -109,7 +109,7 @@ public class TaskServiceImpl implements TaskService {
 		}
 		sanitizeInputs(taskDTO);
 		Task newTask = Task.toTask(taskDTO);
-		checkUpdateTaskDetails(existingTask.get(), newTask);
+		checkUpdateTaskDetails(existingTask.get(), newTask, taskDTO.getIsCompleted() != null);
 
 		if(!existingTask.get().getTaskName().equals(newTask.getTaskName())) {
 			checkSameTaskName(newTask);
@@ -294,7 +294,7 @@ public class TaskServiceImpl implements TaskService {
 		return taskDTO;
 	}
 	
-	private void checkUpdateTaskDetails(Task existingTask, Task newTask) {
+	private void checkUpdateTaskDetails(Task existingTask, Task newTask, boolean isNewCompletedValue) {
 		
 		if(newTask.getDescription() == null && existingTask.getDescription() != null) {
 			newTask.setDescription(existingTask.getDescription());
@@ -307,6 +307,9 @@ public class TaskServiceImpl implements TaskService {
 		}
 		if(newTask.getParentTask() == null && existingTask.getParentTask() != null) {
 			newTask.setParentTask(existingTask.getParentTask());
+		}
+		if(!isNewCompletedValue) {
+			newTask.setIsCompleted(existingTask.getIsCompleted());
 		}
 	}
 

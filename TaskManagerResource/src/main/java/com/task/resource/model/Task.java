@@ -109,6 +109,7 @@ public class Task {
 		task.setParentTask(taskDTO.getParentTaskId());
 		task.setUserId(taskDTO.getUserId());
 		task.setTaskName(taskDTO.getTaskName());
+		task.setIsCompleted(taskDTO.getIsCompleted());
 		
 		return task;
 	}
