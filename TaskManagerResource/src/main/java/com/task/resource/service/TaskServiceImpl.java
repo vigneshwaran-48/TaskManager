@@ -212,7 +212,7 @@ public class TaskServiceImpl implements TaskService {
 			throw new IllegalArgumentException("User id is empty");
 		}
 		Optional<List<Task>> tasks =
-				taskRepository.findByUserIdAndDueDateGreaterThan(userId, LocalDate.now());
+				taskRepository.findByUserIdAndDueDateGreaterThanEqual(userId, LocalDate.now());
 		if(tasks.isEmpty()) {
 			return Optional.empty();
 		}

@@ -9,6 +9,8 @@ import com.task.library.dto.utility.SideNavResponse;
 import com.task.library.exception.AppException;
 import com.task.library.service.ListService;
 import com.task.library.service.TaskService;
+import com.task.library.util.AuthUtil;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -34,12 +36,16 @@ public class UtilityController {
 
     @Autowired
     private ListService listService;
+    private final static String NOT_AUTHENTICATED = "Not Authenticated";
 
     @GetMapping("side-nav")
     public ResponseEntity<?> getSideNav(Principal principal) throws AppException {
-        //Need to remove this hardcoded after spring security enabled
-        //and get the user id from principal.
-        String userId = "12";
+        
+        StringBuffer userIdBuffer = new StringBuffer(principal.getName());
+		if(!AuthUtil.getInstance().isValidUserId(userIdBuffer)) {
+			throw new AppException(NOT_AUTHENTICATED, HttpStatus.BAD_REQUEST.value());
+		}
+        String userId = userIdBuffer.toString();
 
         SideNav upComing = new SideNav();
         upComing.setId("side-nav-1");
