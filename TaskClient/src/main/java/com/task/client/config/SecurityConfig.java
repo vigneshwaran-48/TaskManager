@@ -52,8 +52,8 @@ public class SecurityConfig {
 								.logout()
 								.clearAuthentication(true)
 								.deleteCookies()
-								.invalidateHttpSession(true)
-								.logoutSuccessUrl("/logout-success");
+								.invalidateHttpSession(true);
+								// .logoutSuccessUrl("/logout-success");
 					} catch (Exception e) {
 						e.printStackTrace();
 					}
