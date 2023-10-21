@@ -9,6 +9,8 @@ import com.task.library.dto.utility.SideNavResponse;
 import com.task.library.exception.AppException;
 import com.task.library.service.ListService;
 import com.task.library.service.TaskService;
+import com.task.library.util.AuthUtil;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -34,12 +36,16 @@ public class UtilityController {
 
     @Autowired
     private ListService listService;
+    private final static String NOT_AUTHENTICATED = "Not Authenticated";
 
     @GetMapping("side-nav")
     public ResponseEntity<?> getSideNav(Principal principal) throws AppException {
-        //Need to remove this hardcoded after spring security enabled
-        //and get the user id from principal.
-        String userId = "12";
+        
+        StringBuffer userIdBuffer = new StringBuffer(principal != null ? principal.getName() : "");
+		if(!AuthUtil.getInstance().isValidUserId(userIdBuffer)) {
+			throw new AppException(NOT_AUTHENTICATED, HttpStatus.BAD_REQUEST.value());
+		}
+        String userId = userIdBuffer.toString();
 
         SideNav upComing = new SideNav();
         upComing.setId("side-nav-1");
@@ -55,7 +61,7 @@ public class UtilityController {
         overdue.setId("side-nav-3");
         overdue.setName("Overdue");
         overdue.setIconClassNames("fa fa-solid fa-hourglass-end");
-        Optional<List<TaskDTO>> overdueTasks = taskService.getTasksLessThanDate(userId, LocalDate.now().minusDays(1));
+        Optional<List<TaskDTO>> overdueTasks = taskService.getTasksLessThanDate(userId, LocalDate.now());
         overdueTasks.ifPresent(overdueTask -> {
             overdueTask = overdueTask.stream().filter(task -> !task.getIsCompleted()).toList();
             overdue.setCount(overdueTask.size());
@@ -72,18 +78,21 @@ public class UtilityController {
         Optional<List<TaskDTO>> upcomingTasks = taskService.getUpcomingTasks(userId);
         upcomingTasks.ifPresent(taskDTOS -> upComing.setCount(taskDTOS.size()));
 
+        SideNav all = new SideNav();
+        all.setId("side-nav-5");
+        all.setName("All");
+        all.setIconClassNames("bi bi-search");
+        Optional<List<TaskDTO>> allTasks = taskService.listTaskOfUser(userId);
+        if(allTasks.isPresent()) {
+            all.setCount(allTasks.get().size());
+        }
+        
         SideNavResponse response = new SideNavResponse();
-        response.setSideNavList(List.of(upComing, today, overdue, stickyWall));
+        response.setSideNavList(List.of(upComing, today, all, overdue, stickyWall));
         response.setPath("/api/v1/utility/side-nav");
         response.setMessage("success");
         response.setStatus(HttpStatus.OK.value());
         response.setTime(LocalDateTime.now());
-
-        try {
-			Thread.sleep(2000);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
 
         return ResponseEntity.ok(response);
     }
@@ -91,10 +100,11 @@ public class UtilityController {
     @GetMapping("list-side-nav")
     public ResponseEntity<?> getListSideNavs(Principal principal) {
 
-        //Need to remove this hardcoded after spring security enabled
-        //and get the user id from principal.
-        String userId = "12";
-
+        StringBuffer userIdBuffer = new StringBuffer(principal != null ? principal.getName() : "");
+		if(!AuthUtil.getInstance().isValidUserId(userIdBuffer)) {
+			throw new AppException(NOT_AUTHENTICATED, HttpStatus.BAD_REQUEST.value());
+		}
+        String userId = userIdBuffer.toString();
         Optional<List<ListDTO>> lists = listService.listAllListsOfUser(userId);
 
         List<ListSideNav> listSideNavs = new LinkedList<>();

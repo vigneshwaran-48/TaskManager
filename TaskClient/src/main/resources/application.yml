@@ -1,5 +1,8 @@
 server:
   port: 8282
+  servlet:
+    session:
+      timeout: 300m
 
 spring:
   security:

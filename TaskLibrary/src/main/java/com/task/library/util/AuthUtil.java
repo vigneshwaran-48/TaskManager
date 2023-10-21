@@ -1,15 +1,20 @@
 package com.task.library.util;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.stereotype.Component;
 
+@Component
 public class AuthUtil {
 
     @Value("${app.flag.isSinglUserFlow}")
-    private boolean IS_SINGLE_USERFLOW; 
+    private boolean IS_SINGLE_USERFLOW = false; 
 
     @Value("${app.singleUserId}")
-    private String SINGLE_USERID;
+    private String SINGLE_USERID = "12";
 
+    @Autowired
     private static AuthUtil instance;
 
     public static AuthUtil getInstance() {

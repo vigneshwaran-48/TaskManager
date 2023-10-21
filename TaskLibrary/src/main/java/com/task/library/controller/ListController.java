@@ -44,7 +44,7 @@ public class ListController {
 	@PostMapping
 	public ResponseEntity<?> createList(@Valid @RequestBody ListDTO listDTO, Principal principal) throws Exception {
 		
-		StringBuffer userId = new StringBuffer(principal.getName());
+		StringBuffer userId = new StringBuffer(principal != null ? principal.getName() : "");
 		if(!AuthUtil.getInstance().isValidUserId(userId)) {
 			throw new AppException(NOT_AUTHENTICATED, HttpStatus.BAD_REQUEST.value());
 		}
@@ -57,8 +57,6 @@ public class ListController {
 		response.setListId(listId);
 		response.setTime(LocalDateTime.now());
 		response.setPath(BASE_PATH + "/" + listId);
-
-		Thread.sleep(2000);
 		
 		return ResponseEntity.ok(response);
 	}
@@ -66,7 +64,7 @@ public class ListController {
 	@GetMapping("{listId}")
 	public ResponseEntity<?> getListById(@PathVariable Long listId, Principal principal) {
 		
-		StringBuffer userId = new StringBuffer(principal.getName());
+		StringBuffer userId = new StringBuffer(principal != null ? principal.getName() : "");
 		if(!AuthUtil.getInstance().isValidUserId(userId)) {
 			throw new AppException(NOT_AUTHENTICATED, HttpStatus.BAD_REQUEST.value());
 		}
@@ -88,7 +86,7 @@ public class ListController {
 	@GetMapping
 	public ResponseEntity<?> getAllListsOfUser(Principal principal) {
 		
-		StringBuffer userId = new StringBuffer(principal.getName());
+		StringBuffer userId = new StringBuffer(principal != null ? principal.getName() : "");
 		if(!AuthUtil.getInstance().isValidUserId(userId)) {
 			throw new AppException(NOT_AUTHENTICATED, HttpStatus.BAD_REQUEST.value());
 		}
@@ -107,19 +105,13 @@ public class ListController {
 		response.setTime(LocalDateTime.now());
 		response.setPath(BASE_PATH + "/list");
 
-		try {
-			Thread.sleep(2000);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
-		
 		return ResponseEntity.ok(response);
 	}
 	
 	@DeleteMapping("{listId}")
 	public ResponseEntity<?> deleteByListId(@PathVariable Long listId, Principal principal) {
 		
-		StringBuffer userId = new StringBuffer(principal.getName());
+		StringBuffer userId = new StringBuffer(principal != null ? principal.getName() : "");
 		if(!AuthUtil.getInstance().isValidUserId(userId)) {
 			throw new AppException(NOT_AUTHENTICATED, HttpStatus.BAD_REQUEST.value());
 		}
@@ -137,7 +129,7 @@ public class ListController {
 	@GetMapping("/bytask/{taskId}")
 	public ResponseEntity<?> getListsByTaskId(@PathVariable Long taskId, Principal principal) throws AppException {
 		
-		StringBuffer userId = new StringBuffer(principal.getName());
+		StringBuffer userId = new StringBuffer(principal != null ? principal.getName() : "");
 		if(!AuthUtil.getInstance().isValidUserId(userId)) {
 			throw new AppException(NOT_AUTHENTICATED, HttpStatus.BAD_REQUEST.value());
 		}
@@ -162,7 +154,7 @@ public class ListController {
 	public ResponseEntity<?> patchUpdateList(@PathVariable Long listId, 
 											 @RequestBody ListDTO listDTO, Principal principal) {
 		
-		StringBuffer userId = new StringBuffer(principal.getName());
+		StringBuffer userId = new StringBuffer(principal != null ? principal.getName() : "");
 		if(!AuthUtil.getInstance().isValidUserId(userId)) {
 			throw new AppException(NOT_AUTHENTICATED, HttpStatus.BAD_REQUEST.value());
 		}

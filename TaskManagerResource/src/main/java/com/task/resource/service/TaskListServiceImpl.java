@@ -73,7 +73,7 @@ public class TaskListServiceImpl implements TaskListService {
         }
 
         Optional<List<TaskList>> taskLists = taskListRepository
-            .findByListAndUserId(com.task.resource.model.List.toList(listDTO), listDTO.getUserId());
+            .findByListAndUserId(com.task.resource.model.List.toList(listDTO), userId);
         if(taskLists.isEmpty()) {
             return Optional.empty();
         }
@@ -91,7 +91,7 @@ public class TaskListServiceImpl implements TaskListService {
 
         for(ListDTO listDTO : lists) {
             if(taskListRepository.findByTaskTaskIdAndListListIdAndUserId(taskId, 
-                                                        listDTO.getListId(), listDTO.getUserId()).isEmpty()) {
+                                                        listDTO.getListId(), userId).isEmpty()) {
                 filteredLists.add(listDTO);
             }
         }

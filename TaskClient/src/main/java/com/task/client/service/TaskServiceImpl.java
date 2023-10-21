@@ -6,7 +6,6 @@ import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.env.Environment;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -40,7 +39,7 @@ public class TaskServiceImpl implements TaskService {
     public Optional<TaskDTO> findTaskById(String userId, Long taskId) throws AppException {
         Mono<TaskBodyResponse> response = webClient
                                     .get()
-                                    .uri(resourceServerBaseURL + BASE_URL + SLASH + taskId)
+                                    .uri(BASE_URL + SLASH + taskId)
                                     .retrieve()
                                     .bodyToMono(TaskBodyResponse.class);
         
@@ -60,7 +59,7 @@ public class TaskServiceImpl implements TaskService {
     public Optional<List<TaskDTO>> listTaskOfUser(String userId) throws AppException {
         
         Mono<TaskListBodyResponse> response = webClient.get()
-                                                 .uri(resourceServerBaseURL + BASE_URL)
+                                                 .uri(BASE_URL)
                                                  .retrieve()
                                                  .bodyToMono(TaskListBodyResponse.class);
         
@@ -101,7 +100,7 @@ public class TaskServiceImpl implements TaskService {
         }
         payload.setUserId(taskDTO.getUserId());
         Mono<TaskCreationResponse> response = webClient.post()
-                                                        .uri(resourceServerBaseURL + BASE_URL)
+                                                        .uri(BASE_URL)
                                                         .body(Mono.just(payload), TaskCreationPayload.class)
                                                         .retrieve()
                                                         .bodyToMono(TaskCreationResponse.class);
@@ -116,7 +115,7 @@ public class TaskServiceImpl implements TaskService {
     public TaskDTO updateTask(TaskDTO taskDTO, boolean removeList)
             throws AppException {
 
-        StringBuffer urlBuffer = new StringBuffer(resourceServerBaseURL + BASE_URL);
+        StringBuffer urlBuffer = new StringBuffer(BASE_URL);
         urlBuffer.append(SLASH).append(taskDTO.getTaskId()).append("?")
                  .append("removeListNotIncluded").append("=").append(removeList);
 
@@ -138,7 +137,7 @@ public class TaskServiceImpl implements TaskService {
     @Override
     public Long deleteTask(String userId, Long taskId) throws AppException {
         TaskDeletionResponse response = webClient.delete()
-                                                 .uri(resourceServerBaseURL + BASE_URL + SLASH + taskId)
+                                                 .uri(BASE_URL + SLASH + taskId)
                                                  .retrieve()
                                                  .bodyToMono(TaskDeletionResponse.class)
                                                  .block();
@@ -160,7 +159,7 @@ public class TaskServiceImpl implements TaskService {
     @Override
     public boolean toggleTask(String userId, Long taskId) throws AppException {
         TaskToggleResponse response = webClient.patch()
-                                                .uri(resourceServerBaseURL + BASE_URL + SLASH + taskId + SLASH + "toggle")
+                                                .uri(BASE_URL + SLASH + taskId + SLASH + "toggle")
                                                 .retrieve()
                                                 .bodyToMono(TaskToggleResponse.class)
                                                 .block();
@@ -172,7 +171,7 @@ public class TaskServiceImpl implements TaskService {
 
     @Override
     public Optional<List<TaskDTO>> findByDate(String userId, LocalDate date) throws AppException {
-        StringBuffer urlBuffer = new StringBuffer(resourceServerBaseURL + BASE_URL);
+        StringBuffer urlBuffer = new StringBuffer(BASE_URL);
         urlBuffer.append("?dueDate=").append(date.toString());
         TaskListBodyResponse response = webClient.get()
                                                  .uri(urlBuffer.toString())
@@ -192,7 +191,7 @@ public class TaskServiceImpl implements TaskService {
     @Override
     public Optional<List<TaskDTO>> getUpcomingTasks(String userId) throws AppException {
         TaskListBodyResponse response = webClient.get()
-                                                 .uri(resourceServerBaseURL + BASE_URL + "/upcoming")
+                                                 .uri(BASE_URL + "/upcoming")
                                                  .retrieve()
                                                  .bodyToMono(TaskListBodyResponse.class)
                                                  .block();
@@ -208,7 +207,7 @@ public class TaskServiceImpl implements TaskService {
     @Override
     public Optional<List<TaskDTO>> getThisWeekTasks(String userId) throws AppException {
         TaskListBodyResponse response = webClient.get()
-                                                 .uri(resourceServerBaseURL + BASE_URL + "/this-week")
+                                                 .uri(BASE_URL + "/this-week")
                                                  .retrieve()
                                                  .bodyToMono(TaskListBodyResponse.class)
                                                  .block();
@@ -224,7 +223,7 @@ public class TaskServiceImpl implements TaskService {
     @Override
     public Optional<List<TaskDTO>> getTasksOfList(String userId, Long listId) throws AppException {
         TaskListBodyResponse response = webClient.get()
-                                                 .uri(resourceServerBaseURL + BASE_URL + "/list/" + listId)
+                                                 .uri(BASE_URL + "/list/" + listId)
                                                  .retrieve()
                                                  .bodyToMono(TaskListBodyResponse.class)
                                                  .block();
@@ -239,12 +238,13 @@ public class TaskServiceImpl implements TaskService {
 
     @Override
     public Optional<List<TaskDTO>> getTasksLessThanDate(String userId, LocalDate date) throws AppException {
-        StringBuffer urlBuffer = new StringBuffer(resourceServerBaseURL + BASE_URL);
-        urlBuffer.append("?dueDate=")
-                 .append(date.toString())
-                 .append("&").append("lessThan=").append(true);
         TaskListBodyResponse response = webClient.get()
-                                                 .uri(resourceServerBaseURL + BASE_URL)
+                                                .uri(uriBuilder -> uriBuilder
+                                                                        .path(BASE_URL)
+                                                                        .queryParam("dueDate", date)
+                                                                        .queryParam("lessThan", true)
+                                                                        .build()
+                                                    )
                                                  .retrieve()
                                                  .bodyToMono(TaskListBodyResponse.class)
                                                  .block();

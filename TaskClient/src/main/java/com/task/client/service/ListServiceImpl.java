@@ -75,7 +75,7 @@ public class ListServiceImpl implements ListService {
                                                  .retrieve()
                                                  .bodyToMono(ListCreationResponse.class)
                                                  .block();
-        if(response.getStatus() != HttpStatus.OK.value()) {
+        if(response.getStatus() != HttpStatus.OK.value() && response.getStatus() != HttpStatus.CREATED.value()) {
             throw new AppException(response.getMessage(), response.getStatus());
         }
         return response.getListId();

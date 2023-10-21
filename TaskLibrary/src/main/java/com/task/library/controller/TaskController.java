@@ -26,6 +26,7 @@ import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api/v1/task")
+@CrossOrigin("*")
 public class TaskController {
 
 	private final static String BASE_PATH = "/api/v1/task";
@@ -42,7 +43,7 @@ public class TaskController {
 	public ResponseEntity<?> createTask(@Valid @RequestBody TaskCreationPayload task, 
 			HttpServletRequest request, Principal principal) throws Exception {
 		
-		StringBuffer userId = new StringBuffer(principal.getName());
+		StringBuffer userId = new StringBuffer(principal != null ? principal.getName() : "");
 		if(!AuthUtil.getInstance().isValidUserId(userId)) {
 			throw new AppException(NOT_AUTHENTICATED, HttpStatus.BAD_REQUEST.value());
 		}
@@ -74,7 +75,7 @@ public class TaskController {
 	@GetMapping("{taskId}")
 	public ResponseEntity<?> getTaskById(@PathVariable Long taskId, Principal principal) throws AppException {
 		
-		StringBuffer userId = new StringBuffer(principal.getName());
+		StringBuffer userId = new StringBuffer(principal != null ? principal.getName() : "");
 		if(!AuthUtil.getInstance().isValidUserId(userId)) {
 			throw new AppException(NOT_AUTHENTICATED, HttpStatus.BAD_REQUEST.value());
 		}
@@ -96,26 +97,26 @@ public class TaskController {
 	
 	@GetMapping
 	public ResponseEntity<?> getAllTasksOfUser(
-									@RequestParam Optional<LocalDate> dueDate, 
-									@RequestParam Optional<Boolean> lessThan,
+									@RequestParam(required = false) LocalDate dueDate, 
+									@RequestParam(required = false) boolean lessThan,
 									Principal principal
 								) throws AppException {
 
-		StringBuffer userId = new StringBuffer(principal.getName());
+		StringBuffer userId = new StringBuffer(principal != null ? principal.getName() : "");
 		if(!AuthUtil.getInstance().isValidUserId(userId)) {
 			throw new AppException(NOT_AUTHENTICATED, HttpStatus.BAD_REQUEST.value());
 		}
 		List<TaskDTO> tasks;
 
-		if(dueDate.isPresent()) {
-			if(lessThan.isPresent() && lessThan.get()) {
+		if(dueDate != null) {
+			if(lessThan) {
 				tasks = taskService.getTasksLessThanDate(
 										userId.toString(), 
-										dueDate.get()
+										dueDate
 									).orElse(null);
 			}
 			else {
-				tasks = taskService.findByDate(userId.toString(), dueDate.get()).orElse(null);
+				tasks = taskService.findByDate(userId.toString(), dueDate).orElse(null);
 			}
 		}
 		else {
@@ -140,7 +141,7 @@ public class TaskController {
 	@DeleteMapping("{taskId}")
 	public ResponseEntity<?> deleteTaskById(@PathVariable Long taskId, Principal principal) throws AppException {
 
-		StringBuffer userId = new StringBuffer(principal.getName());
+		StringBuffer userId = new StringBuffer(principal != null ? principal.getName() : "");
 		if(!AuthUtil.getInstance().isValidUserId(userId)) {
 			throw new AppException(NOT_AUTHENTICATED, HttpStatus.BAD_REQUEST.value());
 		}
@@ -165,7 +166,7 @@ public class TaskController {
 											 Principal principal)
 			throws AppException {
 
-		StringBuffer userId = new StringBuffer(principal.getName());
+		StringBuffer userId = new StringBuffer(principal != null ? principal.getName() : "");
 		if(!AuthUtil.getInstance().isValidUserId(userId)) {
 			throw new AppException(NOT_AUTHENTICATED, HttpStatus.BAD_REQUEST.value());
 		}
@@ -187,7 +188,7 @@ public class TaskController {
 	public ResponseEntity<?> toggleTaskCompleted(@PathVariable Long taskId, Principal principal)
 			throws AppException {
 
-		StringBuffer userId = new StringBuffer(principal.getName());
+		StringBuffer userId = new StringBuffer(principal != null ? principal.getName() : "");
 		if(!AuthUtil.getInstance().isValidUserId(userId)) {
 			throw new AppException(NOT_AUTHENTICATED, HttpStatus.BAD_REQUEST.value());
 		}
@@ -208,7 +209,7 @@ public class TaskController {
 	@GetMapping("today")
 	public ResponseEntity<?> getTodayTasks(Principal principal) throws AppException {
 
-		StringBuffer userId = new StringBuffer(principal.getName());
+		StringBuffer userId = new StringBuffer(principal != null ? principal.getName() : "");
 		if(!AuthUtil.getInstance().isValidUserId(userId)) {
 			throw new AppException(NOT_AUTHENTICATED, HttpStatus.BAD_REQUEST.value());
 		}
@@ -226,18 +227,12 @@ public class TaskController {
 		response.setTime(LocalDateTime.now());
 		response.setPath(BASE_PATH + "/today");
 
-		try {
-			Thread.sleep(2000);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
-
 		return ResponseEntity.ok(response);
 	}
 	@GetMapping("upcoming")
 	public ResponseEntity<?> getUpcomingTasks(Principal principal) throws AppException {
 
-		StringBuffer userId = new StringBuffer(principal.getName());
+		StringBuffer userId = new StringBuffer(principal != null ? principal.getName() : "");
 		if(!AuthUtil.getInstance().isValidUserId(userId)) {
 			throw new AppException(NOT_AUTHENTICATED, HttpStatus.BAD_REQUEST.value());
 		}
@@ -259,7 +254,7 @@ public class TaskController {
 	@GetMapping("this-week")
 	public ResponseEntity<?> getThisWeekTasks(Principal principal) throws AppException {
 
-		StringBuffer userId = new StringBuffer(principal.getName());
+		StringBuffer userId = new StringBuffer(principal != null ? principal.getName() : "");
 		if(!AuthUtil.getInstance().isValidUserId(userId)) {
 			throw new AppException(NOT_AUTHENTICATED, HttpStatus.BAD_REQUEST.value());
 		}
@@ -282,12 +277,12 @@ public class TaskController {
 	@GetMapping("overdue")
 	public ResponseEntity<?> getOverduedTasks(Principal principal) throws AppException {
 
-		StringBuffer userId = new StringBuffer(principal.getName());
+		StringBuffer userId = new StringBuffer(principal != null ? principal.getName() : "");
 		if(!AuthUtil.getInstance().isValidUserId(userId)) {
 			throw new AppException(NOT_AUTHENTICATED, HttpStatus.BAD_REQUEST.value());
 		}
 		List<TaskDTO> tasks = taskService.getTasksLessThanDate(userId.toString(), 
-													LocalDate.now().minusDays(1)).orElse(null);
+													LocalDate.now()).orElse(null);
 
 		if(tasks != null) {
 			tasks = tasks.stream().filter(task -> !task.getIsCompleted()).toList();
@@ -309,7 +304,7 @@ public class TaskController {
 	@GetMapping("list/{listId}")
 	public ResponseEntity<?> getAllTasksOfList(@PathVariable Long listId, Principal principal) throws AppException {
 
-		StringBuffer userId = new StringBuffer(principal.getName());
+		StringBuffer userId = new StringBuffer(principal != null ? principal.getName() : "");
 		if(!AuthUtil.getInstance().isValidUserId(userId)) {
 			throw new AppException(NOT_AUTHENTICATED, HttpStatus.BAD_REQUEST.value());
 		}
@@ -328,19 +323,13 @@ public class TaskController {
 		response.setTime(LocalDateTime.now());
 		response.setPath(BASE_PATH + "/list/" + listId);
 
-		try {
-			Thread.sleep(2000);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
-
 		return ResponseEntity.ok(response);
 	}
 
 	@GetMapping("search")
 	public ResponseEntity<?> searchTask(@RequestParam String taskName, Principal principal) throws AppException {
 		
-		StringBuffer userId = new StringBuffer(principal.getName());
+		StringBuffer userId = new StringBuffer(principal != null ? principal.getName() : "");
 		if(!AuthUtil.getInstance().isValidUserId(userId)) {
 			throw new AppException(NOT_AUTHENTICATED, HttpStatus.BAD_REQUEST.value());
 		}

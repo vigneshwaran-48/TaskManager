@@ -22,7 +22,7 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
 		findByUserIdAndDueDateGreaterThanEqualAndDueDateLessThanEqual(String userId,
 																	  LocalDate from, LocalDate to);
 
-	Optional<List<Task>> findByUserIdAndDueDateGreaterThan(String userId, LocalDate dueDate);	
+	Optional<List<Task>> findByUserIdAndDueDateGreaterThanEqual(String userId, LocalDate dueDate);	
 
 	Optional<List<Task>> findByUserIdAndDueDateLessThan(String userId, LocalDate dueDate);
 

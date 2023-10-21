@@ -1,6 +1,7 @@
 package com.task.client.config;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -26,6 +27,9 @@ import reactor.core.publisher.Mono;
 @Configuration
 public class AppConfig {
 
+        @Value("${app.resource.server.baseurl}")
+    private String resourceServerBaseURL;
+
         @Bean
         BCryptPasswordEncoder passwordEncoder() {
         	return new BCryptPasswordEncoder();
@@ -43,6 +47,7 @@ public class AppConfig {
         
         oauth2Client.setDefaultOAuth2AuthorizedClient(true);
         return WebClient.builder()
+                        .baseUrl(resourceServerBaseURL)
         		.filter(oauth2Client)
                         .filter(errorHandler())
         		.exchangeStrategies(strategies)
