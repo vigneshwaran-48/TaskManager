@@ -26,6 +26,7 @@ import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api/v1/task")
+@CrossOrigin("*")
 public class TaskController {
 
 	private final static String BASE_PATH = "/api/v1/task";
@@ -42,7 +43,7 @@ public class TaskController {
 	public ResponseEntity<?> createTask(@Valid @RequestBody TaskCreationPayload task, 
 			HttpServletRequest request, Principal principal) throws Exception {
 		
-		StringBuffer userId = new StringBuffer(principal.getName());
+		StringBuffer userId = new StringBuffer(principal != null ? principal.getName() : "");
 		if(!AuthUtil.getInstance().isValidUserId(userId)) {
 			throw new AppException(NOT_AUTHENTICATED, HttpStatus.BAD_REQUEST.value());
 		}
@@ -74,7 +75,7 @@ public class TaskController {
 	@GetMapping("{taskId}")
 	public ResponseEntity<?> getTaskById(@PathVariable Long taskId, Principal principal) throws AppException {
 		
-		StringBuffer userId = new StringBuffer(principal.getName());
+		StringBuffer userId = new StringBuffer(principal != null ? principal.getName() : "");
 		if(!AuthUtil.getInstance().isValidUserId(userId)) {
 			throw new AppException(NOT_AUTHENTICATED, HttpStatus.BAD_REQUEST.value());
 		}
@@ -101,7 +102,7 @@ public class TaskController {
 									Principal principal
 								) throws AppException {
 
-		StringBuffer userId = new StringBuffer(principal.getName());
+		StringBuffer userId = new StringBuffer(principal != null ? principal.getName() : "");
 		if(!AuthUtil.getInstance().isValidUserId(userId)) {
 			throw new AppException(NOT_AUTHENTICATED, HttpStatus.BAD_REQUEST.value());
 		}
@@ -140,7 +141,7 @@ public class TaskController {
 	@DeleteMapping("{taskId}")
 	public ResponseEntity<?> deleteTaskById(@PathVariable Long taskId, Principal principal) throws AppException {
 
-		StringBuffer userId = new StringBuffer(principal.getName());
+		StringBuffer userId = new StringBuffer(principal != null ? principal.getName() : "");
 		if(!AuthUtil.getInstance().isValidUserId(userId)) {
 			throw new AppException(NOT_AUTHENTICATED, HttpStatus.BAD_REQUEST.value());
 		}
@@ -165,7 +166,7 @@ public class TaskController {
 											 Principal principal)
 			throws AppException {
 
-		StringBuffer userId = new StringBuffer(principal.getName());
+		StringBuffer userId = new StringBuffer(principal != null ? principal.getName() : "");
 		if(!AuthUtil.getInstance().isValidUserId(userId)) {
 			throw new AppException(NOT_AUTHENTICATED, HttpStatus.BAD_REQUEST.value());
 		}
@@ -187,7 +188,7 @@ public class TaskController {
 	public ResponseEntity<?> toggleTaskCompleted(@PathVariable Long taskId, Principal principal)
 			throws AppException {
 
-		StringBuffer userId = new StringBuffer(principal.getName());
+		StringBuffer userId = new StringBuffer(principal != null ? principal.getName() : "");
 		if(!AuthUtil.getInstance().isValidUserId(userId)) {
 			throw new AppException(NOT_AUTHENTICATED, HttpStatus.BAD_REQUEST.value());
 		}
@@ -208,7 +209,7 @@ public class TaskController {
 	@GetMapping("today")
 	public ResponseEntity<?> getTodayTasks(Principal principal) throws AppException {
 
-		StringBuffer userId = new StringBuffer(principal.getName());
+		StringBuffer userId = new StringBuffer(principal != null ? principal.getName() : "");
 		if(!AuthUtil.getInstance().isValidUserId(userId)) {
 			throw new AppException(NOT_AUTHENTICATED, HttpStatus.BAD_REQUEST.value());
 		}
@@ -231,7 +232,7 @@ public class TaskController {
 	@GetMapping("upcoming")
 	public ResponseEntity<?> getUpcomingTasks(Principal principal) throws AppException {
 
-		StringBuffer userId = new StringBuffer(principal.getName());
+		StringBuffer userId = new StringBuffer(principal != null ? principal.getName() : "");
 		if(!AuthUtil.getInstance().isValidUserId(userId)) {
 			throw new AppException(NOT_AUTHENTICATED, HttpStatus.BAD_REQUEST.value());
 		}
@@ -253,7 +254,7 @@ public class TaskController {
 	@GetMapping("this-week")
 	public ResponseEntity<?> getThisWeekTasks(Principal principal) throws AppException {
 
-		StringBuffer userId = new StringBuffer(principal.getName());
+		StringBuffer userId = new StringBuffer(principal != null ? principal.getName() : "");
 		if(!AuthUtil.getInstance().isValidUserId(userId)) {
 			throw new AppException(NOT_AUTHENTICATED, HttpStatus.BAD_REQUEST.value());
 		}
@@ -276,7 +277,7 @@ public class TaskController {
 	@GetMapping("overdue")
 	public ResponseEntity<?> getOverduedTasks(Principal principal) throws AppException {
 
-		StringBuffer userId = new StringBuffer(principal.getName());
+		StringBuffer userId = new StringBuffer(principal != null ? principal.getName() : "");
 		if(!AuthUtil.getInstance().isValidUserId(userId)) {
 			throw new AppException(NOT_AUTHENTICATED, HttpStatus.BAD_REQUEST.value());
 		}
@@ -303,7 +304,7 @@ public class TaskController {
 	@GetMapping("list/{listId}")
 	public ResponseEntity<?> getAllTasksOfList(@PathVariable Long listId, Principal principal) throws AppException {
 
-		StringBuffer userId = new StringBuffer(principal.getName());
+		StringBuffer userId = new StringBuffer(principal != null ? principal.getName() : "");
 		if(!AuthUtil.getInstance().isValidUserId(userId)) {
 			throw new AppException(NOT_AUTHENTICATED, HttpStatus.BAD_REQUEST.value());
 		}
@@ -328,7 +329,7 @@ public class TaskController {
 	@GetMapping("search")
 	public ResponseEntity<?> searchTask(@RequestParam String taskName, Principal principal) throws AppException {
 		
-		StringBuffer userId = new StringBuffer(principal.getName());
+		StringBuffer userId = new StringBuffer(principal != null ? principal.getName() : "");
 		if(!AuthUtil.getInstance().isValidUserId(userId)) {
 			throw new AppException(NOT_AUTHENTICATED, HttpStatus.BAD_REQUEST.value());
 		}

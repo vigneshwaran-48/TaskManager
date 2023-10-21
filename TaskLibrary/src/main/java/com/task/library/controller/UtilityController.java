@@ -41,7 +41,7 @@ public class UtilityController {
     @GetMapping("side-nav")
     public ResponseEntity<?> getSideNav(Principal principal) throws AppException {
         
-        StringBuffer userIdBuffer = new StringBuffer(principal.getName());
+        StringBuffer userIdBuffer = new StringBuffer(principal != null ? principal.getName() : "");
 		if(!AuthUtil.getInstance().isValidUserId(userIdBuffer)) {
 			throw new AppException(NOT_AUTHENTICATED, HttpStatus.BAD_REQUEST.value());
 		}
@@ -100,10 +100,11 @@ public class UtilityController {
     @GetMapping("list-side-nav")
     public ResponseEntity<?> getListSideNavs(Principal principal) {
 
-        //Need to remove this hardcoded after spring security enabled
-        //and get the user id from principal.
-        String userId = "12";
-
+        StringBuffer userIdBuffer = new StringBuffer(principal != null ? principal.getName() : "");
+		if(!AuthUtil.getInstance().isValidUserId(userIdBuffer)) {
+			throw new AppException(NOT_AUTHENTICATED, HttpStatus.BAD_REQUEST.value());
+		}
+        String userId = userIdBuffer.toString();
         Optional<List<ListDTO>> lists = listService.listAllListsOfUser(userId);
 
         List<ListSideNav> listSideNavs = new LinkedList<>();

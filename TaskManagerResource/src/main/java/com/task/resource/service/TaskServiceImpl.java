@@ -47,7 +47,9 @@ public class TaskServiceImpl implements TaskService {
 		if(task == null) {
 			return Optional.empty();
 		}
-		return Optional.of(toTaskDTO(task));
+		TaskDTO taskDTO = toTaskDTO(task);
+		decodeData(taskDTO);
+		return Optional.of(taskDTO);
 	}
 
 	@Override
@@ -62,6 +64,7 @@ public class TaskServiceImpl implements TaskService {
 									.stream()
 									.map(this::toTaskDTO)
 									.toList();
+		taskDTOs.forEach(this::decodeData);
 		return Optional.of(taskDTOs);
 	}
 
@@ -127,7 +130,7 @@ public class TaskServiceImpl implements TaskService {
 			updatedTask.setLists(updatedLists);
 			LOGGER.info("Saved Lists related to task => " + updatedTask.getTaskId());
 		}
-		
+		decodeData(updatedTask);
 		return updatedTask;
 	}
 
@@ -160,6 +163,7 @@ public class TaskServiceImpl implements TaskService {
 			Optional<List<TaskDTO>> sTasks = getAllSubTasks(userId, task.getTaskId());
 			task.setSubTasks(sTasks.orElse(null));
 		});
+		taskDTOs.forEach(this::decodeData);
 		return Optional.of(taskDTOs);
 	}
 	
@@ -201,7 +205,7 @@ public class TaskServiceImpl implements TaskService {
 			return Optional.empty();
 		}
 		List<TaskDTO> taskDTOS = tasks.get().stream().map(this::toTaskDTO).toList();
-
+		taskDTOS.forEach(this::decodeData);
 		return Optional.of(taskDTOS);
 	}
 
@@ -217,7 +221,7 @@ public class TaskServiceImpl implements TaskService {
 			return Optional.empty();
 		}
 		List<TaskDTO> taskDTOS = tasks.get().stream().map(this::toTaskDTO).toList();
-
+		taskDTOS.forEach(this::decodeData);
 		return Optional.of(taskDTOS);
 	}
 
@@ -233,7 +237,10 @@ public class TaskServiceImpl implements TaskService {
 		if(tasks.isEmpty()) {
 			return Optional.empty();
 		}
-		List<TaskDTO> taskDTOS = tasks.get().stream().map(this::toTaskDTO).toList();
+		List<TaskDTO> taskDTOS = tasks.get().stream()
+											.map(this::toTaskDTO)
+											.toList();
+		taskDTOS.forEach(this::decodeData);
 		return Optional.of(taskDTOS);
 	}
 
@@ -253,6 +260,7 @@ public class TaskServiceImpl implements TaskService {
 												return findTaskById(userId, taskList.getTaskDTO().getTaskId()).orElse(null);
 											})
 											.toList();
+			tasks.forEach(this::decodeData);
 			return Optional.of(tasks);
 		}
 		return Optional.empty();
@@ -266,6 +274,7 @@ public class TaskServiceImpl implements TaskService {
 			return Optional.empty();
 		}
 		List<TaskDTO> taskDTOs = tasks.get().stream().map(this::toTaskDTO).toList();
+		taskDTOs.forEach(this::decodeData);
 		return Optional.of(taskDTOs);
 	}
 
@@ -343,6 +352,14 @@ public class TaskServiceImpl implements TaskService {
 		if(taskDTO.getDescription() != null) {
 			taskDTO.setDescription(taskDTO.getDescription().trim());
 			taskDTO.setDescription(HtmlUtils.htmlEscape(taskDTO.getDescription()));
+		}
+	}
+	private void decodeData(TaskDTO taskDTO) {
+		if(taskDTO.getTaskName() != null) {
+			taskDTO.setTaskName(HtmlUtils.htmlUnescape(taskDTO.getTaskName()));
+		}
+		if(taskDTO.getDescription() != null) {
+			taskDTO.setDescription(HtmlUtils.htmlUnescape(taskDTO.getDescription()));
 		}
 	}
 }
