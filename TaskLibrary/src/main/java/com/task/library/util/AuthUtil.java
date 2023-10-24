@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 public class AuthUtil {
 
     @Value("${app.flag.isSinglUserFlow}")
-    private boolean IS_SINGLE_USERFLOW = false; 
+    private boolean IS_SINGLE_USERFLOW = true; 
 
     @Value("${app.singleUserId}")
     private String SINGLE_USERID = "12";

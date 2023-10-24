@@ -13,6 +13,7 @@ import com.task.library.dto.ListDTO;
 import com.task.library.exception.AlreadyExistsException;
 import com.task.library.exception.AppException;
 import com.task.library.service.ListService;
+import com.task.library.service.TaskListService;
 import com.task.library.service.TaskService;
 import com.task.resource.annotation.TimeLogger;
 import com.task.resource.model.List;
@@ -35,6 +36,9 @@ public class ListServiceImpl implements ListService {
 	
 	@Autowired
 	private TaskListRepository taskListRepository;
+
+	@Autowired
+	private TaskListService taskListService;
 	
 	@Override
 	@TimeLogger
@@ -61,6 +65,7 @@ public class ListServiceImpl implements ListService {
 	@Override
 	@TimeLogger
 	public Optional<java.util.List<ListDTO>> listAllListsOfUser(String userId) {
+		
 		Optional<java.util.List<List>> lists = listRepository.findByUserId(userId);
 		
 		if(lists.isEmpty()) {
@@ -103,6 +108,9 @@ public class ListServiceImpl implements ListService {
 	@Override
 	@TimeLogger
 	public Long removeList(String userId, Long listId) {
+		taskListService.deleteAllRelationOfList(userId, listId);
+		LOGGER.info("Delete relation of list => {}", listId);
+		
 		java.util.List<List> deletedLists = listRepository.deleteByUserIdAndListId(userId, listId);
 		
 		if(deletedLists != null && deletedLists.size() > 0) {

@@ -18,5 +18,7 @@ public interface TaskListService {
 
     void deleteAllRelationOfTask(String userId, Long taskId);
 
+    void deleteAllRelationOfList(String userId, Long listId);
+
     Optional<List<TaskListDTO>> findByList(String userId, ListDTO listDTO);
 }
