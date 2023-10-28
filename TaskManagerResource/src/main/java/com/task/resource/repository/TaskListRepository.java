@@ -25,5 +25,8 @@ public interface TaskListRepository extends JpaRepository<TaskList, Long> {
 
 	@Transactional
 	void deleteByTaskTaskIdAndUserId(Long taskId, String userId);
+
+	@Transactional
+	void deleteByListListIdAndUserId(Long listId, String userId);
 	
 }

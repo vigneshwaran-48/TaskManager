@@ -83,6 +83,11 @@ public class TaskListServiceImpl implements TaskListService {
                                     .toList());
     }
 
+    @Override
+    public void deleteAllRelationOfList(String userId, Long listId) {
+        taskListRepository.deleteByListListIdAndUserId(listId, userId);
+    }
+
     private List<ListDTO> getUniqueLists(String userId, Long taskId, List<ListDTO> lists) {
         List<ListDTO> filteredLists = new ArrayList<>();
         if(userId == null) {
