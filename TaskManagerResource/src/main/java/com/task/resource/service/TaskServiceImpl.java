@@ -9,6 +9,7 @@ import java.util.Optional;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.web.util.HtmlUtils;
 
@@ -52,8 +53,8 @@ public class TaskServiceImpl implements TaskService {
 		return Optional.of(taskDTO);
 	}
 
-	@Override
 	@TimeLogger
+	@Override
 	public Optional<List<TaskDTO>> listTaskOfUser(String userId) throws AppException {
 		List<Task> tasks = taskRepository.findByUserId(userId).orElse(null);
 		

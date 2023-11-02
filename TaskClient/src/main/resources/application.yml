@@ -12,7 +12,7 @@ spring:
           taskmanager:
             client-id: proapp-edd7ec4a-7d61-45f7-a393-c9c00426a436
             client-secret: "task@123"
-            scope: "openid, TaskManager.ALL"
+            scope: "openid, TaskManager.list.ALL, TaskManager.task.ALL"
         provider:
           taskmanager:
             issuer-uri: "http://localhost:9090"
