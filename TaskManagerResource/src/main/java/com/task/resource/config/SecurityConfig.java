@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -20,6 +21,7 @@ import com.google.common.net.HttpHeaders;
 
 @EnableWebSecurity
 @Configuration
+@EnableMethodSecurity
 public class SecurityConfig {
     
     @Value("${authserver.baseurl}")
@@ -37,12 +39,22 @@ public class SecurityConfig {
 				.disable()
 				.authorizeHttpRequests(request -> {
 					request
-					.requestMatchers("/test").permitAll()
-					.requestMatchers(HttpMethod.POST, "/api/user").permitAll()
-					.requestMatchers(HttpMethod.OPTIONS, "/api/user")
-					.permitAll()
-							.requestMatchers(HttpMethod.GET, "/api/user/{userId}/profile-image")
-							.permitAll()
+						// Task scopes
+						.requestMatchers(HttpMethod.POST, "/api/v1/task/**")
+							.hasAnyAuthority("SCOPE_TaskManager.task.ALL", "SCOPE_TaskManager.task.CREATE")
+						.requestMatchers(HttpMethod.GET, "/api/v1/task/**")
+							.hasAnyAuthority("SCOPE_TaskManager.task.ALL", "SCOPE_TaskManager.task.READ")
+						.requestMatchers(HttpMethod.PATCH, "/api/v1/task/**")
+							.hasAnyAuthority("SCOPE_TaskManager.task.ALL", "SCOPE_TaskManager.task.UPDATE")
+
+						// List Scopes
+						.requestMatchers(HttpMethod.POST, "/api/v1/list/**")
+							.hasAnyAuthority("SCOPE_TaskManager.list.ALL", "SCOPE_TaskManager.list.CREATE")
+						.requestMatchers(HttpMethod.GET, "/api/v1/list/**")
+							.hasAnyAuthority("SCOPE_TaskManager.list.ALL", "SCOPE_TaskManager.list.READ")
+						.requestMatchers(HttpMethod.PATCH, "/api/v1/list/**")
+							.hasAnyAuthority("SCOPE_TaskManager.list.ALL", "SCOPE_TaskManager.list.UPDATE")
+
 					.anyRequest().authenticated();
 				})
 				.oauth2ResourceServer(oauth2 -> oauth2.jwt())
