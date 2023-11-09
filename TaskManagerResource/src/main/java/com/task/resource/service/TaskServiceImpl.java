@@ -2,6 +2,7 @@ package com.task.resource.service;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.temporal.TemporalAdjusters;
 import java.util.List;
 import java.util.Optional;
@@ -9,11 +10,13 @@ import java.util.Optional;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.web.util.HtmlUtils;
 
 import com.task.library.dto.ListDTO;
+import com.task.library.dto.Notification;
 import com.task.library.dto.TaskDTO;
 import com.task.library.dto.TaskListDTO;
 import com.task.library.exception.AlreadyExistsException;
@@ -39,6 +42,12 @@ public class TaskServiceImpl implements TaskService {
 
 	@Autowired
 	private TaskListService taskListService;
+
+	@Autowired
+	private SimpMessagingTemplate messagingTemplate;
+
+	@Autowired
+	private KafkaTemplate<String, Notification> kafkaTemplate;
 	
 	@Override
 	public Optional<TaskDTO> findTaskById(String userId, Long taskId) {
@@ -95,6 +104,14 @@ public class TaskServiceImpl implements TaskService {
 		}
 		
 		if(createdTask != null) {
+			messagingTemplate.convertAndSend("/task-manager/task", createdTask);
+
+			Notification notification = new Notification();
+			notification.setMessage("Task " + createdTask.getTaskName() + " is created");
+			notification.setTimestamp(LocalDateTime.now().toString());
+
+			kafkaTemplate.send("notification", notification);
+			
 			return createdTask.getTaskId();
 		}
 		throw new Exception("Error while creating task");

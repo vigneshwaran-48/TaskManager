@@ -6,10 +6,11 @@ import org.springframework.stereotype.Controller;
 @Controller
 public class WebsocketController {
     
-
-    @MessageMapping("/create-task")
+    @MessageMapping("/task")
     public void createTaskTest() {
 
-        System.out.println("Create task endpoint called");
+        for(int i = 0; i < 10; i++) {
+            System.out.println("Hi");
+        }
     }
 }
