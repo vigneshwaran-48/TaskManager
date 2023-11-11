@@ -22,6 +22,10 @@ spring:
       max-request-size: 10MB
   main:
     allow-circular-references: true
+  sleuth:
+    integration:
+      websockets:
+        enabled: false
 
 logging:
   level:

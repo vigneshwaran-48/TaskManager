@@ -11,7 +11,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.kafka.core.KafkaTemplate;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.web.util.HtmlUtils;
 
@@ -22,6 +21,9 @@ import com.task.library.dto.TaskListDTO;
 import com.task.library.exception.AlreadyExistsException;
 import com.task.library.exception.AppException;
 import com.task.library.exception.TaskNotFoundException;
+import com.task.library.kafka.KafkaAppEvent;
+import com.task.library.kafka.KafkaTaskMessage;
+import com.task.library.kafka.KafkaTopics;
 import com.task.library.service.ListService;
 import com.task.library.service.TaskListService;
 import com.task.library.service.TaskService;
@@ -44,10 +46,7 @@ public class TaskServiceImpl implements TaskService {
 	private TaskListService taskListService;
 
 	@Autowired
-	private SimpMessagingTemplate messagingTemplate;
-
-	@Autowired
-	private KafkaTemplate<String, Notification> kafkaTemplate;
+	private KafkaTemplate<String, Object> kafkaTemplate;
 	
 	@Override
 	public Optional<TaskDTO> findTaskById(String userId, Long taskId) {
@@ -104,13 +103,14 @@ public class TaskServiceImpl implements TaskService {
 		}
 		
 		if(createdTask != null) {
-			messagingTemplate.convertAndSend("/task-manager/task", createdTask);
 
 			Notification notification = new Notification();
 			notification.setMessage("Task " + createdTask.getTaskName() + " is created");
 			notification.setTimestamp(LocalDateTime.now().toString());
 
-			kafkaTemplate.send("notification", notification);
+			KafkaTaskMessage taskMessage = new KafkaTaskMessage(KafkaAppEvent.CREATE, taskDTO);
+
+			kafkaTemplate.send(KafkaTopics.TASK, taskMessage);
 			
 			return createdTask.getTaskId();
 		}

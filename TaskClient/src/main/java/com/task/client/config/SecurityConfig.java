@@ -41,7 +41,7 @@ public class SecurityConfig {
 						request
 							.requestMatchers("/static/**",
 			                    "/*.ico", "/*.json", "/*.png", "/ping",
-									"/logout-success")
+									"/logout-success", "/test")
 							.permitAll()
 							.anyRequest()
 							.authenticated()
