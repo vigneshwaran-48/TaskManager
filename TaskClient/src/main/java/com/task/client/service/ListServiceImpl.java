@@ -32,7 +32,7 @@ public class ListServiceImpl implements ListService {
     private final static String SLASH = "/";
 
     @Override
-    public Optional<ListDTO> findByListId(String userId, Long listId) {
+    public Optional<ListDTO> findByListId(String userId, Long listId) throws AppException {
         
         ListBodyResponse response = webClient.get()
                                              .uri(resourceServerBaseURL + BASE_URL + SLASH + listId)
@@ -49,7 +49,7 @@ public class ListServiceImpl implements ListService {
     }
 
     @Override
-    public Optional<List<ListDTO>> listAllListsOfUser(String userId) {
+    public Optional<List<ListDTO>> listAllListsOfUser(String userId) throws AppException {
         ListBodyListResponse response = webClient.get()
                                              .uri(resourceServerBaseURL + BASE_URL)
                                              .retrieve()
@@ -82,7 +82,7 @@ public class ListServiceImpl implements ListService {
     }
 
     @Override
-    public Long removeList(String userId, Long listId) {
+    public Long removeList(String userId, Long listId) throws AppException {
         ListDeletionResponse response = webClient.delete()
                                                  .uri(resourceServerBaseURL + BASE_URL + SLASH + listId)
                                                  .retrieve()
@@ -95,7 +95,7 @@ public class ListServiceImpl implements ListService {
     }
 
     @Override
-    public Optional<ListDTO> updateList(ListDTO listDTO) {
+    public Optional<ListDTO> updateList(ListDTO listDTO) throws AppException {
         ListBodyResponse response = webClient.patch()
                                                  .uri(resourceServerBaseURL + BASE_URL + SLASH + listDTO.getListId())
                                                  .retrieve()
@@ -111,7 +111,7 @@ public class ListServiceImpl implements ListService {
     }
 
     @Override
-    public Optional<List<ListDTO>> getListsOfTask(String userId, Long taskId) {
+    public Optional<List<ListDTO>> getListsOfTask(String userId, Long taskId, boolean safe) throws AppException {
         StringBuffer urlBuffer = new StringBuffer(resourceServerBaseURL);
         urlBuffer.append(BASE_URL).append(SLASH).append("bytask").append(SLASH).append(taskId);
 

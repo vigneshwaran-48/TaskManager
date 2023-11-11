@@ -1,4 +1,4 @@
-package com.task.resource.controller;
+package com.task.client.controller;
 
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.stereotype.Controller;
@@ -6,10 +6,8 @@ import org.springframework.stereotype.Controller;
 @Controller
 public class WebsocketController {
     
-
-    @MessageMapping("/create-task")
-    public void createTaskTest() {
-
-        System.out.println("Create task endpoint called");
+    @MessageMapping("test")
+    public void test() {
+        System.out.println("Testing websocket ...................");
     }
 }

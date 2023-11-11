@@ -3,6 +3,7 @@ package com.task.library.controller;
 import java.security.Principal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -53,10 +54,11 @@ public class TaskController {
 
 		if(task.getLists() != null) {
 			
-			List<ListDTO> lists = task.getLists().stream().map(list -> {
-				return listService.findByListId(task.getUserId(), list).get();
-			}).toList();
+			List<ListDTO> lists = new ArrayList<>();
 
+			for(Long list : task.getLists()) {
+				lists.add(listService.findByListId(task.getUserId(), list).get());
+			}
 			taskDTO.setLists(lists);
 		}
 

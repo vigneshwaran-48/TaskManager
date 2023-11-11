@@ -13,7 +13,7 @@ public class Logging {
     
     private static final Logger LOGGER = LoggerFactory.getLogger(Logging.class);
 
-    @Around("@annotation(com.task.resource.annotation.TimeLogger)")
+    // @Around("@annotation(com.task.resource.annotation.TimeLogger)")
     public Object timeChecker(ProceedingJoinPoint joinPoint) throws Throwable {
         long startTime = System.currentTimeMillis();
 

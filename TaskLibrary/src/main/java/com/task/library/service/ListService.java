@@ -8,15 +8,15 @@ import com.task.library.exception.AppException;
 
 public interface ListService {
 
-	Optional<ListDTO> findByListId(String userId, Long listId);
+	Optional<ListDTO> findByListId(String userId, Long listId) throws AppException;
 	
-	Optional<List<ListDTO>> listAllListsOfUser(String userId);
+	Optional<List<ListDTO>> listAllListsOfUser(String userId) throws AppException;
 	
 	Long createList(ListDTO list) throws Exception;
 	
-	Long removeList(String userId, Long listId);
+	Long removeList(String userId, Long listId) throws AppException;
 	
-	Optional<ListDTO> updateList(ListDTO listDTO);
+	Optional<ListDTO> updateList(ListDTO listDTO) throws AppException;
 	
-	Optional<List<ListDTO>> getListsOfTask(String userId, Long taskId) throws AppException;
+	Optional<List<ListDTO>> getListsOfTask(String userId, Long taskId, boolean safe) throws AppException;
 }

@@ -24,7 +24,7 @@ public class TaskListServiceImpl implements TaskListService {
 	private TaskListRepository taskListRepository;
 
     @Override
-    public List<ListDTO> addListsToTask(String userId, TaskDTO task, List<ListDTO> lists, boolean removeListsNotIncluded) {
+    public List<ListDTO> addListsToTask(String userId, TaskDTO task, List<ListDTO> lists, boolean removeListsNotIncluded) throws AppException {
 
         if(userId == null) {
             throw new AppException("UserId not found in task", 400);
@@ -66,7 +66,7 @@ public class TaskListServiceImpl implements TaskListService {
     }
 
     @Override
-    public Optional<List<TaskListDTO>> findByList(String userId, ListDTO listDTO) {
+    public Optional<List<TaskListDTO>> findByList(String userId, ListDTO listDTO) throws AppException {
 
         if(userId == null) {
             throw new AppException("UserId not found", 400);
@@ -88,7 +88,7 @@ public class TaskListServiceImpl implements TaskListService {
         taskListRepository.deleteByListListIdAndUserId(listId, userId);
     }
 
-    private List<ListDTO> getUniqueLists(String userId, Long taskId, List<ListDTO> lists) {
+    private List<ListDTO> getUniqueLists(String userId, Long taskId, List<ListDTO> lists) throws AppException {
         List<ListDTO> filteredLists = new ArrayList<>();
         if(userId == null) {
             throw new AppException("UserId not found", 400);

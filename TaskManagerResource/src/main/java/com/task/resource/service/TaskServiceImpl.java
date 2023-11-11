@@ -9,7 +9,7 @@ import java.util.Optional;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.web.util.HtmlUtils;
 
@@ -19,6 +19,9 @@ import com.task.library.dto.TaskListDTO;
 import com.task.library.exception.AlreadyExistsException;
 import com.task.library.exception.AppException;
 import com.task.library.exception.TaskNotFoundException;
+import com.task.library.kafka.KafkaAppEvent;
+import com.task.library.kafka.KafkaTaskMessage;
+import com.task.library.kafka.KafkaTopics;
 import com.task.library.service.ListService;
 import com.task.library.service.TaskListService;
 import com.task.library.service.TaskService;
@@ -39,6 +42,9 @@ public class TaskServiceImpl implements TaskService {
 
 	@Autowired
 	private TaskListService taskListService;
+
+	@Autowired
+	private KafkaTemplate<String, Object> kafkaTemplate;
 	
 	@Override
 	public Optional<TaskDTO> findTaskById(String userId, Long taskId) {
@@ -95,15 +101,21 @@ public class TaskServiceImpl implements TaskService {
 		}
 		
 		if(createdTask != null) {
+
+			LOGGER.info("Created task, TaskId => {}", createdTask.getTaskId());
+		
+			sendDataToKafka(toTaskDTO(createdTask), KafkaAppEvent.CREATE);
+			
 			return createdTask.getTaskId();
 		}
+		LOGGER.error("Unable to create task!");
 		throw new Exception("Error while creating task");
 	}
 
 	@Override
 	@TimeLogger
 	public TaskDTO updateTask(TaskDTO taskDTO, boolean removeList)
-			throws TaskNotFoundException, AlreadyExistsException {
+			throws AppException {
 		Optional<Task> existingTask = taskRepository
 									  .findByTaskIdAndUserId(taskDTO.getTaskId(),
 											  				 taskDTO.getUserId());
@@ -119,7 +131,7 @@ public class TaskServiceImpl implements TaskService {
 			checkSameTaskName(newTask);
 		}
 		Task task = taskRepository.save(newTask);
-		LOGGER.info("Updated task => " + task.getTaskId());
+		LOGGER.info("Updated task => {}", task.getTaskId());
 
 		List<ListDTO> lists = taskDTO.getLists();
 		TaskDTO updatedTask = toTaskDTO(task);
@@ -129,9 +141,12 @@ public class TaskServiceImpl implements TaskService {
 												 updatedTask, lists, removeList);
 		
 			updatedTask.setLists(updatedLists);
-			LOGGER.info("Saved Lists related to task => " + updatedTask.getTaskId());
+			LOGGER.info("Saved Lists related to task => {}", updatedTask.getTaskId());
 		}
 		decodeData(updatedTask);
+
+		sendDataToKafka(updatedTask, KafkaAppEvent.UPDATE);
+		
 		return updatedTask;
 	}
 
@@ -142,6 +157,10 @@ public class TaskServiceImpl implements TaskService {
 		List<Task> task = taskRepository.deleteByUserIdAndTaskId(userId, taskId);
 		
 		if(task != null && task.size() > 0) {
+
+			LOGGER.info("Deleted task => {}", task.get(0).getTaskId());
+			sendDataToKafka(toTaskDTO(task.get(0)), KafkaAppEvent.DELETE);
+
 			return task.get(0).getTaskId();
 		}
 		return null;
@@ -192,6 +211,9 @@ public class TaskServiceImpl implements TaskService {
 		existingTask.get().setIsCompleted(!existingTask.get().getIsCompleted());
 		Task task = taskRepository.save(existingTask.get());
 
+		LOGGER.info("Toggled task status to {}", task.getIsCompleted() ? "Completed" : "Yet2Finish");
+
+		sendDataToKafka(toTaskDTO(task), KafkaAppEvent.UPDATE);
 		return task.getIsCompleted();
 	}
 
@@ -294,7 +316,7 @@ public class TaskServiceImpl implements TaskService {
 		
 		try {
 			Optional<List<ListDTO>> lists = listService.getListsOfTask(task.getUserId(),
-																		task.getTaskId());
+																		task.getTaskId(), true);
 			taskDTO.setLists(lists.isPresent() ? lists.get() : null);
 		} 
 		catch (AppException e) {
@@ -363,4 +385,12 @@ public class TaskServiceImpl implements TaskService {
 			taskDTO.setDescription(HtmlUtils.htmlUnescape(taskDTO.getDescription()));
 		}
 	}
+
+	private void sendDataToKafka(TaskDTO task, KafkaAppEvent event) {
+		KafkaTaskMessage kafkaTaskMessage = new KafkaTaskMessage(event, task);
+		kafkaTemplate.send(KafkaTopics.TASK, kafkaTaskMessage);
+
+		LOGGER.info("Task change event {} pushed to Kafka Topic => {}", event, KafkaTopics.TASK);
+	}
+	
 }
