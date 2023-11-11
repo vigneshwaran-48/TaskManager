@@ -136,8 +136,11 @@ public class ListServiceImpl implements ListService {
 
 	@Override
 	@TimeLogger
-	public Optional<java.util.List<ListDTO>> getListsOfTask(String userId, Long taskId) throws AppException {
+	public Optional<java.util.List<ListDTO>> getListsOfTask(String userId, Long taskId, boolean safe) throws AppException {
 		if(!taskService.isTaskExists(userId, taskId)) {
+			if(safe) {
+				return Optional.empty();
+			}
 			throw new IllegalArgumentException("No task found with the given taskId => " + taskId);
 		}
 		

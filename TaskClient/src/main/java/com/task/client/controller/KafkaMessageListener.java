@@ -19,7 +19,7 @@ public class KafkaMessageListener {
     public void listen(KafkaTaskMessage kafkaTaskMessage) {
  
         simpMessagingTemplate.convertAndSendToUser(
-                                kafkaTaskMessage.getTaskDTO().getUserId(), 
+                                kafkaTaskMessage.getTask().getUserId(), 
                                 "/queue/task", 
                                 kafkaTaskMessage);   
     }

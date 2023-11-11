@@ -62,7 +62,7 @@ public class ListController {
 	}
 	
 	@GetMapping("{listId}")
-	public ResponseEntity<?> getListById(@PathVariable Long listId, Principal principal) {
+	public ResponseEntity<?> getListById(@PathVariable Long listId, Principal principal) throws AppException {
 		
 		StringBuffer userId = new StringBuffer(principal != null ? principal.getName() : "");
 		if(!AuthUtil.getInstance().isValidUserId(userId)) {
@@ -84,7 +84,7 @@ public class ListController {
 	}
 	
 	@GetMapping
-	public ResponseEntity<?> getAllListsOfUser(Principal principal) {
+	public ResponseEntity<?> getAllListsOfUser(Principal principal) throws AppException {
 		
 		StringBuffer userId = new StringBuffer(principal != null ? principal.getName() : "");
 		if(!AuthUtil.getInstance().isValidUserId(userId)) {
@@ -109,7 +109,7 @@ public class ListController {
 	}
 	
 	@DeleteMapping("{listId}")
-	public ResponseEntity<?> deleteByListId(@PathVariable Long listId, Principal principal) {
+	public ResponseEntity<?> deleteByListId(@PathVariable Long listId, Principal principal) throws AppException {
 		
 		StringBuffer userId = new StringBuffer(principal != null ? principal.getName() : "");
 		if(!AuthUtil.getInstance().isValidUserId(userId)) {
@@ -134,7 +134,7 @@ public class ListController {
 			throw new AppException(NOT_AUTHENTICATED, HttpStatus.BAD_REQUEST.value());
 		}
 		
-		List<ListDTO> lists = listService.getListsOfTask(userId.toString(), taskId).orElse(null);
+		List<ListDTO> lists = listService.getListsOfTask(userId.toString(), taskId, false).orElse(null);
 		
 		if(lists != null) {
 			lists.forEach(this::fillWithLinks);
@@ -152,7 +152,7 @@ public class ListController {
 	
 	@PatchMapping("{listId}")
 	public ResponseEntity<?> patchUpdateList(@PathVariable Long listId, 
-											 @RequestBody ListDTO listDTO, Principal principal) {
+											 @RequestBody ListDTO listDTO, Principal principal) throws AppException {
 		
 		StringBuffer userId = new StringBuffer(principal != null ? principal.getName() : "");
 		if(!AuthUtil.getInstance().isValidUserId(userId)) {

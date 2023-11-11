@@ -6,13 +6,13 @@ public class KafkaTaskMessage {
     
     private KafkaAppEvent event;
     
-    private TaskDTO taskDTO;
+    private TaskDTO task;
 
     public KafkaTaskMessage() {}
 
-    public KafkaTaskMessage(KafkaAppEvent event, TaskDTO taskDTO) {
+    public KafkaTaskMessage(KafkaAppEvent event, TaskDTO task) {
         this.event = event;
-        this.taskDTO = taskDTO;
+        this.task = task;
     }
 
     public KafkaAppEvent getEvent() {
@@ -23,17 +23,17 @@ public class KafkaTaskMessage {
         this.event = event;
     }
 
-    public TaskDTO getTaskDTO() {
-        return taskDTO;
+    public TaskDTO getTask() {
+        return task;
     }
 
-    public void setTaskDTO(TaskDTO taskDTO) {
-        this.taskDTO = taskDTO;
+    public void setTask(TaskDTO task) {
+        this.task = task;
     }
 
     @Override
     public String toString() {
-        return "KafkaTaskMessage {event=" + event + ", taskDTO=" + taskDTO + "}";
+        return "KafkaTaskMessage {event=" + event + ", task=" + task + "}";
     }
 
     

@@ -98,7 +98,7 @@ public class UtilityController {
     }
 
     @GetMapping("list-side-nav")
-    public ResponseEntity<?> getListSideNavs(Principal principal) {
+    public ResponseEntity<?> getListSideNavs(Principal principal) throws AppException {
 
         StringBuffer userIdBuffer = new StringBuffer(principal != null ? principal.getName() : "");
 		if(!AuthUtil.getInstance().isValidUserId(userIdBuffer)) {

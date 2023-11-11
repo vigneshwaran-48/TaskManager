@@ -2,7 +2,6 @@ package com.task.resource.service;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.temporal.TemporalAdjusters;
 import java.util.List;
 import java.util.Optional;
@@ -15,7 +14,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.util.HtmlUtils;
 
 import com.task.library.dto.ListDTO;
-import com.task.library.dto.Notification;
 import com.task.library.dto.TaskDTO;
 import com.task.library.dto.TaskListDTO;
 import com.task.library.exception.AlreadyExistsException;
@@ -104,23 +102,20 @@ public class TaskServiceImpl implements TaskService {
 		
 		if(createdTask != null) {
 
-			Notification notification = new Notification();
-			notification.setMessage("Task " + createdTask.getTaskName() + " is created");
-			notification.setTimestamp(LocalDateTime.now().toString());
-
-			KafkaTaskMessage taskMessage = new KafkaTaskMessage(KafkaAppEvent.CREATE, taskDTO);
-
-			kafkaTemplate.send(KafkaTopics.TASK, taskMessage);
+			LOGGER.info("Created task, TaskId => {}", createdTask.getTaskId());
+		
+			sendDataToKafka(toTaskDTO(createdTask), KafkaAppEvent.CREATE);
 			
 			return createdTask.getTaskId();
 		}
+		LOGGER.error("Unable to create task!");
 		throw new Exception("Error while creating task");
 	}
 
 	@Override
 	@TimeLogger
 	public TaskDTO updateTask(TaskDTO taskDTO, boolean removeList)
-			throws TaskNotFoundException, AlreadyExistsException {
+			throws AppException {
 		Optional<Task> existingTask = taskRepository
 									  .findByTaskIdAndUserId(taskDTO.getTaskId(),
 											  				 taskDTO.getUserId());
@@ -136,7 +131,7 @@ public class TaskServiceImpl implements TaskService {
 			checkSameTaskName(newTask);
 		}
 		Task task = taskRepository.save(newTask);
-		LOGGER.info("Updated task => " + task.getTaskId());
+		LOGGER.info("Updated task => {}", task.getTaskId());
 
 		List<ListDTO> lists = taskDTO.getLists();
 		TaskDTO updatedTask = toTaskDTO(task);
@@ -146,9 +141,12 @@ public class TaskServiceImpl implements TaskService {
 												 updatedTask, lists, removeList);
 		
 			updatedTask.setLists(updatedLists);
-			LOGGER.info("Saved Lists related to task => " + updatedTask.getTaskId());
+			LOGGER.info("Saved Lists related to task => {}", updatedTask.getTaskId());
 		}
 		decodeData(updatedTask);
+
+		sendDataToKafka(updatedTask, KafkaAppEvent.UPDATE);
+		
 		return updatedTask;
 	}
 
@@ -159,6 +157,10 @@ public class TaskServiceImpl implements TaskService {
 		List<Task> task = taskRepository.deleteByUserIdAndTaskId(userId, taskId);
 		
 		if(task != null && task.size() > 0) {
+
+			LOGGER.info("Deleted task => {}", task.get(0).getTaskId());
+			sendDataToKafka(toTaskDTO(task.get(0)), KafkaAppEvent.DELETE);
+
 			return task.get(0).getTaskId();
 		}
 		return null;
@@ -209,6 +211,9 @@ public class TaskServiceImpl implements TaskService {
 		existingTask.get().setIsCompleted(!existingTask.get().getIsCompleted());
 		Task task = taskRepository.save(existingTask.get());
 
+		LOGGER.info("Toggled task status to {}", task.getIsCompleted() ? "Completed" : "Yet2Finish");
+
+		sendDataToKafka(toTaskDTO(task), KafkaAppEvent.UPDATE);
 		return task.getIsCompleted();
 	}
 
@@ -311,7 +316,7 @@ public class TaskServiceImpl implements TaskService {
 		
 		try {
 			Optional<List<ListDTO>> lists = listService.getListsOfTask(task.getUserId(),
-																		task.getTaskId());
+																		task.getTaskId(), true);
 			taskDTO.setLists(lists.isPresent() ? lists.get() : null);
 		} 
 		catch (AppException e) {
@@ -380,4 +385,12 @@ public class TaskServiceImpl implements TaskService {
 			taskDTO.setDescription(HtmlUtils.htmlUnescape(taskDTO.getDescription()));
 		}
 	}
+
+	private void sendDataToKafka(TaskDTO task, KafkaAppEvent event) {
+		KafkaTaskMessage kafkaTaskMessage = new KafkaTaskMessage(event, task);
+		kafkaTemplate.send(KafkaTopics.TASK, kafkaTaskMessage);
+
+		LOGGER.info("Task change event {} pushed to Kafka Topic => {}", event, KafkaTopics.TASK);
+	}
+	
 }
