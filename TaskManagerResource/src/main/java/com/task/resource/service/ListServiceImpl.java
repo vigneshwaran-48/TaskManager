@@ -6,12 +6,16 @@ import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.web.util.HtmlUtils;
 
 import com.task.library.dto.ListDTO;
 import com.task.library.exception.AlreadyExistsException;
 import com.task.library.exception.AppException;
+import com.task.library.kafka.KafkaAppEvent;
+import com.task.library.kafka.KafkaListMessage;
+import com.task.library.kafka.KafkaTopics;
 import com.task.library.service.ListService;
 import com.task.library.service.TaskListService;
 import com.task.library.service.TaskService;
@@ -39,6 +43,9 @@ public class ListServiceImpl implements ListService {
 
 	@Autowired
 	private TaskListService taskListService;
+
+	@Autowired
+	private KafkaTemplate<String, Object> kafkaTemplate;
 	
 	@Override
 	@TimeLogger
@@ -101,6 +108,10 @@ public class ListServiceImpl implements ListService {
 		if(createdList == null) {
 			throw new Exception("Error while creating list");
 		}
+		LOGGER.info("Created list {}", createdList.getListId());
+
+		KafkaListMessage kafkaListMessage = new KafkaListMessage(KafkaAppEvent.CREATE, createdList.toListDTO());
+		kafkaTemplate.send(KafkaTopics.LIST, kafkaListMessage);
 		
 		return createdList.getListId();
 	}
@@ -109,11 +120,14 @@ public class ListServiceImpl implements ListService {
 	@TimeLogger
 	public Long removeList(String userId, Long listId) {
 		taskListService.deleteAllRelationOfList(userId, listId);
-		LOGGER.info("Delete relation of list => {}", listId);
 		
 		java.util.List<List> deletedLists = listRepository.deleteByUserIdAndListId(userId, listId);
 		
 		if(deletedLists != null && deletedLists.size() > 0) {
+			LOGGER.info("Removed list {}", deletedLists.get(0).getListId());
+
+			KafkaListMessage kafkaListMessage = new KafkaListMessage(KafkaAppEvent.DELETE, deletedLists.get(0).toListDTO());
+			kafkaTemplate.send(KafkaTopics.LIST, kafkaListMessage);
 			return deletedLists.get(0).getListId();
 		}
 		return null;
@@ -131,6 +145,12 @@ public class ListServiceImpl implements ListService {
 		checkAndUpdateList(existingList.get(), newList);
 		
 		List updatedList = listRepository.save(newList);
+
+		LOGGER.info("Updated list {}", updatedList.getListId());
+
+		KafkaListMessage kafkaListMessage = new KafkaListMessage(KafkaAppEvent.UPDATE, updatedList.toListDTO());
+		kafkaTemplate.send(KafkaTopics.LIST, kafkaListMessage);
+		
 		return Optional.of(updatedList.toListDTO());
 	}
 

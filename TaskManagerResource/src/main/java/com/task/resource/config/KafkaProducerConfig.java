@@ -30,6 +30,7 @@ public class KafkaProducerConfig {
         config.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
         config.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, JsonSerializer.class);
         config.put(JsonSerializer.TYPE_MAPPINGS, "kafkaTaskMessage:com.task.library.kafka.KafkaTaskMessage");
+        config.put(JsonSerializer.TYPE_MAPPINGS, "kafkaListMessage:com.task.library.kafka.KafkaListMessage");
 
         return config;
     }

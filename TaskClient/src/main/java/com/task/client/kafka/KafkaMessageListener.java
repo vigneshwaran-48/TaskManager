@@ -1,26 +1,32 @@
-package com.task.client.controller;
+package com.task.client.kafka;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.kafka.annotation.KafkaHandler;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Component;
 
+import com.task.library.kafka.KafkaListMessage;
 import com.task.library.kafka.KafkaTaskMessage;
 import com.task.library.kafka.KafkaTopics;
 
 @Component
-@KafkaListener(id = "task-manager-app-listener", topics = KafkaTopics.TASK)
 public class KafkaMessageListener {
     
     @Autowired SimpMessagingTemplate simpMessagingTemplate;
     
-    @KafkaHandler
-    public void listen(KafkaTaskMessage kafkaTaskMessage) {
+    @KafkaListener(topics = KafkaTopics.TASK, groupId = "kafka-consumers")
+    public void taskListener(KafkaTaskMessage kafkaTaskMessage) {
  
         simpMessagingTemplate.convertAndSendToUser(
                                 kafkaTaskMessage.getTask().getUserId(), 
-                                "/queue/task", 
+                                "/personal/task", 
                                 kafkaTaskMessage);   
+    }
+
+    @KafkaListener(topics = KafkaTopics.LIST, groupId = "kafka-consumers")
+    public void listListener(KafkaListMessage kafkaListMessage) {
+
+        simpMessagingTemplate.convertAndSendToUser(
+            kafkaListMessage.getList().getUserId(), "/personal/list", kafkaListMessage);
     }
 }
