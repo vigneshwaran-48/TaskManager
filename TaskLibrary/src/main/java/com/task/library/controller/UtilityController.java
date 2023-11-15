@@ -47,18 +47,23 @@ public class UtilityController {
 		}
         String userId = userIdBuffer.toString();
 
+        SideNav dashboard = new SideNav();
+        dashboard.setId("side-nav-1");
+        dashboard.setName("Dashboard");
+        dashboard.setIconClassNames("bi bi-speedometer");
+
         SideNav upComing = new SideNav();
-        upComing.setId("side-nav-1");
+        upComing.setId("side-nav-2");
         upComing.setName("Upcoming");
         upComing.setIconClassNames("fa fa-solid fa-forward");
 
         SideNav today = new SideNav();
-        today.setId("side-nav-2");
+        today.setId("side-nav-3");
         today.setName("Today");
         today.setIconClassNames("bi bi-list-task");
 
         SideNav overdue = new SideNav();
-        overdue.setId("side-nav-3");
+        overdue.setId("side-nav-4");
         overdue.setName("Overdue");
         overdue.setIconClassNames("fa fa-solid fa-hourglass-end");
         Optional<List<TaskDTO>> overdueTasks = taskService.getTasksLessThanDate(userId, LocalDate.now());
@@ -66,11 +71,6 @@ public class UtilityController {
             overdueTask = overdueTask.stream().filter(task -> !task.getIsCompleted()).toList();
             overdue.setCount(overdueTask.size());
         });
-
-        SideNav stickyWall = new SideNav();
-        stickyWall.setId("side-nav-4");
-        stickyWall.setName("Sticky Wall");
-        stickyWall.setIconClassNames("bi bi-sticky");
 
         Optional<List<TaskDTO>> tasks = taskService.findByDate(userId, LocalDate.now());
         tasks.ifPresent(taskDTOS -> today.setCount(taskDTOS.size()));
@@ -88,7 +88,7 @@ public class UtilityController {
         }
         
         SideNavResponse response = new SideNavResponse();
-        response.setSideNavList(List.of(upComing, today, all, overdue, stickyWall));
+        response.setSideNavList(List.of(dashboard, upComing, today, all, overdue));
         response.setPath("/api/v1/utility/side-nav");
         response.setMessage("success");
         response.setStatus(HttpStatus.OK.value());
