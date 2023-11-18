@@ -16,6 +16,7 @@ import org.springframework.kafka.support.mapping.DefaultJackson2JavaTypeMapper;
 import org.springframework.kafka.support.mapping.Jackson2JavaTypeMapper.TypePrecedence;
 import org.springframework.kafka.support.serializer.JsonDeserializer;
 
+import com.task.library.kafka.KafkaListMessage;
 import com.task.library.kafka.KafkaTaskMessage;
 
 @Configuration
@@ -44,6 +45,7 @@ public class KafkaConsumerConfig {
 
         Map<String, Class<?>> mappings = new HashMap<>();
         mappings.put("kafkaTaskMessage", KafkaTaskMessage.class);
+        mappings.put("kafkaListMessage", KafkaListMessage.class);
 
         typeMapper.setIdClassMapping(mappings);
         converter.setTypeMapper(typeMapper);
@@ -54,6 +56,7 @@ public class KafkaConsumerConfig {
         Map<String, Object> config = new HashMap<>();
         config.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
         config.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
+        config.put(ConsumerConfig.GROUP_ID_CONFIG, "kafka-consumers");
         config.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
         config.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, JsonDeserializer.class);
 
