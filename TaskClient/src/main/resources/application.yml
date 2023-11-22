@@ -36,7 +36,7 @@ logging:
 app:
   resource:
     server:
-      baseurl: http://127.0.0.1:8383
+      baseurl: http://localhost:8383
   flag:
     isSinglUserFlow: false
   singleUserId: "12"
