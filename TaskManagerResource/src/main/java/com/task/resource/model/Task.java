@@ -1,10 +1,11 @@
 package com.task.resource.model;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 import org.springframework.format.annotation.DateTimeFormat;
 
-import com.task.library.dto.TaskDTO;
+import com.task.library.dto.task.TaskDTO;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -32,6 +33,10 @@ public class Task {
 	@DateTimeFormat(pattern = "dd-mm-yyyy")
 	@Column(name = "due_date")
 	private LocalDate dueDate;
+
+	@DateTimeFormat(pattern = "dd-mm-yyyy")
+	@Column(name = "created_time", nullable = false)
+	private LocalDateTime createdTime = LocalDateTime.now();
 	
 	@Column(name = "parent_task")
 	private Long parentTask;
@@ -95,6 +100,14 @@ public class Task {
 		this.isCompleted = isCompleted;
 	}
 
+	public LocalDateTime getCreatedTime() {
+		return createdTime;
+	}
+
+	public void setCreatedTime(LocalDateTime createdTime) {
+		this.createdTime = createdTime;
+	}
+
 	@Override
 	public String toString() {
 		return "Task [taskId=" + taskId + ", taskName=" + taskName + ", description=" + description + ", dueDate="
@@ -110,6 +123,7 @@ public class Task {
 		task.setUserId(taskDTO.getUserId());
 		task.setTaskName(taskDTO.getTaskName());
 		task.setIsCompleted(taskDTO.getIsCompleted());
+		task.setCreatedTime(taskDTO.getCreatedTime());
 		
 		return task;
 	}
@@ -125,6 +139,7 @@ public class Task {
 		taskDTO.setDueDate(this.getDueDate());
 		taskDTO.setParentTaskId(this.getParentTask());
 		taskDTO.setIsCompleted(this.getIsCompleted());
+		taskDTO.setCreatedTime(this.createdTime);
 
 		return taskDTO;
 	}

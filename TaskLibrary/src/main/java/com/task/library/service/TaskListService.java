@@ -4,8 +4,8 @@ import java.util.List;
 import java.util.Optional;
 
 import com.task.library.dto.ListDTO;
-import com.task.library.dto.TaskDTO;
-import com.task.library.dto.TaskListDTO;
+import com.task.library.dto.task.TaskDTO;
+import com.task.library.dto.task.TaskListDTO;
 import com.task.library.exception.AppException;
 
 public interface TaskListService {

@@ -4,7 +4,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
-import com.task.library.dto.TaskDTO;
+import com.task.library.dto.task.TaskDTO;
 import com.task.library.exception.AlreadyExistsException;
 import com.task.library.exception.AppException;
 import com.task.library.exception.TaskNotFoundException;

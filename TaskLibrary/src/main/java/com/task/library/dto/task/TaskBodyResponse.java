@@ -1,15 +1,21 @@
-package com.task.library.dto;
+package com.task.library.dto.task;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
-public class TaskDeletionResponse {
+public class TaskBodyResponse {
 
 	private String message;
 	private int status;
 	private LocalDateTime time;
-	private List<Long> deletedTasks;
+	private TaskDTO task;
+	private String path;
 	
+	public String getPath() {
+		return path;
+	}
+	public void setPath(String path) {
+		this.path = path;
+	}
 	public String getMessage() {
 		return message;
 	}
@@ -22,24 +28,22 @@ public class TaskDeletionResponse {
 	public void setStatus(int status) {
 		this.status = status;
 	}
-	
+	public TaskDTO getTask() {
+		return task;
+	}
+	public void setTask(TaskDTO task) {
+		this.task = task;
+	}
 	public LocalDateTime getTime() {
 		return time;
 	}
 	public void setTime(LocalDateTime time) {
 		this.time = time;
 	}
-	public List<Long> getDeletedTasks() {
-		return deletedTasks;
-	}
-	public void setDeletedTasks(List<Long> deletedTasks) {
-		this.deletedTasks = deletedTasks;
-	}
 	@Override
 	public String toString() {
-		return "TaskCreationResponse [message=" + message + ", status=" + status + ", deletedTasks=" + deletedTasks + ", time="
+		return "TaskCreationResponse [message=" + message + ", status=" + status + ", task=" + task + ", time="
 				+ time + "]";
 	}
-	
 	
 }

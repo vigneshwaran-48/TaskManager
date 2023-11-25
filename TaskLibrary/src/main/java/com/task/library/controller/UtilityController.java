@@ -1,7 +1,7 @@
 package com.task.library.controller;
 
 import com.task.library.dto.ListDTO;
-import com.task.library.dto.TaskDTO;
+import com.task.library.dto.task.TaskDTO;
 import com.task.library.dto.utility.ListSideNav;
 import com.task.library.dto.utility.ListSideNavResponse;
 import com.task.library.dto.utility.SideNav;

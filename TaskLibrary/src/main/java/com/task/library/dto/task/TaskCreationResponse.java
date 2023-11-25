@@ -1,15 +1,16 @@
-package com.task.library.dto;
+package com.task.library.dto.task;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
-public class TaskListBodyResponse {
+public class TaskCreationResponse {
 
 	private String message;
 	private int status;
 	private LocalDateTime time;
-	private List<TaskDTO> tasks;
+	private Long taskId;
 	private String path;
+	
+	
 	
 	public String getPath() {
 		return path;
@@ -29,11 +30,11 @@ public class TaskListBodyResponse {
 	public void setStatus(int status) {
 		this.status = status;
 	}
-	public List<TaskDTO> getTasks() {
-		return tasks;
+	public Long getTaskId() {
+		return taskId;
 	}
-	public void setTasks(List<TaskDTO> tasks) {
-		this.tasks = tasks;
+	public void setTaskId(Long taskId) {
+		this.taskId = taskId;
 	}
 	public LocalDateTime getTime() {
 		return time;
@@ -43,8 +44,9 @@ public class TaskListBodyResponse {
 	}
 	@Override
 	public String toString() {
-		return "TaskCreationResponse [message=" + message + ", status=" + status + ", tasks=" + tasks + ", time="
+		return "TaskCreationResponse [message=" + message + ", status=" + status + ", taskId=" + taskId + ", time="
 				+ time + "]";
 	}
+	
 	
 }

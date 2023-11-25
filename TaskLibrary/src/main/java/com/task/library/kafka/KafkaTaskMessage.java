@@ -1,6 +1,6 @@
 package com.task.library.kafka;
 
-import com.task.library.dto.TaskDTO;
+import com.task.library.dto.task.TaskDTO;
 
 public class KafkaTaskMessage {
     

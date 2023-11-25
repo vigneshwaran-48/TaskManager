@@ -1,8 +1,11 @@
-package com.task.library.dto;
+package com.task.library.dto.task;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
+
+import com.task.library.dto.ListDTO;
 
 import jakarta.validation.constraints.NotBlank;
 
@@ -16,7 +19,8 @@ public class TaskDTO {
 	
 	private String description;
 	private Long parentTaskId;
-	private LocalDate dueDate;
+	private LocalDate dueDate;	
+	private LocalDateTime createdTime;
 	private Boolean isCompleted;
 	private List<TaskDTO> subTasks;
 	private List<ListDTO> lists;
@@ -82,6 +86,12 @@ public class TaskDTO {
 	}
 	public void setUserId(String userId) {
 		this.userId = userId;
+	}
+	public LocalDateTime getCreatedTime() {
+		return createdTime;
+	}
+	public void setCreatedTime(LocalDateTime createdTime) {
+		this.createdTime = createdTime;
 	}
 	@Override
 	public String toString() {

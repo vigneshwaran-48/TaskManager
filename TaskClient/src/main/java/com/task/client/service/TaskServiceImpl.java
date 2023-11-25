@@ -10,13 +10,13 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 
-import com.task.library.dto.TaskBodyResponse;
-import com.task.library.dto.TaskCreationPayload;
-import com.task.library.dto.TaskCreationResponse;
-import com.task.library.dto.TaskDTO;
-import com.task.library.dto.TaskDeletionResponse;
-import com.task.library.dto.TaskListBodyResponse;
-import com.task.library.dto.TaskToggleResponse;
+import com.task.library.dto.task.TaskBodyResponse;
+import com.task.library.dto.task.TaskCreationPayload;
+import com.task.library.dto.task.TaskCreationResponse;
+import com.task.library.dto.task.TaskDTO;
+import com.task.library.dto.task.TaskDeletionResponse;
+import com.task.library.dto.task.TaskListBodyResponse;
+import com.task.library.dto.task.TaskToggleResponse;
 import com.task.library.exception.AppException;
 import com.task.library.service.TaskService;
 

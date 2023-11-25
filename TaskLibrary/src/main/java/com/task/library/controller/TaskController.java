@@ -4,6 +4,7 @@ import java.security.Principal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -11,6 +12,13 @@ import java.util.Map;
 import java.util.Optional;
 
 import com.task.library.dto.*;
+import com.task.library.dto.task.TaskBodyResponse;
+import com.task.library.dto.task.TaskCreationPayload;
+import com.task.library.dto.task.TaskCreationResponse;
+import com.task.library.dto.task.TaskDTO;
+import com.task.library.dto.task.TaskDeletionResponse;
+import com.task.library.dto.task.TaskListBodyResponse;
+import com.task.library.dto.task.TaskToggleResponse;
 import com.task.library.exception.AppException;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,6 +41,15 @@ public class TaskController {
 	private final static String BASE_PATH = "/api/v1/task";
 	private final static String LIST_BASE_PATH = "/api/v1/list";
 	private final static String NOT_AUTHENTICATED = "Not Authenticated";
+
+	private Comparator<TaskDTO> taskNameComaparator = 
+			(firstTask, secondTask) -> firstTask.getTaskName().compareTo(secondTask.getTaskName());
+	
+	private Comparator<TaskDTO> taskCreatedTimeComparator = 
+			(firstTask, secondTask) -> firstTask.getCreatedTime().compareTo(secondTask.getCreatedTime());
+
+	private Comparator<TaskDTO> taskRecentlyCreatedComparator = 
+			(firstTask, secondTask) -> secondTask.getCreatedTime().compareTo(firstTask.getCreatedTime());
 
 	@Autowired
 	private TaskService taskService;
@@ -101,6 +118,7 @@ public class TaskController {
 	public ResponseEntity<?> getAllTasksOfUser(
 									@RequestParam(required = false) LocalDate dueDate, 
 									@RequestParam(required = false) boolean lessThan,
+									@RequestParam(required = false) Integer sortBy,
 									Principal principal
 								) throws AppException {
 
@@ -123,6 +141,9 @@ public class TaskController {
 		}
 		else {
 			tasks = taskService.listTaskOfUser(userId.toString()).orElse(null);
+		}
+		if(sortBy != null && tasks != null) {
+			sortTasks(tasks, sortBy);
 		}
 		
 		if(tasks != null) {
@@ -209,13 +230,18 @@ public class TaskController {
 	}
 
 	@GetMapping("today")
-	public ResponseEntity<?> getTodayTasks(Principal principal) throws AppException {
+	public ResponseEntity<?> getTodayTasks(@RequestParam(required = false) boolean excludeUnCompleted, 
+											Principal principal) throws AppException {
 
 		StringBuffer userId = new StringBuffer(principal != null ? principal.getName() : "");
 		if(!AuthUtil.getInstance().isValidUserId(userId)) {
 			throw new AppException(NOT_AUTHENTICATED, HttpStatus.BAD_REQUEST.value());
 		}
 		List<TaskDTO> tasks = taskService.findByDate(userId.toString(), LocalDate.now()).orElse(null);
+
+		if(excludeUnCompleted && tasks != null) {
+			tasks = tasks.stream().filter(task -> task.getIsCompleted()).toList();
+		}
 
 		if(tasks != null) {
 			tasks.forEach(this::fillWithLinks);
@@ -232,21 +258,27 @@ public class TaskController {
 		return ResponseEntity.ok(response);
 	}
 	@GetMapping("upcoming")
-	public ResponseEntity<?> getUpcomingTasks(Principal principal) throws AppException {
+	public ResponseEntity<?> getUpcomingTasks(
+			@RequestParam(required = false) boolean excludeUnCompleted, 
+			Principal principal) throws AppException {
 
 		StringBuffer userId = new StringBuffer(principal != null ? principal.getName() : "");
 		if(!AuthUtil.getInstance().isValidUserId(userId)) {
 			throw new AppException(NOT_AUTHENTICATED, HttpStatus.BAD_REQUEST.value());
 		}
-		Optional<List<TaskDTO>> tasks = taskService.getUpcomingTasks(userId.toString());
-
-		tasks.ifPresent(taskDTOS -> taskDTOS.forEach(this::fillWithLinks));
+		List<TaskDTO> tasks = taskService.getUpcomingTasks(userId.toString()).orElse(null);
+		if(tasks != null && excludeUnCompleted) {
+			tasks = tasks.stream().filter(task -> task.getIsCompleted()).toList();
+		}
+		if(tasks != null) {
+			tasks.forEach(this::fillWithLinks);
+		}
 
 		TaskListBodyResponse response = new TaskListBodyResponse();
 		response.setMessage("success");
-		response.setStatus(tasks.isPresent() && !tasks.get().isEmpty()
+		response.setStatus(tasks != null && !tasks.isEmpty()
 				? HttpStatus.OK.value() : HttpStatus.NO_CONTENT.value());
-		response.setTasks(tasks.orElse(null));
+		response.setTasks(tasks);
 		response.setTime(LocalDateTime.now());
 		response.setPath(BASE_PATH + "/upcoming");
 
@@ -254,21 +286,28 @@ public class TaskController {
 		return ResponseEntity.ok(response);
 	}
 	@GetMapping("this-week")
-	public ResponseEntity<?> getThisWeekTasks(Principal principal) throws AppException {
+	public ResponseEntity<?> getThisWeekTasks(@RequestParam(required = false) boolean excludeUnCompleted, 
+												Principal principal) throws AppException {
 
 		StringBuffer userId = new StringBuffer(principal != null ? principal.getName() : "");
 		if(!AuthUtil.getInstance().isValidUserId(userId)) {
 			throw new AppException(NOT_AUTHENTICATED, HttpStatus.BAD_REQUEST.value());
 		}
-		Optional<List<TaskDTO>> tasks = taskService.getThisWeekTasks(userId.toString());
+		List<TaskDTO> tasks = taskService.getThisWeekTasks(userId.toString()).orElse(null);
 
-		tasks.ifPresent(taskDTOS -> taskDTOS.forEach(this::fillWithLinks));
+		if(excludeUnCompleted) {
+			tasks = tasks.stream().filter(task -> task.getIsCompleted()).toList();
+		}
+
+		if(tasks != null) {
+			tasks.forEach(this::fillWithLinks);
+		}
 
 		TaskListBodyResponse response = new TaskListBodyResponse();
 		response.setMessage("success");
-		response.setStatus(tasks.isPresent() && !tasks.get().isEmpty()
+		response.setStatus(tasks != null && !tasks.isEmpty()
 				? HttpStatus.OK.value() : HttpStatus.NO_CONTENT.value());
-		response.setTasks(tasks.orElse(null));
+		response.setTasks(tasks);
 		response.setTime(LocalDateTime.now());
 		response.setPath(BASE_PATH + "/this-week");
 
@@ -304,7 +343,8 @@ public class TaskController {
 	}
 
 	@GetMapping("list/{listId}")
-	public ResponseEntity<?> getAllTasksOfList(@PathVariable Long listId, Principal principal) throws AppException {
+	public ResponseEntity<?> getAllTasksOfList(@RequestParam(required = false) boolean excludeUnCompleted, 
+								@PathVariable Long listId, Principal principal) throws AppException {
 
 		StringBuffer userId = new StringBuffer(principal != null ? principal.getName() : "");
 		if(!AuthUtil.getInstance().isValidUserId(userId)) {
@@ -313,6 +353,9 @@ public class TaskController {
 
 		List<TaskDTO> tasks = taskService.getTasksOfList(userId.toString(), listId).orElse(null);
 
+		if(excludeUnCompleted) {
+			tasks = tasks.stream().filter(task -> task.getIsCompleted()).toList();
+		}
 		if(tasks != null) {
 			tasks.forEach(this::fillWithLinks);
 		}
@@ -372,6 +415,22 @@ public class TaskController {
 		
 		if(taskDTO.getSubTasks() != null) {
 			taskDTO.getSubTasks().forEach(this::fillWithLinks);
+		}
+	}
+
+	private void sortTasks(List<TaskDTO> tasks, int sortBy) {
+		switch (sortBy) {
+			case SortBy.NAME:
+				tasks.sort(taskNameComaparator);
+				break;
+			case SortBy.CREATED_TIME:
+				tasks.sort(taskCreatedTimeComparator);
+				break;
+			case SortBy.RECENTLY_CREATED:
+				tasks.sort(taskRecentlyCreatedComparator);
+				break;
+			default:
+				break;
 		}
 	}
 }
