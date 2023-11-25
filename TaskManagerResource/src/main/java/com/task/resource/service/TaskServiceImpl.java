@@ -2,6 +2,7 @@ package com.task.resource.service;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.temporal.TemporalAdjusters;
 import java.util.List;
 import java.util.Optional;
@@ -14,8 +15,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.util.HtmlUtils;
 
 import com.task.library.dto.ListDTO;
-import com.task.library.dto.TaskDTO;
-import com.task.library.dto.TaskListDTO;
+import com.task.library.dto.task.TaskDTO;
+import com.task.library.dto.task.TaskListDTO;
 import com.task.library.exception.AlreadyExistsException;
 import com.task.library.exception.AppException;
 import com.task.library.exception.TaskNotFoundException;
@@ -90,7 +91,8 @@ public class TaskServiceImpl implements TaskService {
 		if(taskPayload.getDueDate() == null) {
 			taskPayload.setDueDate(LocalDate.now());
 		}
-		
+		taskPayload.setCreatedTime(LocalDateTime.now());
+
 		Task createdTask = taskRepository.save(taskPayload);
 
 		if(taskDTO.getLists() != null && !taskDTO.getLists().isEmpty()) {
@@ -310,6 +312,7 @@ public class TaskServiceImpl implements TaskService {
 		taskDTO.setDueDate(task.getDueDate());
 		taskDTO.setParentTaskId(task.getParentTask());
 		taskDTO.setIsCompleted(task.getIsCompleted());
+		taskDTO.setCreatedTime(task.getCreatedTime());
 		
 		Optional<List<TaskDTO>> subTasks = getAllSubTasks(task.getUserId(), task.getTaskId());
 		taskDTO.setSubTasks(subTasks.isPresent() ? subTasks.get() : null);

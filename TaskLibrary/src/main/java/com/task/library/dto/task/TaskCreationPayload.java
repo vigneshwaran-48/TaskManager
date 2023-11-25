@@ -1,4 +1,4 @@
-package com.task.library.dto;
+package com.task.library.dto.task;
 
 import java.time.LocalDate;
 import java.util.List;

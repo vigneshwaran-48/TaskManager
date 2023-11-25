@@ -1,4 +1,6 @@
-package com.task.library.dto;
+package com.task.library.dto.task;
+
+import com.task.library.dto.ListDTO;
 
 public class TaskListDTO {
     
