@@ -230,7 +230,7 @@ public class TaskController {
 	}
 
 	@GetMapping("today")
-	public ResponseEntity<?> getTodayTasks(@RequestParam(required = false) boolean excludeUnCompleted, 
+	public ResponseEntity<?> getTodayTasks(@RequestParam(required = false) Integer sortBy, 
 											Principal principal) throws AppException {
 
 		StringBuffer userId = new StringBuffer(principal != null ? principal.getName() : "");
@@ -239,8 +239,8 @@ public class TaskController {
 		}
 		List<TaskDTO> tasks = taskService.findByDate(userId.toString(), LocalDate.now()).orElse(null);
 
-		if(excludeUnCompleted && tasks != null) {
-			tasks = tasks.stream().filter(task -> task.getIsCompleted()).toList();
+		if(sortBy != null && tasks != null) {
+			sortTasks(tasks, sortBy);
 		}
 
 		if(tasks != null) {
@@ -259,7 +259,7 @@ public class TaskController {
 	}
 	@GetMapping("upcoming")
 	public ResponseEntity<?> getUpcomingTasks(
-			@RequestParam(required = false) boolean excludeUnCompleted, 
+			@RequestParam(required = false) Integer sortBy, 
 			Principal principal) throws AppException {
 
 		StringBuffer userId = new StringBuffer(principal != null ? principal.getName() : "");
@@ -267,8 +267,8 @@ public class TaskController {
 			throw new AppException(NOT_AUTHENTICATED, HttpStatus.BAD_REQUEST.value());
 		}
 		List<TaskDTO> tasks = taskService.getUpcomingTasks(userId.toString()).orElse(null);
-		if(tasks != null && excludeUnCompleted) {
-			tasks = tasks.stream().filter(task -> task.getIsCompleted()).toList();
+		if(tasks != null && sortBy != null) {
+			sortTasks(tasks, sortBy);
 		}
 		if(tasks != null) {
 			tasks.forEach(this::fillWithLinks);
@@ -286,7 +286,7 @@ public class TaskController {
 		return ResponseEntity.ok(response);
 	}
 	@GetMapping("this-week")
-	public ResponseEntity<?> getThisWeekTasks(@RequestParam(required = false) boolean excludeUnCompleted, 
+	public ResponseEntity<?> getThisWeekTasks(@RequestParam(required = false) Integer sortBy, 
 												Principal principal) throws AppException {
 
 		StringBuffer userId = new StringBuffer(principal != null ? principal.getName() : "");
@@ -295,8 +295,8 @@ public class TaskController {
 		}
 		List<TaskDTO> tasks = taskService.getThisWeekTasks(userId.toString()).orElse(null);
 
-		if(excludeUnCompleted) {
-			tasks = tasks.stream().filter(task -> task.getIsCompleted()).toList();
+		if(sortBy != null && tasks != null) {
+			sortTasks(tasks, sortBy);
 		}
 
 		if(tasks != null) {
@@ -343,7 +343,7 @@ public class TaskController {
 	}
 
 	@GetMapping("list/{listId}")
-	public ResponseEntity<?> getAllTasksOfList(@RequestParam(required = false) boolean excludeUnCompleted, 
+	public ResponseEntity<?> getAllTasksOfList(@RequestParam(required = false) Integer sortBy, 
 								@PathVariable Long listId, Principal principal) throws AppException {
 
 		StringBuffer userId = new StringBuffer(principal != null ? principal.getName() : "");
@@ -353,8 +353,8 @@ public class TaskController {
 
 		List<TaskDTO> tasks = taskService.getTasksOfList(userId.toString(), listId).orElse(null);
 
-		if(excludeUnCompleted) {
-			tasks = tasks.stream().filter(task -> task.getIsCompleted()).toList();
+		if(sortBy != null && tasks != null) {
+			sortTasks(tasks, sortBy);
 		}
 		if(tasks != null) {
 			tasks.forEach(this::fillWithLinks);
