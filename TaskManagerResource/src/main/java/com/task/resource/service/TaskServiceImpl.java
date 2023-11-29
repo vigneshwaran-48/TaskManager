@@ -6,6 +6,7 @@ import java.time.LocalDateTime;
 import java.time.temporal.TemporalAdjusters;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -71,7 +72,7 @@ public class TaskServiceImpl implements TaskService {
 		List<TaskDTO> taskDTOs = tasks
 									.stream()
 									.map(this::toTaskDTO)
-									.toList();
+									.collect(Collectors.toList());
 		taskDTOs.forEach(this::decodeData);
 		return Optional.of(taskDTOs);
 	}
@@ -180,7 +181,7 @@ public class TaskServiceImpl implements TaskService {
 		List<TaskDTO> taskDTOs = subTasks.get()
 											.stream()
 											.map(this::toTaskDTO)
-											.toList();
+											.collect(Collectors.toList());
 		taskDTOs.forEach(task -> {
 			Optional<List<TaskDTO>> sTasks = getAllSubTasks(userId, task.getTaskId());
 			task.setSubTasks(sTasks.orElse(null));
@@ -229,7 +230,7 @@ public class TaskServiceImpl implements TaskService {
 		if(tasks.isEmpty()) {
 			return Optional.empty();
 		}
-		List<TaskDTO> taskDTOS = tasks.get().stream().map(this::toTaskDTO).toList();
+		List<TaskDTO> taskDTOS = tasks.get().stream().map(this::toTaskDTO).collect(Collectors.toList());
 		taskDTOS.forEach(this::decodeData);
 		return Optional.of(taskDTOS);
 	}
@@ -245,7 +246,7 @@ public class TaskServiceImpl implements TaskService {
 		if(tasks.isEmpty()) {
 			return Optional.empty();
 		}
-		List<TaskDTO> taskDTOS = tasks.get().stream().map(this::toTaskDTO).toList();
+		List<TaskDTO> taskDTOS = tasks.get().stream().map(this::toTaskDTO).collect(Collectors.toList());
 		taskDTOS.forEach(this::decodeData);
 		return Optional.of(taskDTOS);
 	}
@@ -264,7 +265,7 @@ public class TaskServiceImpl implements TaskService {
 		}
 		List<TaskDTO> taskDTOS = tasks.get().stream()
 											.map(this::toTaskDTO)
-											.toList();
+											.collect(Collectors.toList());
 		taskDTOS.forEach(this::decodeData);
 		return Optional.of(taskDTOS);
 	}
@@ -284,7 +285,7 @@ public class TaskServiceImpl implements TaskService {
 											.map(taskList -> {
 												return findTaskById(userId, taskList.getTaskDTO().getTaskId()).orElse(null);
 											})
-											.toList();
+											.collect(Collectors.toList());
 			tasks.forEach(this::decodeData);
 			return Optional.of(tasks);
 		}
@@ -298,7 +299,7 @@ public class TaskServiceImpl implements TaskService {
 		if(tasks.isEmpty()) {
 			return Optional.empty();
 		}
-		List<TaskDTO> taskDTOs = tasks.get().stream().map(this::toTaskDTO).toList();
+		List<TaskDTO> taskDTOs = tasks.get().stream().map(this::toTaskDTO).collect(Collectors.toList());
 		taskDTOs.forEach(this::decodeData);
 		return Optional.of(taskDTOs);
 	}
