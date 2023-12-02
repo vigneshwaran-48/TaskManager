@@ -1,10 +1,11 @@
-package com.task.library.dto;
+package com.task.library.dto.list;
 
+import java.io.Serializable;
 import java.util.Map;
 
 import jakarta.validation.constraints.NotBlank;
 
-public class ListDTO {
+public class ListDTO implements Serializable {
 
 	private Long listId;
 	@NotBlank(message = "List name is required")

@@ -1,15 +1,16 @@
 package com.task.library.dto.task;
 
+import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
-import com.task.library.dto.ListDTO;
+import com.task.library.dto.list.ListDTO;
 
 import jakarta.validation.constraints.NotBlank;
 
-public class TaskDTO {
+public class TaskDTO implements Serializable {
 	
 	private Long taskId;
 	private String userId;

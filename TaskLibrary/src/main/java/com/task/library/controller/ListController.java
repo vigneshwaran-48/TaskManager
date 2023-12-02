@@ -19,10 +19,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.task.library.dto.ListDTO;
 import com.task.library.dto.list.ListBodyListResponse;
 import com.task.library.dto.list.ListBodyResponse;
 import com.task.library.dto.list.ListCreationResponse;
+import com.task.library.dto.list.ListDTO;
 import com.task.library.dto.list.ListDeletionResponse;
 import com.task.library.exception.AppException;
 import com.task.library.service.ListService;

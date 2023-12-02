@@ -3,7 +3,7 @@ package com.task.library.service;
 import java.util.List;
 import java.util.Optional;
 
-import com.task.library.dto.ListDTO;
+import com.task.library.dto.list.ListDTO;
 import com.task.library.dto.task.TaskDTO;
 import com.task.library.dto.task.TaskListDTO;
 import com.task.library.exception.AppException;

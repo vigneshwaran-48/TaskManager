@@ -15,7 +15,7 @@ import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.web.util.HtmlUtils;
 
-import com.task.library.dto.ListDTO;
+import com.task.library.dto.list.ListDTO;
 import com.task.library.dto.task.TaskDTO;
 import com.task.library.dto.task.TaskListDTO;
 import com.task.library.exception.AlreadyExistsException;

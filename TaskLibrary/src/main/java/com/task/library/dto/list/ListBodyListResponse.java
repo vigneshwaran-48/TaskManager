@@ -3,8 +3,6 @@ package com.task.library.dto.list;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import com.task.library.dto.ListDTO;
-
 public class ListBodyListResponse {
 
 	private String message;
