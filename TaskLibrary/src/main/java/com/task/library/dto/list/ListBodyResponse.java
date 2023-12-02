@@ -2,8 +2,6 @@ package com.task.library.dto.list;
 
 import java.time.LocalDateTime;
 
-import com.task.library.dto.ListDTO;
-
 public class ListBodyResponse {
 
 	private String message;

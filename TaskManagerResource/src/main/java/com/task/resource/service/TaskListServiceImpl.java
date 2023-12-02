@@ -8,7 +8,7 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.task.library.dto.ListDTO;
+import com.task.library.dto.list.ListDTO;
 import com.task.library.dto.task.TaskDTO;
 import com.task.library.dto.task.TaskListDTO;
 import com.task.library.exception.AppException;

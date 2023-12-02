@@ -1,6 +1,6 @@
 package com.task.resource.model;
 
-import com.task.library.dto.ListDTO;
+import com.task.library.dto.list.ListDTO;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
