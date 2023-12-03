@@ -18,7 +18,7 @@ public interface TaskService {
 	
 	Long createTask(TaskDTO taskDTO) throws Exception;
 	
-	TaskDTO updateTask(TaskDTO taskDTO, boolean removeList, boolean checkExist) throws AppException;
+	TaskDTO updateTask(TaskDTO taskDTO, boolean removeList) throws AppException;
 	
 	Long deleteTask(String userId, Long taskId) throws AppException;
 	

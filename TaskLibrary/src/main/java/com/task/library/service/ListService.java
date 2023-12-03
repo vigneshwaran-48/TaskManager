@@ -16,7 +16,7 @@ public interface ListService {
 	
 	Long removeList(String userId, Long listId) throws AppException;
 	
-	Optional<ListDTO> updateList(ListDTO listDTO, boolean checkExist) throws AppException;
+	Optional<ListDTO> updateList(ListDTO listDTO) throws AppException;
 	
 	Optional<List<ListDTO>> getListsOfTask(String userId, Long taskId, boolean safe) throws AppException;
 }
