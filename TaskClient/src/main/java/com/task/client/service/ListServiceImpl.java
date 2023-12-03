@@ -95,7 +95,7 @@ public class ListServiceImpl implements ListService {
     }
 
     @Override
-    public Optional<ListDTO> updateList(ListDTO listDTO, boolean checkExist) throws AppException {
+    public Optional<ListDTO> updateList(ListDTO listDTO) throws AppException {
         ListBodyResponse response = webClient.patch()
                                                  .uri(resourceServerBaseURL + BASE_URL + SLASH + listDTO.getListId())
                                                  .retrieve()
