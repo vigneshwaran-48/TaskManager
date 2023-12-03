@@ -197,7 +197,7 @@ public class TaskController {
 		task.setUserId(userId.toString());
 		task.setTaskId(taskId);
 		
-		TaskDTO updatedTask = taskService.updateTask(task, Boolean.parseBoolean(removeListNotIncluded));
+		TaskDTO updatedTask = taskService.updateTask(task, Boolean.parseBoolean(removeListNotIncluded), true);
 		
 		TaskBodyResponse response = new TaskBodyResponse();
 		response.setMessage("Updated task successfully!");

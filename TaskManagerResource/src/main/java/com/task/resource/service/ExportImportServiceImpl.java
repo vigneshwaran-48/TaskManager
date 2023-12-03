@@ -86,21 +86,13 @@ public class ExportImportServiceImpl implements ExportImportService {
 
     private void addOrUpdateTasks(String userId, List<TaskDTO> tasks) throws Exception {
         for(TaskDTO task : tasks) {
-            if(taskService.isTaskExists(userId, task.getTaskId())) {
-                taskService.updateTask(task, true);
-                continue;
-            }
-            taskService.createTask(task);
+            taskService.updateTask(task, true, false);
         }
     }
 
     private void addOrUpdateLists(String userId, List<ListDTO> lists) throws Exception {
         for(ListDTO list : lists) {
-            if(listService.findByListId(userId, list.getListId()).isPresent()) {
-                listService.updateList(list);
-                continue;
-            }
-            listService.createList(list);
+            listService.updateList(list, false);
         }
     }
     

@@ -135,14 +135,17 @@ public class ListServiceImpl implements ListService {
 
 	@Override
 	@TimeLogger
-	public Optional<ListDTO> updateList(ListDTO listDTO) {
+	public Optional<ListDTO> updateList(ListDTO listDTO, boolean checkExist) {
 		Optional<List> existingList = listRepository.findByListIdAndUserId(listDTO.getListId(), listDTO.getUserId());
 		
-		if(existingList.isEmpty()) {
+		if(checkExist && existingList.isEmpty()) {
 			throw new IllegalArgumentException("No list exists with listId => " + listDTO.getListId());
 		}
 		List newList = List.toList(listDTO);
-		checkAndUpdateList(existingList.get(), newList);
+
+		if(existingList.isPresent()) {
+			checkAndUpdateList(existingList.get(), newList);
+		}
 		
 		List updatedList = listRepository.save(newList);
 

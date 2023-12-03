@@ -112,7 +112,7 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
-    public TaskDTO updateTask(TaskDTO taskDTO, boolean removeList)
+    public TaskDTO updateTask(TaskDTO taskDTO, boolean removeList, boolean checkExist)
             throws AppException {
 
         StringBuffer urlBuffer = new StringBuffer(BASE_URL);

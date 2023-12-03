@@ -117,22 +117,25 @@ public class TaskServiceImpl implements TaskService {
 
 	@Override
 	@TimeLogger
-	public TaskDTO updateTask(TaskDTO taskDTO, boolean removeList)
+	public TaskDTO updateTask(TaskDTO taskDTO, boolean removeList, boolean checkExist)
 			throws AppException {
 		Optional<Task> existingTask = taskRepository
 									  .findByTaskIdAndUserId(taskDTO.getTaskId(),
 											  				 taskDTO.getUserId());
-		if(existingTask.isEmpty()) {
+		if(checkExist && existingTask.isEmpty()) {
 			LOGGER.error("Task Not found with the give taskId {}", taskDTO.getTaskId());
 			throw new TaskNotFoundException("No task found with the given taskId");
 		}
 		sanitizeInputs(taskDTO);
 		Task newTask = Task.toTask(taskDTO);
-		checkUpdateTaskDetails(existingTask.get(), newTask, taskDTO.getIsCompleted() != null);
-
-		if(!existingTask.get().getTaskName().equals(newTask.getTaskName())) {
-			checkSameTaskName(newTask);
+		
+		if(existingTask.isPresent()) {
+			checkUpdateTaskDetails(existingTask.get(), newTask, taskDTO.getIsCompleted() != null);
+			if(!existingTask.get().getTaskName().equals(newTask.getTaskName())) {
+				checkSameTaskName(newTask);
+			}
 		}
+		
 		Task task = taskRepository.save(newTask);
 		LOGGER.info("Updated task => {}", task.getTaskId());
 

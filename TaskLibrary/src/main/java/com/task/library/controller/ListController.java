@@ -161,7 +161,7 @@ public class ListController {
 		listDTO.setListId(listId);
 		listDTO.setUserId(userId.toString());
 		
-		ListDTO updatedList = listService.updateList(listDTO).orElse(null);
+		ListDTO updatedList = listService.updateList(listDTO, true).orElse(null);
 		if(updatedList != null) {
 			fillWithLinks(updatedList);
 		}

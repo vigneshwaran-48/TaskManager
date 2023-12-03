@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Optional;
 
 import com.task.library.dto.task.TaskDTO;
-import com.task.library.exception.AlreadyExistsException;
 import com.task.library.exception.AppException;
 import com.task.library.exception.TaskNotFoundException;
 
@@ -19,7 +18,7 @@ public interface TaskService {
 	
 	Long createTask(TaskDTO taskDTO) throws Exception;
 	
-	TaskDTO updateTask(TaskDTO taskDTO, boolean removeList) throws TaskNotFoundException, AlreadyExistsException, AppException;
+	TaskDTO updateTask(TaskDTO taskDTO, boolean removeList, boolean checkExist) throws AppException;
 	
 	Long deleteTask(String userId, Long taskId) throws AppException;
 	
