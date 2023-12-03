@@ -16,7 +16,9 @@ import org.springframework.stereotype.Service;
 import com.task.library.dto.TaskListData;
 import com.task.library.dto.list.ListDTO;
 import com.task.library.dto.task.TaskDTO;
+import com.task.library.exception.AlreadyExistsException;
 import com.task.library.exception.AppException;
+import com.task.library.exception.TaskNotFoundException;
 import com.task.library.service.ExportImportService;
 import com.task.library.service.ListService;
 import com.task.library.service.TaskService;
@@ -62,13 +64,41 @@ public class ExportImportServiceImpl implements ExportImportService {
             if(!taskListData.getUserId().equals(userId)) {
                 throw new AppException("This data is not yours!", HttpStatus.UNAUTHORIZED.value());
             }
-            LOGGER.info("Imported data => {}", taskListData);
+
+            addOrUpdateTasks(userId, taskListData.getTasks());
+            addOrUpdateLists(userId, taskListData.getLists());
+
+            LOGGER.info("Imported data");
         }
         catch(IOException | ClassNotFoundException e) {
+            LOGGER.error(e.getMessage(), e);
+            throw new AppException("Error while parsing import data", HttpStatus.INTERNAL_SERVER_ERROR.value());
+        }
+        catch(Exception e) {
             LOGGER.error(e.getMessage(), e);
             throw new AppException("Error while importing data", HttpStatus.INTERNAL_SERVER_ERROR.value());
         }
         
+    }
+
+    private void addOrUpdateTasks(String userId, List<TaskDTO> tasks) throws Exception {
+        for(TaskDTO task : tasks) {
+            if(taskService.isTaskExists(userId, task.getTaskId())) {
+                taskService.updateTask(task, true);
+                continue;
+            }
+            taskService.createTask(task);
+        }
+    }
+
+    private void addOrUpdateLists(String userId, List<ListDTO> lists) throws Exception {
+        for(ListDTO list : lists) {
+            if(listService.findByListId(userId, list.getListId()).isPresent()) {
+                listService.updateList(list);
+                continue;
+            }
+            listService.createList(list);
+        }
     }
     
 }
