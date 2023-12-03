@@ -64,11 +64,14 @@ public class ExportImportServiceImpl implements ExportImportService {
             if(!taskListData.getUserId().equals(userId)) {
                 throw new AppException("This data is not yours!", HttpStatus.UNAUTHORIZED.value());
             }
-
-            addOrUpdateTasks(userId, taskListData.getTasks());
+            /**
+             * This order is important because when task is first imported then sometimes it has a relation
+             * with a list that dosen't imported yet.
+             */
             addOrUpdateLists(userId, taskListData.getLists());
-
+            addOrUpdateTasks(userId, taskListData.getTasks());
             LOGGER.info("Imported data");
+            
         }
         catch(IOException | ClassNotFoundException e) {
             LOGGER.error(e.getMessage(), e);
