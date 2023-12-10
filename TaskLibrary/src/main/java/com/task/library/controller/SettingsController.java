@@ -120,7 +120,7 @@ public class SettingsController {
     
     @PatchMapping
     public ResponseEntity<?> updateSettings(
-                        @RequestBody String settingOption, 
+                        @RequestBody String settingsOption, 
                         @RequestBody String value, Principal principal) throws AppException {
 
         StringBuffer userId = new StringBuffer(principal != null ? principal.getName() : "");
@@ -130,7 +130,7 @@ public class SettingsController {
         
         SettingsDTO settingsDTO = settingsService.getSettings(userId.toString()).orElse(null);
 
-        switch (settingOption) {
+        switch (settingsOption) {
             case SHOULD_GROUP_TASKS:
                 settingsDTO.setShouldGroupTasks(Boolean.parseBoolean(value));
                 break;
