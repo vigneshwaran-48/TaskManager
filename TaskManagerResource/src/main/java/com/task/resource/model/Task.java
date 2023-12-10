@@ -38,9 +38,6 @@ public class Task {
 	@Column(name = "created_time", nullable = false)
 	private LocalDateTime createdTime = LocalDateTime.now();
 	
-	@Column(name = "parent_task")
-	private Long parentTask;
-
 	@Column(name = "is_completed", nullable = false)
 	private boolean isCompleted = false;
 
@@ -76,14 +73,6 @@ public class Task {
 		this.dueDate = dueDate;
 	}
 
-	public Long getParentTask() {
-		return parentTask;
-	}
-
-	public void setParentTask(Long parentTask) {
-		this.parentTask = parentTask;
-	}
-
 	public String getUserId() {
 		return userId;
 	}
@@ -111,7 +100,7 @@ public class Task {
 	@Override
 	public String toString() {
 		return "Task [taskId=" + taskId + ", taskName=" + taskName + ", description=" + description + ", dueDate="
-				+ dueDate + ", parentTask=" + parentTask + "]";
+				+ dueDate + "]";
 	}
 	
 	public static Task toTask(TaskDTO taskDTO) {
@@ -119,7 +108,6 @@ public class Task {
 		task.setTaskId(taskDTO.getTaskId());
 		task.setDescription(taskDTO.getDescription());
 		task.setDueDate(taskDTO.getDueDate());
-		task.setParentTask(taskDTO.getParentTaskId());
 		task.setUserId(taskDTO.getUserId());
 		task.setTaskName(taskDTO.getTaskName());
 		task.setIsCompleted(taskDTO.getIsCompleted());
@@ -137,7 +125,6 @@ public class Task {
 		taskDTO.setTaskId(this.getTaskId());
 		taskDTO.setTaskName(this.getTaskName());
 		taskDTO.setDueDate(this.getDueDate());
-		taskDTO.setParentTaskId(this.getParentTask());
 		taskDTO.setIsCompleted(this.getIsCompleted());
 		taskDTO.setCreatedTime(this.createdTime);
 

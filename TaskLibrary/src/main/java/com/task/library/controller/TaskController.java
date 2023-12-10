@@ -413,10 +413,6 @@ public class TaskController {
 		links.put("all", BASE_PATH);
 		
 		taskDTO.setLinks(links);
-		
-		if(taskDTO.getSubTasks() != null) {
-			taskDTO.getSubTasks().forEach(this::fillWithLinks);
-		}
 	}
 
 	private void sortTasks(List<TaskDTO> tasks, int sortBy) {
