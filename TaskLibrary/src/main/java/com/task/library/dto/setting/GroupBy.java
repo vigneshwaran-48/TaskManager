@@ -1,5 +1,7 @@
 package com.task.library.dto.setting;
 
+import com.fasterxml.jackson.annotation.JsonValue;
+
 public enum GroupBy {
     CREATED_TIME("createdTime"),
     DUE_DATE("dueDate");
@@ -11,5 +13,10 @@ public enum GroupBy {
     }
     public String getName() {
         return this.name;
+    }
+   
+    @JsonValue
+    public String getValue() {
+        return name;
     }
 }

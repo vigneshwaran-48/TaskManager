@@ -1,5 +1,7 @@
 package com.task.library.dto.setting;
 
+import com.fasterxml.jackson.annotation.JsonValue;
+
 public enum SortGroupBy {
     ASCENDING("ascending"),
     DESCENDING("descending");
@@ -11,5 +13,10 @@ public enum SortGroupBy {
     }
     public String getName() {
         return this.name;
+    }
+
+    @JsonValue
+    public String getValue() {
+        return name;
     }
 }
