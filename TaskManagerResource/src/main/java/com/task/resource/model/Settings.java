@@ -101,6 +101,7 @@ public class Settings {
         settingsDTO.setGroupBy(groupBy);
         settingsDTO.setShouldGroupTasks(groupTasks);
         settingsDTO.setSortBy(sort);
+        settingsDTO.setSortGroupBy(sortGroupBy);
         settingsDTO.setTheme(theme);
 
         return settingsDTO;
@@ -115,6 +116,7 @@ public class Settings {
         settings.setSettingId(settingsDTO.getSettingId());
         settings.setSort(settingsDTO.getSortBy());
         settings.setTheme(settingsDTO.getTheme());
+        settings.setSortGroupBy(settingsDTO.getSortGroupBy());
 
         return settings;
     }
