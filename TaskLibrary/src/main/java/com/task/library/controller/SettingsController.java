@@ -142,7 +142,7 @@ public class SettingsController {
                 settingsDTO.setSortGroupBy(SortGroupBy.valueOf(value));
                 break;
             case THEME:
-                settingsDTO.setTheme(Theme.valueOf(value));
+                settingsDTO.setTheme(Theme.valueOf(value.toUpperCase()));
                 break;
             default:
                 throw new AppException("Invalid settings option", HttpStatus.BAD_REQUEST.value());
