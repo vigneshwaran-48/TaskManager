@@ -1,6 +1,9 @@
 package com.task.library.dto.setting;
 
+import org.springframework.http.HttpStatus;
+
 import com.fasterxml.jackson.annotation.JsonValue;
+import com.task.library.exception.AppException;
 
 public enum Sort {
     NAME(1),
@@ -16,6 +19,14 @@ public enum Sort {
         return this.name;
     }
 
+    public static Sort getSortBy(int name) throws AppException {
+        for(Sort sort : Sort.values()) {
+            if(sort.getName() == name) {
+                return sort;
+            }
+        }
+        throw new AppException("Invalid sort id", HttpStatus.BAD_REQUEST.value());
+    }
     @JsonValue
     public int getValue() {
         return name;

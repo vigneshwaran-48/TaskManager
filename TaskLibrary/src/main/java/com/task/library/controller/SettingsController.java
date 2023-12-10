@@ -136,10 +136,10 @@ public class SettingsController {
                 settingsDTO.setShouldGroupTasks(Boolean.parseBoolean(value));
                 break;
             case SORT_BY:
-                settingsDTO.setSortBy(Sort.valueOf(value));
+                settingsDTO.setSortBy(Sort.getSortBy(Integer.parseInt(value)));
                 break;
             case SORT_GROUP_BY:
-                settingsDTO.setSortGroupBy(SortGroupBy.valueOf(value));
+                settingsDTO.setSortGroupBy(SortGroupBy.geSortGroupBy(value));
                 break;
             case THEME:
                 settingsDTO.setTheme(Theme.valueOf(value.toUpperCase()));
