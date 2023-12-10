@@ -13,9 +13,7 @@ public interface TaskService {
 	Optional<TaskDTO> findTaskById(String userId, Long taskId) throws AppException;
 	
 	Optional<List<TaskDTO>> listTaskOfUser(String userId) throws AppException;
-	
-	Optional<List<TaskDTO>> getAllSubTasks(String userId, Long parentTaskId);
-	
+		
 	Long createTask(TaskDTO taskDTO) throws Exception;
 	
 	TaskDTO updateTask(TaskDTO taskDTO, boolean removeList) throws AppException;

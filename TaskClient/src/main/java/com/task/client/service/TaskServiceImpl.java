@@ -74,14 +74,6 @@ public class TaskServiceImpl implements TaskService {
         return Optional.of(taskListBodyResponse.getTasks());
     }
 
-    /**
-     * Until finishing endpoint for sub tasks this can't be implemented.
-     */
-    @Override
-    public Optional<List<TaskDTO>> getAllSubTasks(String userId, Long parentTaskId) {
-        throw new UnsupportedOperationException("Unimplemented method 'getAllSubTasks'");
-    }
-
     @Override
     public Long createTask(TaskDTO taskDTO) throws Exception {
 

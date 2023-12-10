@@ -172,23 +172,6 @@ public class TaskServiceImpl implements TaskService {
 
 	@Override
 	@TimeLogger
-	public Optional<List<TaskDTO>> getAllSubTasks(String userId, Long parentTaskId) {
-		Optional<List<Task>> subTasks = taskRepository
-									.findByUserIdAndParentTask(userId, parentTaskId);
-		
-		if(subTasks.isEmpty()) {
-			return null;
-		}
-		List<TaskDTO> taskDTOs = subTasks.get()
-											.stream()
-											.map(this::toTaskDTO)
-											.collect(Collectors.toList());
-		taskDTOs.forEach(this::decodeData);
-		return Optional.of(taskDTOs);
-	}
-	
-	@Override
-	@TimeLogger
 	public boolean isTaskExists(String userId, Long taskId) {
 		if(taskId == null || userId == null) {
 			throw new IllegalArgumentException("Invalid Input");
