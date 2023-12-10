@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.task.library.dto.setting.SettingsDataResponse;
@@ -120,8 +121,8 @@ public class SettingsController {
     
     @PatchMapping
     public ResponseEntity<?> updateSettings(
-                        @RequestBody String settingsOption, 
-                        @RequestBody String value, Principal principal) throws AppException {
+                        @RequestParam String settingsOption, 
+                        @RequestParam String value, Principal principal) throws AppException {
 
         StringBuffer userId = new StringBuffer(principal != null ? principal.getName() : "");
 		if(!AuthUtil.getInstance().isValidUserId(userId)) {
