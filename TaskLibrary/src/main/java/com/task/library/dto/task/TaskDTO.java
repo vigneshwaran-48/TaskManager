@@ -19,11 +19,9 @@ public class TaskDTO implements Serializable {
 	private String taskName;
 	
 	private String description;
-	private Long parentTaskId;
 	private LocalDate dueDate;	
 	private LocalDateTime createdTime;
 	private Boolean isCompleted;
-	private List<TaskDTO> subTasks;
 	private List<ListDTO> lists;
 	private Map<String, Object> links;
 
@@ -52,23 +50,11 @@ public class TaskDTO implements Serializable {
 	public void setTaskName(String taskName) {
 		this.taskName = taskName;
 	}
-	public Long getParentTaskId() {
-		return parentTaskId;
-	}
-	public void setParentTaskId(Long parentTaskId) {
-		this.parentTaskId = parentTaskId;
-	}
 	public LocalDate getDueDate() {
 		return dueDate;
 	}
 	public void setDueDate(LocalDate dueDate) {
 		this.dueDate = dueDate;
-	}
-	public List<TaskDTO> getSubTasks() {
-		return subTasks;
-	}
-	public void setSubTasks(List<TaskDTO> subTasks) {
-		this.subTasks = subTasks;
 	}
 	public List<ListDTO> getLists() {
 		return lists;
@@ -96,7 +82,7 @@ public class TaskDTO implements Serializable {
 	}
 	@Override
 	public String toString() {
-		return "TaskDTO [taskId=" + taskId + ", taskName=" + taskName + ", parentTaskId=" + parentTaskId
-				+ ", dueDate=" + dueDate + ", subTasks=" + subTasks + "]";
+		return "TaskDTO [taskId=" + taskId + ", taskName=" + taskName
+				+ ", dueDate=" + dueDate + "]";
 	}
 }

@@ -142,6 +142,7 @@ public class ListServiceImpl implements ListService {
 			throw new IllegalArgumentException("No list exists with listId => " + listDTO.getListId());
 		}
 		List newList = List.toList(listDTO);
+
 		checkAndUpdateList(existingList.get(), newList);
 		
 		List updatedList = listRepository.save(newList);

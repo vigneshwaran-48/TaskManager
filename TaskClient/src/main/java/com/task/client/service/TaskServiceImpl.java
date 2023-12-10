@@ -87,7 +87,6 @@ public class TaskServiceImpl implements TaskService {
 
         TaskCreationPayload payload = new TaskCreationPayload();
         payload.setTaskName(taskDTO.getTaskName());
-        payload.setParentTaskId(taskDTO.getParentTaskId());
         payload.setDescription(taskDTO.getDescription());
         payload.setDueDate(taskDTO.getDueDate());
         payload.setIsCompleted(taskDTO.getIsCompleted());

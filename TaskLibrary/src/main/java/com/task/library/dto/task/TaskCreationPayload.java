@@ -88,7 +88,6 @@ public class TaskCreationPayload {
         taskDTO.setDueDate(this.getDueDate());
         taskDTO.setTaskId(this.getTaskId());
         taskDTO.setIsCompleted(this.isCompleted());
-        taskDTO.setParentTaskId(this.getParentTaskId());
         taskDTO.setTaskName(this.getTaskName());
         taskDTO.setUserId(this.getUserId());
 

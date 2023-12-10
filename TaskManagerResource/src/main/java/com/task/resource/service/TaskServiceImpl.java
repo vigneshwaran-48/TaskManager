@@ -128,11 +128,12 @@ public class TaskServiceImpl implements TaskService {
 		}
 		sanitizeInputs(taskDTO);
 		Task newTask = Task.toTask(taskDTO);
-		checkUpdateTaskDetails(existingTask.get(), newTask, taskDTO.getIsCompleted() != null);
 
+		checkUpdateTaskDetails(existingTask.get(), newTask, taskDTO.getIsCompleted() != null);
 		if(!existingTask.get().getTaskName().equals(newTask.getTaskName())) {
 			checkSameTaskName(newTask);
 		}
+		
 		Task task = taskRepository.save(newTask);
 		LOGGER.info("Updated task => {}", task.getTaskId());
 
@@ -182,10 +183,6 @@ public class TaskServiceImpl implements TaskService {
 											.stream()
 											.map(this::toTaskDTO)
 											.collect(Collectors.toList());
-		taskDTOs.forEach(task -> {
-			Optional<List<TaskDTO>> sTasks = getAllSubTasks(userId, task.getTaskId());
-			task.setSubTasks(sTasks.orElse(null));
-		});
 		taskDTOs.forEach(this::decodeData);
 		return Optional.of(taskDTOs);
 	}
@@ -311,13 +308,9 @@ public class TaskServiceImpl implements TaskService {
 		taskDTO.setTaskId(task.getTaskId());
 		taskDTO.setTaskName(task.getTaskName());
 		taskDTO.setDueDate(task.getDueDate());
-		taskDTO.setParentTaskId(task.getParentTask());
 		taskDTO.setIsCompleted(task.getIsCompleted());
 		taskDTO.setCreatedTime(task.getCreatedTime());
-		
-		Optional<List<TaskDTO>> subTasks = getAllSubTasks(task.getUserId(), task.getTaskId());
-		taskDTO.setSubTasks(subTasks.isPresent() ? subTasks.get() : null);
-		
+				
 		try {
 			Optional<List<ListDTO>> lists = listService.getListsOfTask(task.getUserId(),
 																		task.getTaskId(), true);
@@ -340,9 +333,6 @@ public class TaskServiceImpl implements TaskService {
 		}
 		if(newTask.getDueDate() == null && existingTask.getDueDate() != null) {
 			newTask.setDueDate(existingTask.getDueDate());
-		}
-		if(newTask.getParentTask() == null && existingTask.getParentTask() != null) {
-			newTask.setParentTask(existingTask.getParentTask());
 		}
 		if(!isNewCompletedValue) {
 			newTask.setIsCompleted(existingTask.getIsCompleted());

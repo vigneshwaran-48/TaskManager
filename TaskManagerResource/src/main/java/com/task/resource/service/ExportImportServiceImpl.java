@@ -7,6 +7,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -62,13 +63,64 @@ public class ExportImportServiceImpl implements ExportImportService {
             if(!taskListData.getUserId().equals(userId)) {
                 throw new AppException("This data is not yours!", HttpStatus.UNAUTHORIZED.value());
             }
-            LOGGER.info("Imported data => {}", taskListData);
+            /**
+             * This order is important because when task is first imported then sometimes it has a relation
+             * with a list that dosen't imported yet.
+             */
+            addOrUpdateLists(userId, taskListData.getLists(), taskListData.getTasks());
+            addOrUpdateTasks(userId, taskListData.getTasks());
+
+            LOGGER.info("Imported data");
         }
         catch(IOException | ClassNotFoundException e) {
+            LOGGER.error(e.getMessage(), e);
+            throw new AppException("Error while parsing import data", HttpStatus.INTERNAL_SERVER_ERROR.value());
+        }
+        catch(Exception e) {
             LOGGER.error(e.getMessage(), e);
             throw new AppException("Error while importing data", HttpStatus.INTERNAL_SERVER_ERROR.value());
         }
         
+    }
+
+    private void addOrUpdateTasks(String userId, List<TaskDTO> tasks) throws Exception {
+        for(TaskDTO task : tasks) {
+            if(taskService.isTaskExists(userId, task.getTaskId())) {
+                taskService.updateTask(task, true);
+                continue;
+            }
+            taskService.createTask(task);
+        }
+    }
+
+    private void addOrUpdateLists(String userId, List<ListDTO> lists, List<TaskDTO> tasks) throws Exception {
+        for(ListDTO list : lists) {
+            if(listService.findByListId(userId, list.getListId()).isPresent()) {
+                listService.updateList(list);
+                continue;
+            }
+            Long oldListId = list.getListId();
+            Long listId = listService.createList(list);
+
+            /**
+             * This check is for spring data always creates a new listId so setting the new list id
+             * in task relations.
+             */
+            for(TaskDTO task : tasks) {
+                if(task.getLists().stream().anyMatch(taskList -> taskList.getListId().equals(oldListId))) {
+                    // Removing list with old listId
+                    task
+                        .setLists(
+                            task.getLists()
+                                .stream()
+                                .filter(taskList -> !taskList.getListId().equals(oldListId))
+                                .collect(Collectors.toList())
+                            );
+                    // Adding list with new List Id
+                    task.getLists().add(listService.findByListId(userId, listId).get());
+                }
+            }
+        }
     }
     
 }
