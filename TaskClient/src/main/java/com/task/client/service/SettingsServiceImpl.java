@@ -13,6 +13,8 @@ import com.task.library.dto.setting.SettingsDTO;
 import com.task.library.exception.AppException;
 import com.task.library.service.SettingsService;
 
+import reactor.core.publisher.Mono;
+
 @Service
 public class SettingsServiceImpl implements SettingsService {
 
@@ -50,6 +52,7 @@ public class SettingsServiceImpl implements SettingsService {
     public Optional<SettingsDTO> updateSettings(String userId, SettingsDTO settingsDTO) throws AppException {
         SettingsDataResponse response = webClient.put()
                                         .uri(BASE_PATH)
+                                        .body(Mono.just(settingsDTO), SettingsDTO.class)
                                         .retrieve()
                                         .bodyToMono(SettingsDataResponse.class)
                                         .block();
