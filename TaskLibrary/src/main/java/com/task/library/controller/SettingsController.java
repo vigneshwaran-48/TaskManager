@@ -21,6 +21,7 @@ import com.task.library.dto.setting.Sort;
 import com.task.library.dto.setting.SortGroupBy;
 import com.task.library.dto.setting.Theme;
 import com.task.library.dto.NoDataResponse;
+import com.task.library.dto.setting.GroupBy;
 import com.task.library.dto.setting.SettingsDTO;
 import com.task.library.exception.AppException;
 import com.task.library.service.SettingsService;
@@ -45,7 +46,8 @@ public class SettingsController {
     private static final String SHOULD_GROUP_TASKS = "shouldGroupTasks";
     private static final String SORT_BY = "sortBy";
     private static final String SORT_GROUP_BY = "sortGroupBy";
-    private static final String THEME = "theme";
+    private static final String THEME = "theme";    
+    private static final String GROUP_TASKS_BY = "groupTasksBy";
     
 
     @GetMapping
@@ -143,6 +145,9 @@ public class SettingsController {
                 break;
             case THEME:
                 settingsDTO.setTheme(Theme.valueOf(value.toUpperCase()));
+                break;
+            case GROUP_TASKS_BY:
+                settingsDTO.setGroupBy(GroupBy.getGroupBy(value));
                 break;
             default:
                 throw new AppException("Invalid settings option", HttpStatus.BAD_REQUEST.value());
