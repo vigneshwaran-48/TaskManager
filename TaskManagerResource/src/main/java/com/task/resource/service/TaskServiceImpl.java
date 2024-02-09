@@ -350,6 +350,10 @@ public class TaskServiceImpl implements TaskService {
 		}
 		
 		if(taskDTO.getDescription() != null) {
+
+			if(taskDTO.getDescription().trim().length() > 200) {
+				throw new IllegalArgumentException("Task description length should be lesser than or equal to 200");
+			}
 			taskDTO.setDescription(taskDTO.getDescription().trim());
 			taskDTO.setDescription(HtmlUtils.htmlEscape(taskDTO.getDescription()));
 		}

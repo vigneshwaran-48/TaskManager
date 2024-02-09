@@ -27,7 +27,7 @@ public class Task {
 	@Column(name = "task_name", nullable = false)
 	private String taskName;
 	
-	@Column(nullable = true)
+	@Column(nullable = true, length = 200)
 	private String description;
 	
 	@DateTimeFormat(pattern = "dd-mm-yyyy")

@@ -5,7 +5,12 @@
     <artifactId>TaskManager</artifactId>
     <version>0.0.1-SNAPSHOT</version>
   </parent>
+
+<groupId>com.github.vigneshwaran</groupId>
   <artifactId>TaskManagerResource</artifactId>
+  <packaging>jar</packaging>
+  <version>0.0.1-SNAPSHOT</version>
+
 	<properties>
 		<java.version>17</java.version>
 	</properties>
@@ -74,11 +79,13 @@
 		</dependency>
 	</dependencies>
 	<build>
-		<plugins>
-			<plugin>
-				<groupId>org.springframework.boot</groupId>
-				<artifactId>spring-boot-maven-plugin</artifactId>
-			</plugin>
-		</plugins>
+		<pluginManagement>
+			<plugins>
+				<plugin>
+					<groupId>org.springframework.boot</groupId>
+					<artifactId>spring-boot-maven-plugin</artifactId>
+				</plugin>
+			</plugins>
+		</pluginManagement>
 	</build>
 </project>
