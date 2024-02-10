@@ -26,7 +26,7 @@ import reactor.core.publisher.Mono;
 public class AppConfig {
 
         @Value("${app.resource.server.baseurl}")
-    private String resourceServerBaseURL;
+        private String resourceServerBaseURL;
 
         @Bean
         BCryptPasswordEncoder passwordEncoder() {
