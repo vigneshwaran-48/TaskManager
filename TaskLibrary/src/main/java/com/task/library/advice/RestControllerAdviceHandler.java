@@ -15,7 +15,6 @@ import com.task.library.dto.AppErrorResponse;
 import com.task.library.exception.AppException;
 
 import jakarta.servlet.http.HttpServletRequest;
-import reactor.core.Exceptions;
 
 @RestControllerAdvice
 public class RestControllerAdviceHandler {

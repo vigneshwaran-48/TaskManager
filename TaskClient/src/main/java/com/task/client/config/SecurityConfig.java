@@ -22,67 +22,51 @@ import io.netty.handler.codec.http.HttpMethod;
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
-    
-    private static final Long MAX_AGE = 3600L;
 
-    @Bean
+	private static final Long MAX_AGE = 3600L;
+
+	@Bean
 	SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-		return http
-				.cors()
-					.configurationSource(corsConfigurationSource())
-				.and()
-				.csrf((csrf) -> csrf
-		                .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
-		                .csrfTokenRequestHandler(new CsrfTokenRequestAttributeHandler())
-		            )
-				.addFilterAfter(new CsrfFilter(), BasicAuthenticationFilter.class)
+		return http.cors().configurationSource(corsConfigurationSource()).and()
+				// .csrf((csrf) -> csrf.csrfTokenRepository(C)
+				// 		.csrfTokenRequestHandler(new CsrfTokenRequestAttributeHandler()))
+				// .addFilterAfter(new CsrfFilter(), BasicAuthenticationFilter.class)
 				.authorizeHttpRequests(request -> {
 					try {
 						request
-							.requestMatchers("/static/**",
-			                    "/*.ico", "/*.json", "/*.png", "/ping",
-									"/logout-success", "/test")
-							.permitAll()
-							.anyRequest()
-							.authenticated()
+							.requestMatchers("/static/**", "/*.ico", "/*.json", "/*.png", "/ping", "/logout-success",
+								"/test")
+								.permitAll()
+							.anyRequest().authenticated()
 							.and()
-							.oauth2Login()							
-							.permitAll()
-								.and()
+							.oauth2Login()
+								.permitAll()
+							.and()
 								.logout()
-								.clearAuthentication(true)
-								.deleteCookies()
-								.invalidateHttpSession(true);
-								// .logoutSuccessUrl("/logout-success");
+									.clearAuthentication(true)
+									.deleteCookies()
+									.invalidateHttpSession(true);
+						// .logoutSuccessUrl("/logout-success");
 					} catch (Exception e) {
 						e.printStackTrace();
 					}
-			   })				
-			.build();
+				}).build();
 	}
 
-    @Bean
+	@Bean
 	CorsConfigurationSource corsConfigurationSource() {
 		UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
 		CorsConfiguration config = new CorsConfiguration();
 		config.setAllowCredentials(true);
-		config.setAllowedOrigins(Arrays.asList("http://localhost:3000", "http://localhost:9090"));
-		config.setAllowedHeaders(Arrays.asList(
-					HttpHeaders.AUTHORIZATION,
-					HttpHeaders.CONTENT_TYPE,
-					HttpHeaders.ACCEPT,
-					"X-XSRF-TOKEN"
-				));
-		config.setAllowedMethods(Arrays.asList(
-					HttpMethod.GET.name(),
-					HttpMethod.POST.name(),
-					HttpMethod.PUT.name(),
-					HttpMethod.DELETE.name(),
-					HttpMethod.OPTIONS.name()
-				));
+		config.setAllowedOrigins(
+				Arrays.asList("http://localhost:3000", "http://localhost:9090", "https://accounts.google.com"));
+		config.setAllowedHeaders(
+				Arrays.asList(HttpHeaders.AUTHORIZATION, HttpHeaders.CONTENT_TYPE, HttpHeaders.ACCEPT, "X-XSRF-TOKEN"));
+		config.setAllowedMethods(Arrays.asList(HttpMethod.GET.name(), HttpMethod.POST.name(), HttpMethod.PUT.name(),
+				HttpMethod.DELETE.name(), HttpMethod.OPTIONS.name()));
 		config.setMaxAge(MAX_AGE);
-		source.registerCorsConfiguration("/**", config);	
-		
+		source.registerCorsConfiguration("/**", config);
+
 		return source;
 	}
 }

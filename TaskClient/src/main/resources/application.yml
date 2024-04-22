@@ -3,19 +3,24 @@ server:
   servlet:
     session:
       timeout: 300m
+      cookie:
+        http-only: true
+      tracking-modes:
+      - cookie
 
 spring:
   security:
     oauth2:
       client:
         registration:
-          taskmanager:
-            client-id: proapp-edd7ec4a-7d61-45f7-a393-c9c00426a436
-            client-secret: "task@123"
-            scope: "openid, TaskManager.list.ALL, TaskManager.task.ALL"
-        provider:
-          taskmanager:
-            issuer-uri: "http://localhost:9090"
+          google:
+            client-id: ${GOOGLE_CLIENT_ID}
+            client-secret: ${GOOGLE_CLIENT_SECRET}
+            scope:
+            - openid
+            - profile
+            - email
+
   servlet:
     multipart:
       max-file-size: 10MB
@@ -32,11 +37,13 @@ logging:
     org:
       springframework:
         security: trace
+  file:
+    name: logs/app.log
 
 app:
   resource:
     server:
-      baseurl: http://localhost:8383
+      baseurl: http://127.0.0.1:8383
   flag:
     isSinglUserFlow: false
   singleUserId: "12"
