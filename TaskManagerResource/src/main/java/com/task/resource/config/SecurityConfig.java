@@ -57,7 +57,7 @@ public class SecurityConfig {
 
 					.anyRequest().authenticated();
 				})
-				.oauth2ResourceServer(oauth2 -> oauth2.jwt().decoder(jwtDecoder()))
+				.oauth2ResourceServer(oauth2 -> oauth2.jwt())
 				.build();
 	}	
 	@Bean

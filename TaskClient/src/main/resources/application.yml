@@ -20,6 +20,9 @@ spring:
             - openid
             - profile
             - email
+        provider:
+          google:
+            issuer-uri: https://accounts.google.com
 
   servlet:
     multipart:
@@ -37,9 +40,6 @@ logging:
     org:
       springframework:
         security: trace
-  file:
-    name: logs/app.log
-
 app:
   resource:
     server:
