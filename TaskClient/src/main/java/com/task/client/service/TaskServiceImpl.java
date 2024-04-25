@@ -36,7 +36,7 @@ public class TaskServiceImpl implements TaskService {
 
 
     @Override
-    public Optional<TaskDTO> findTaskById(String userId, Long taskId) throws AppException {
+    public Optional<TaskDTO> findTaskById(String userId, String taskId) throws AppException {
         Mono<TaskBodyResponse> response = webClient
                                     .get()
                                     .uri(BASE_URL + SLASH + taskId)
@@ -75,7 +75,7 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
-    public Long createTask(TaskDTO taskDTO) throws Exception {
+    public String createTask(TaskDTO taskDTO) throws Exception {
 
         TaskCreationPayload payload = new TaskCreationPayload();
         payload.setTaskName(taskDTO.getTaskName());
@@ -126,7 +126,7 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
-    public Long deleteTask(String userId, Long taskId) throws AppException {
+    public String deleteTask(String userId, String taskId) throws AppException {
         TaskDeletionResponse response = webClient.delete()
                                                  .uri(BASE_URL + SLASH + taskId)
                                                  .retrieve()
@@ -142,13 +142,13 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
-    public boolean isTaskExists(String userId, Long taskId) throws AppException {
+    public boolean isTaskExists(String userId, String taskId) throws AppException {
         Optional<TaskDTO> task = findTaskById(userId, taskId);
         return task.isPresent();
     }
 
     @Override
-    public boolean toggleTask(String userId, Long taskId) throws AppException {
+    public boolean toggleTask(String userId, String taskId) throws AppException {
         TaskToggleResponse response = webClient.patch()
                                                 .uri(BASE_URL + SLASH + taskId + SLASH + "toggle")
                                                 .retrieve()
@@ -212,7 +212,7 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
-    public Optional<List<TaskDTO>> getTasksOfList(String userId, Long listId) throws AppException {
+    public Optional<List<TaskDTO>> getTasksOfList(String userId, String listId) throws AppException {
         TaskListBodyResponse response = webClient.get()
                                                  .uri(BASE_URL + "/list/" + listId)
                                                  .retrieve()

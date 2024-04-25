@@ -3,49 +3,37 @@ package com.task.resource.model;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import com.task.library.dto.task.TaskDTO;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-
-@Entity
+@Document
 public class Task {
 
 	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	@Column(name = "task_id")
-	private Long taskId;
+	private String taskId;
 	
-	@Column(name = "user_id", nullable = false)
 	private String userId;
 	
-	@Column(name = "task_name", nullable = false)
 	private String taskName;
 	
-	@Column(nullable = true, length = 200)
 	private String description;
 	
 	@DateTimeFormat(pattern = "dd-mm-yyyy")
-	@Column(name = "due_date")
 	private LocalDate dueDate;
 
 	@DateTimeFormat(pattern = "dd-mm-yyyy")
-	@Column(name = "created_time", nullable = false)
 	private LocalDateTime createdTime = LocalDateTime.now();
 	
-	@Column(name = "is_completed", nullable = false)
 	private boolean isCompleted = false;
 
-	public Long getTaskId() {
+	public String getTaskId() {
 		return taskId;
 	}
 
-	public void setTaskId(Long taskId) {
+	public void setTaskId(String taskId) {
 		this.taskId = taskId;
 	}
 

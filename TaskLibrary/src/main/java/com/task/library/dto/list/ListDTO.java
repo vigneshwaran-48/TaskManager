@@ -7,7 +7,7 @@ import jakarta.validation.constraints.NotBlank;
 
 public class ListDTO implements Serializable {
 
-	private Long listId;
+	private String listId;
 	@NotBlank(message = "List name is required")
 	private String listName;
 	private String listColor;
@@ -15,10 +15,10 @@ public class ListDTO implements Serializable {
 	private int taskCount;
 	private Map<String, Object> links;
 	
-	public Long getListId() {
+	public String getListId() {
 		return listId;
 	}
-	public void setListId(Long listId) {
+	public void setListId(String listId) {
 		this.listId = listId;
 	}
 	public String getListName() {

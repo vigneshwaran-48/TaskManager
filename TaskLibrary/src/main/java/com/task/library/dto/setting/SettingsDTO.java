@@ -2,7 +2,7 @@ package com.task.library.dto.setting;
 
 public class SettingsDTO {
     
-    private Long settingId;
+    private String settingId;
     private String userId;
     private Theme theme;
     private Sort sortBy;
@@ -10,10 +10,10 @@ public class SettingsDTO {
     private SortGroupBy sortGroupBy;
     private boolean shouldGroupTasks;
     
-    public Long getSettingId() {
+    public String getSettingId() {
         return settingId;
     }
-    public void setSettingId(Long settingId) {
+    public void setSettingId(String settingId) {
         this.settingId = settingId;
     }
     public String getUserId() {

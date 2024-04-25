@@ -16,11 +16,11 @@ public interface TaskListService {
      */
     List<ListDTO> addListsToTask(String userId, TaskDTO task, List<ListDTO> lists, boolean removeListsNotIncluded) throws AppException;
 
-    void deleteTaskListsRelation(String userId, Long taskId, List<Long> listIds);
+    void deleteTaskListsRelation(String userId, String taskId, List<String> listIds);
 
-    void deleteAllRelationOfTask(String userId, Long taskId);
+    void deleteAllRelationOfTask(String userId, String taskId);
 
-    void deleteAllRelationOfList(String userId, Long listId);
+    void deleteAllRelationOfList(String userId, String listId);
 
     Optional<List<TaskListDTO>> findByList(String userId, ListDTO listDTO) throws AppException;
 }

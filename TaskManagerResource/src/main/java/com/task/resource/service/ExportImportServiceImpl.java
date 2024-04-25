@@ -99,8 +99,8 @@ public class ExportImportServiceImpl implements ExportImportService {
                 listService.updateList(list);
                 continue;
             }
-            Long oldListId = list.getListId();
-            Long listId = listService.createList(list);
+            String oldListId = list.getListId();
+            String listId = listService.createList(list);
 
             /**
              * This check is for spring data always creates a new listId so setting the new list id

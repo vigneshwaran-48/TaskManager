@@ -49,7 +49,7 @@ public class TaskServiceImpl implements TaskService {
 	private KafkaTemplate<String, Object> kafkaTemplate;
 	
 	@Override
-	public Optional<TaskDTO> findTaskById(String userId, Long taskId) {
+	public Optional<TaskDTO> findTaskById(String userId, String taskId) {
 		
 		Task task = taskRepository.findByTaskIdAndUserId(taskId, userId).orElse(null);
 		
@@ -79,7 +79,7 @@ public class TaskServiceImpl implements TaskService {
 
 	@Override
 	@TimeLogger
-	public Long createTask(TaskDTO taskDTO) throws Exception {
+	public String createTask(TaskDTO taskDTO) throws Exception {
 		
 		if(taskRepository.findByTaskNameAndUserId(taskDTO.getTaskName(),
 				taskDTO.getUserId()).isPresent()) {
@@ -156,7 +156,7 @@ public class TaskServiceImpl implements TaskService {
 
 	@Override
 	@TimeLogger
-	public Long deleteTask(String userId, Long taskId) {
+	public String deleteTask(String userId, String taskId) {
 		taskListService.deleteAllRelationOfTask(userId, taskId);
 		List<Task> task = taskRepository.deleteByUserIdAndTaskId(userId, taskId);
 		
@@ -172,7 +172,7 @@ public class TaskServiceImpl implements TaskService {
 
 	@Override
 	@TimeLogger
-	public boolean isTaskExists(String userId, Long taskId) {
+	public boolean isTaskExists(String userId, String taskId) {
 		if(taskId == null || userId == null) {
 			throw new IllegalArgumentException("Invalid Input");
 		}
@@ -181,7 +181,7 @@ public class TaskServiceImpl implements TaskService {
 
 	@Override
 	@TimeLogger
-	public boolean toggleTask(String userId, Long taskId) throws TaskNotFoundException {
+	public boolean toggleTask(String userId, String taskId) throws TaskNotFoundException {
 		if(taskId == null || userId == null) {
 			throw new IllegalArgumentException("Invalid Input");
 		}
@@ -238,7 +238,7 @@ public class TaskServiceImpl implements TaskService {
 		LocalDate nextSaturday = today.with(TemporalAdjusters.nextOrSame(DayOfWeek.SATURDAY));
 
 		Optional<List<Task>> tasks =
-				taskRepository.findByUserIdAndDueDateGreaterThanEqualAndDueDateLessThanEqual(userId,
+				taskRepository.findByUserIdAndDueDateBetween(userId,
 								today, nextSaturday);
 		if(tasks.isEmpty()) {
 			return Optional.empty();
@@ -252,7 +252,7 @@ public class TaskServiceImpl implements TaskService {
 
 	@Override
 	@TimeLogger
-	public Optional<List<TaskDTO>> getTasksOfList(String userId, Long listId) throws AppException {
+	public Optional<List<TaskDTO>> getTasksOfList(String userId, String listId) throws AppException {
 
 		Optional<ListDTO> list = listService.findByListId(userId, listId);
 		if(list.isEmpty()) {

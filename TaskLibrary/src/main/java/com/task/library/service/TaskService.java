@@ -10,19 +10,19 @@ import com.task.library.exception.TaskNotFoundException;
 
 public interface TaskService {
 
-	Optional<TaskDTO> findTaskById(String userId, Long taskId) throws AppException;
+	Optional<TaskDTO> findTaskById(String userId, String taskId) throws AppException;
 	
 	Optional<List<TaskDTO>> listTaskOfUser(String userId) throws AppException;
 		
-	Long createTask(TaskDTO taskDTO) throws Exception;
+	String createTask(TaskDTO taskDTO) throws Exception;
 	
 	TaskDTO updateTask(TaskDTO taskDTO, boolean removeList) throws AppException;
 	
-	Long deleteTask(String userId, Long taskId) throws AppException;
+	String deleteTask(String userId, String taskId) throws AppException;
 	
-	boolean isTaskExists(String userId, Long taskId) throws AppException;
+	boolean isTaskExists(String userId, String taskId) throws AppException;
 
-	boolean toggleTask(String userId, Long taskId) throws TaskNotFoundException, AppException;
+	boolean toggleTask(String userId, String taskId) throws TaskNotFoundException, AppException;
 
 	Optional<List<TaskDTO>> findByDate(String userId, LocalDate date) throws AppException;
 
@@ -30,7 +30,7 @@ public interface TaskService {
 
 	Optional<List<TaskDTO>> getThisWeekTasks(String userId) throws AppException;
 
-	Optional<List<TaskDTO>> getTasksOfList(String userId, Long listId) throws AppException;
+	Optional<List<TaskDTO>> getTasksOfList(String userId, String listId) throws AppException;
 
 	Optional<List<TaskDTO>> getTasksLessThanDate(String userId, LocalDate date) throws AppException;
 }

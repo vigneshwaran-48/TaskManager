@@ -56,12 +56,12 @@ public class TaskListServiceImpl implements TaskListService {
     }
 
     @Override
-    public void deleteTaskListsRelation(String userId, Long taskId, List<Long> listIds) {
+    public void deleteTaskListsRelation(String userId, String taskId, List<String> listIds) {
         taskListRepository.deleteByTaskTaskIdAndListListIdInAndUserId(taskId, listIds, userId);
     }  
 
     @Override
-    public void deleteAllRelationOfTask(String userId, Long taskId) {
+    public void deleteAllRelationOfTask(String userId, String taskId) {
         taskListRepository.deleteByTaskTaskIdAndUserId(taskId, userId);
     }
 
@@ -84,11 +84,11 @@ public class TaskListServiceImpl implements TaskListService {
     }
 
     @Override
-    public void deleteAllRelationOfList(String userId, Long listId) {
+    public void deleteAllRelationOfList(String userId, String listId) {
         taskListRepository.deleteByListListIdAndUserId(listId, userId);
     }
 
-    private List<ListDTO> getUniqueLists(String userId, Long taskId, List<ListDTO> lists) throws AppException {
+    private List<ListDTO> getUniqueLists(String userId, String taskId, List<ListDTO> lists) throws AppException {
         List<ListDTO> filteredLists = new ArrayList<>();
         if(userId == null) {
             throw new AppException("UserId not found", 400);
@@ -103,12 +103,12 @@ public class TaskListServiceImpl implements TaskListService {
         return filteredLists;
     }
 
-    private void checkAndRemoveLists(String userId, Long taskId, List<ListDTO> lists) {
+    private void checkAndRemoveLists(String userId, String taskId, List<ListDTO> lists) {
 
-        List<Long> listsToAdd = lists.stream().map(list -> list.getListId()).toList();
+        List<String> listsToAdd = lists.stream().map(list -> list.getListId()).toList();
 
         Optional<List<TaskList>> taskLists = taskListRepository.findByTaskTaskIdAndUserId(taskId, userId);
-        List<Long> listsToRemove = new LinkedList<>();
+        List<String> listsToRemove = new LinkedList<>();
 
         if(taskLists.isPresent()) {
             taskLists.get().forEach(list -> {

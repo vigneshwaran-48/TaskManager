@@ -1,0 +1,16 @@
+[
+    {
+        "class": "com.task.resource.model.List",
+        "listId": "personal-list-01",
+        "listName": "Personal",
+        "userId": "-1",
+        "listColor": "#fe6a6b"
+    },
+    {
+        "class": "com.task.resource.model.List",
+        "listId": "work-list-02",
+        "listName": "Work",
+        "userId": "-1",
+        "listColor": "#db77f3"
+    }
+]

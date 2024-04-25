@@ -1,39 +1,30 @@
 package com.task.resource.model;
 
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.DocumentReference;
+
 import com.task.library.dto.task.TaskListDTO;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-
-@Entity(name = "task_list")
+@Document
 public class TaskList {
 
 	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	@Column(name = "id")
-	private Long id;
+	private String id;
 	
-	@ManyToOne
-	@JoinColumn(name = "task_id", nullable = false)
+	@DocumentReference
 	private Task task;
 	
-	@ManyToOne
-	@JoinColumn(name = "list_id", nullable = false)
+	@DocumentReference
 	private List list;
 
-	@Column(name = "user_id", nullable = false)
 	private String userId;
 
-	public Long getId() {
+	public String getId() {
 		return id;
 	}
 
-	public void setId(Long taskListId) {
+	public void setId(String taskListId) {
 		this.id = taskListId;
 	}
 

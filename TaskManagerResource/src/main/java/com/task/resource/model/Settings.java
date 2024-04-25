@@ -1,47 +1,36 @@
 package com.task.resource.model;
 
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
+
 import com.task.library.dto.setting.GroupBy;
 import com.task.library.dto.setting.SettingsDTO;
 import com.task.library.dto.setting.Sort;
 import com.task.library.dto.setting.SortGroupBy;
 import com.task.library.dto.setting.Theme;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-
-@Entity
+@Document
 public class Settings {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    @Column(name = "setting_id")
-    private Long settingId;
+    private String settingId;
 
-    @Column(unique = true, nullable = false, name = "user_id")
     private String userId;
 
-    @Column(nullable = false, name = "group_tasks")
     private boolean groupTasks;
 
-    @Column(nullable = false, name = "group_by")
     private GroupBy groupBy = GroupBy.CREATED_TIME;
 
-    @Column(nullable = false, name = "theme")
     private Theme theme = Theme.LIGHT;
 
-    @Column(nullable = false, name = "sort")
     private Sort sort = Sort.CREATED_TIME;
 
-    @Column(nullable = false, name = "sort_tasks_group_by")
     private SortGroupBy sortGroupBy = SortGroupBy.DESCENDING;
 
-    public Long getSettingId() {
+    public String getSettingId() {
         return settingId;
     }
 
-    public void setSettingId(Long settingId) {
+    public void setSettingId(String settingId) {
         this.settingId = settingId;
     }
 

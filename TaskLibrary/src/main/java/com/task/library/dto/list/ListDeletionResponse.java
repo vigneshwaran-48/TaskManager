@@ -8,7 +8,7 @@ public class ListDeletionResponse {
 	private String message;
 	private int status;
 	private LocalDateTime time;
-	private List<Long> deletedLists;
+	private List<String> deletedLists;
 	private String path;
 	
 	public String getMessage() {
@@ -35,10 +35,10 @@ public class ListDeletionResponse {
 	public void setPath(String path) {
 		this.path = path;
 	}
-	public List<Long> getDeletedLists() {
+	public List<String> getDeletedLists() {
 		return deletedLists;
 	}
-	public void setDeletedLists(List<Long> deletedLists) {
+	public void setDeletedLists(List<String> deletedLists) {
 		this.deletedLists = deletedLists;
 	}
 	@Override

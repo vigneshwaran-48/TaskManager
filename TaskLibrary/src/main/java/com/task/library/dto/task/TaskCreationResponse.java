@@ -7,7 +7,7 @@ public class TaskCreationResponse {
 	private String message;
 	private int status;
 	private LocalDateTime time;
-	private Long taskId;
+	private String taskId;
 	private String path;
 	
 	
@@ -30,10 +30,10 @@ public class TaskCreationResponse {
 	public void setStatus(int status) {
 		this.status = status;
 	}
-	public Long getTaskId() {
+	public String getTaskId() {
 		return taskId;
 	}
-	public void setTaskId(Long taskId) {
+	public void setTaskId(String taskId) {
 		this.taskId = taskId;
 	}
 	public LocalDateTime getTime() {
