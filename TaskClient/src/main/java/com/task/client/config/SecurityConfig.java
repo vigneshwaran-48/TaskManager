@@ -28,9 +28,9 @@ public class SecurityConfig {
 	@Bean
 	SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 		return http.cors().configurationSource(corsConfigurationSource()).and()
-				// .csrf((csrf) -> csrf.csrfTokenRepository(C)
-				// 		.csrfTokenRequestHandler(new CsrfTokenRequestAttributeHandler()))
-				// .addFilterAfter(new CsrfFilter(), BasicAuthenticationFilter.class)
+				.csrf((csrf) -> csrf.csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
+						.csrfTokenRequestHandler(new CsrfTokenRequestAttributeHandler()))
+				.addFilterAfter(new CsrfFilter(), BasicAuthenticationFilter.class)
 				.authorizeHttpRequests(request -> {
 					try {
 						request
