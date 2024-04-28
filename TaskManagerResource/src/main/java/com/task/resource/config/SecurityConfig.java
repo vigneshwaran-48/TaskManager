@@ -39,22 +39,6 @@ public class SecurityConfig {
 				.disable()
 				.authorizeHttpRequests(request -> {
 					request
-						// Task scopes
-						// .requestMatchers(HttpMethod.POST, "/api/v1/task/**")
-						// 	.hasAnyAuthority("SCOPE_TaskManager.task.ALL", "SCOPE_TaskManager.task.CREATE")
-						// .requestMatchers(HttpMethod.GET, "/api/v1/task/**")
-						// 	.hasAnyAuthority("SCOPE_TaskManager.task.ALL", "SCOPE_TaskManager.task.READ")
-						// .requestMatchers(HttpMethod.PATCH, "/api/v1/task/**")
-						// 	.hasAnyAuthority("SCOPE_TaskManager.task.ALL", "SCOPE_TaskManager.task.UPDATE")
-
-						// List Scopes
-						// .requestMatchers(HttpMethod.POST, "/api/v1/list/**")
-						// 	.hasAnyAuthority("SCOPE_TaskManager.list.ALL", "SCOPE_TaskManager.list.CREATE")
-						// .requestMatchers(HttpMethod.GET, "/api/v1/list/**")
-						// 	.hasAnyAuthority("SCOPE_TaskManager.list.ALL", "SCOPE_TaskManager.list.READ")
-						// .requestMatchers(HttpMethod.PATCH, "/api/v1/list/**")
-						// 	.hasAnyAuthority("SCOPE_TaskManager.list.ALL", "SCOPE_TaskManager.list.UPDATE")
-
 					.anyRequest().authenticated();
 				})
 				.oauth2ResourceServer(oauth2 -> oauth2.jwt())

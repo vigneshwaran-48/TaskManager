@@ -1,5 +1,4 @@
 server:
-  port: 8282
   servlet:
     session:
       timeout: 300m
@@ -9,9 +8,6 @@ server:
       - cookie
 
 spring:
-  kafka:
-      bootstrap-servers:
-      - localhost:9092
   security:
     oauth2:
       client:
@@ -23,10 +19,19 @@ spring:
             - openid
             - profile
             - email
+            redirect-uri: ${GOOGLE_REDIRECT_URI}
         provider:
           google:
             issuer-uri: https://accounts.google.com
 
+  kafka:
+    bootstrap-servers:
+    - https://mutual-rabbit-12595-us1-kafka.upstash.io:9092
+    properties:
+      security.protocol: SASL_SSL
+      sasl.mechanism: SCRAM-SHA-256
+      sasl.jaas.config: org.apache.kafka.common.security.scram.ScramLoginModule required username="${KAFKA_USER}" password="${KAFKA_PASS}";
+     
   servlet:
     multipart:
       max-file-size: 10MB
@@ -46,7 +51,7 @@ logging:
 app:
   resource:
     server:
-      baseurl: http://127.0.0.1:8383
+      baseurl: ${RESOURCE_SERVER_BASE}
   flag:
     isSinglUserFlow: false
   singleUserId: "12"

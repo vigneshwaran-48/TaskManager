@@ -31,3 +31,8 @@ build/
 
 ### VS Code ###
 .vscode/
+
+
+
+TaskClient/catalyst.json
+TaskManagerResource/catalyst.json
