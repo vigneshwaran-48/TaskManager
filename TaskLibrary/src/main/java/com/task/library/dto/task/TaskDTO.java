@@ -12,7 +12,7 @@ import jakarta.validation.constraints.NotBlank;
 
 public class TaskDTO implements Serializable {
 	
-	private Long taskId;
+	private String taskId;
 	private String userId;
 	
 	@NotBlank(message = "taskName is required")
@@ -38,10 +38,10 @@ public class TaskDTO implements Serializable {
 	public void setIsCompleted(boolean isCompleted) {
 		this.isCompleted = isCompleted;
 	}
-	public Long getTaskId() {
+	public String getTaskId() {
 		return taskId;
 	}
-	public void setTaskId(Long taskId) {
+	public void setTaskId(String taskId) {
 		this.taskId = taskId;
 	}
 	public String getTaskName() {

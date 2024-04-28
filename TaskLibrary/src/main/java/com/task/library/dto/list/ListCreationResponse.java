@@ -7,7 +7,7 @@ public class ListCreationResponse {
 	private String message;
 	private int status;
 	private LocalDateTime time;
-	private Long listId;
+	private String listId;
 	private String path;
 	
 	public String getMessage() {
@@ -28,10 +28,10 @@ public class ListCreationResponse {
 	public void setTime(LocalDateTime time) {
 		this.time = time;
 	}
-	public Long getListId() {
+	public String getListId() {
 		return listId;
 	}
-	public void setListId(Long listId) {
+	public void setListId(String listId) {
 		this.listId = listId;
 	}
 	public String getPath() {

@@ -9,7 +9,7 @@ import org.springframework.context.annotation.EnableAspectJAutoProxy;
 @EnableAspectJAutoProxy
 @ComponentScan(basePackages = { "com.task.resource", "com.task.library.controller", "com.task.library.advice" })
 public class TaskMangerResource {
-
+	
 	public static void main(String[] args) {
 		SpringApplication.run(TaskMangerResource.class, args);
 	}

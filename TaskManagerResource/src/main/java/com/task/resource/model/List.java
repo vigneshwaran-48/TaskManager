@@ -1,35 +1,27 @@
 package com.task.resource.model;
 
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
+
 import com.task.library.dto.list.ListDTO;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-
-@Entity
+@Document
 public class List {
 
 	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	@Column(name = "list_id")
-	private Long listId;
+	private String listId;
 	
-	@Column(name = "user_id", nullable = false)
 	private String userId;
 	
-	@Column(name = "list_name", nullable = false)
 	private String listName;
 	
-	@Column(name = "list_color")
 	private String listColor;
 
-	public Long getListId() {
+	public String getListId() {
 		return listId;
 	}
 
-	public void setListId(Long listId) {
+	public void setListId(String listId) {
 		this.listId = listId;
 	}
 

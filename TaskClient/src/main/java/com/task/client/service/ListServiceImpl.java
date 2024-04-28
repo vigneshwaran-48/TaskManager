@@ -32,7 +32,7 @@ public class ListServiceImpl implements ListService {
     private final static String SLASH = "/";
 
     @Override
-    public Optional<ListDTO> findByListId(String userId, Long listId) throws AppException {
+    public Optional<ListDTO> findByListId(String userId, String listId) throws AppException {
         
         ListBodyResponse response = webClient.get()
                                              .uri(resourceServerBaseURL + BASE_URL + SLASH + listId)
@@ -67,7 +67,7 @@ public class ListServiceImpl implements ListService {
     }
 
     @Override
-    public Long createList(ListDTO list) throws Exception {
+    public String createList(ListDTO list) throws Exception {
         
         ListCreationResponse response = webClient.post()
                                                  .uri(resourceServerBaseURL + BASE_URL)
@@ -82,7 +82,7 @@ public class ListServiceImpl implements ListService {
     }
 
     @Override
-    public Long removeList(String userId, Long listId) throws AppException {
+    public String removeList(String userId, String listId) throws AppException {
         ListDeletionResponse response = webClient.delete()
                                                  .uri(resourceServerBaseURL + BASE_URL + SLASH + listId)
                                                  .retrieve()
@@ -111,7 +111,7 @@ public class ListServiceImpl implements ListService {
     }
 
     @Override
-    public Optional<List<ListDTO>> getListsOfTask(String userId, Long taskId, boolean safe) throws AppException {
+    public Optional<List<ListDTO>> getListsOfTask(String userId, String taskId, boolean safe) throws AppException {
         StringBuffer urlBuffer = new StringBuffer(resourceServerBaseURL);
         urlBuffer.append(BASE_URL).append(SLASH).append("bytask").append(SLASH).append(taskId);
 

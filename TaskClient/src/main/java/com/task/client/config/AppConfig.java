@@ -3,15 +3,19 @@ package com.task.client.config;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClientManager;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClientProvider;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClientProviderBuilder;
+import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
 import org.springframework.security.oauth2.client.web.DefaultOAuth2AuthorizedClientManager;
 import org.springframework.security.oauth2.client.web.OAuth2AuthorizedClientRepository;
 import org.springframework.security.oauth2.client.web.reactive.function.client
         .ServletOAuth2AuthorizedClientExchangeFilterFunction;
+import org.springframework.security.oauth2.core.oidc.user.DefaultOidcUser;
+import org.springframework.web.reactive.function.client.ClientRequest;
 import org.springframework.web.reactive.function.client.ExchangeFilterFunction;
 import org.springframework.web.reactive.function.client.ExchangeStrategies;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -26,7 +30,7 @@ import reactor.core.publisher.Mono;
 public class AppConfig {
 
         @Value("${app.resource.server.baseurl}")
-    private String resourceServerBaseURL;
+        private String resourceServerBaseURL;
 
         @Bean
         BCryptPasswordEncoder passwordEncoder() {
@@ -46,7 +50,15 @@ public class AppConfig {
         oauth2Client.setDefaultOAuth2AuthorizedClient(true);
         return WebClient.builder()
                         .baseUrl(resourceServerBaseURL)
-        		.filter(oauth2Client)
+        		// .filter(oauth2Client)
+                        .filter((request, next) -> {
+                                OAuth2AuthenticationToken oauth2Token = (OAuth2AuthenticationToken) SecurityContextHolder.getContext().getAuthentication();
+                                String idToken = ((DefaultOidcUser) oauth2Token.getPrincipal()).getIdToken().getTokenValue();
+                                ClientRequest clientRequest = ClientRequest.from(request)
+                                        .header("Authorization", "Bearer " + idToken)
+                                        .build();
+                                return next.exchange(clientRequest);
+                        })
                         .filter(errorHandler())
         		.exchangeStrategies(strategies)
                 .build();

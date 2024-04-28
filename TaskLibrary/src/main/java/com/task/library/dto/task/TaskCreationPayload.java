@@ -8,17 +8,17 @@ import jakarta.validation.constraints.NotBlank;
 
 public class TaskCreationPayload {
 	
-	private Long taskId;
+	private String taskId;
 	private String userId;
 	
 	@NotBlank(message = "taskName is required")
 	private String taskName;
 	
 	private String description;
-	private Long parentTaskId;
+	private String parentTaskId;
 	private LocalDate dueDate;
 	private boolean isCompleted;
-	private List<Long> lists;
+	private List<String> lists;
 	private Map<String, Object> links;
 
 	public Map<String, Object> getLinks() {
@@ -34,10 +34,10 @@ public class TaskCreationPayload {
 	public void setIsCompleted(boolean completed) {
 		isCompleted = completed;
 	}
-	public Long getTaskId() {
+	public String getTaskId() {
 		return taskId;
 	}
-	public void setTaskId(Long taskId) {
+	public void setTaskId(String taskId) {
 		this.taskId = taskId;
 	}
 	public String getTaskName() {
@@ -46,10 +46,10 @@ public class TaskCreationPayload {
 	public void setTaskName(String taskName) {
 		this.taskName = taskName;
 	}
-	public Long getParentTaskId() {
+	public String getParentTaskId() {
 		return parentTaskId;
 	}
-	public void setParentTaskId(Long parentTaskId) {
+	public void setParentTaskId(String parentTaskId) {
 		this.parentTaskId = parentTaskId;
 	}
 	public LocalDate getDueDate() {
@@ -58,10 +58,10 @@ public class TaskCreationPayload {
 	public void setDueDate(LocalDate dueDate) {
 		this.dueDate = dueDate;
 	}
-	public List<Long> getLists() {
+	public List<String> getLists() {
 		return lists;
 	}
-	public void setLists(List<Long> lists) {
+	public void setLists(List<String> lists) {
 		this.lists = lists;
 	}
 	public String getDescription() {

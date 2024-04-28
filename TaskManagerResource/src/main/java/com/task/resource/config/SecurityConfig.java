@@ -24,7 +24,7 @@ import com.google.common.net.HttpHeaders;
 @EnableMethodSecurity
 public class SecurityConfig {
     
-    @Value("${authserver.baseurl}")
+    @Value("${spring.security.oauth2.resourceserver.jwt.issuer-uri}")
 	private String authServerUrl;
 
     private static final Long MAX_AGE = 3600L;
@@ -39,53 +39,37 @@ public class SecurityConfig {
 				.disable()
 				.authorizeHttpRequests(request -> {
 					request
-						// Task scopes
-						.requestMatchers(HttpMethod.POST, "/api/v1/task/**")
-							.hasAnyAuthority("SCOPE_TaskManager.task.ALL", "SCOPE_TaskManager.task.CREATE")
-						.requestMatchers(HttpMethod.GET, "/api/v1/task/**")
-							.hasAnyAuthority("SCOPE_TaskManager.task.ALL", "SCOPE_TaskManager.task.READ")
-						.requestMatchers(HttpMethod.PATCH, "/api/v1/task/**")
-							.hasAnyAuthority("SCOPE_TaskManager.task.ALL", "SCOPE_TaskManager.task.UPDATE")
-
-						// List Scopes
-						.requestMatchers(HttpMethod.POST, "/api/v1/list/**")
-							.hasAnyAuthority("SCOPE_TaskManager.list.ALL", "SCOPE_TaskManager.list.CREATE")
-						.requestMatchers(HttpMethod.GET, "/api/v1/list/**")
-							.hasAnyAuthority("SCOPE_TaskManager.list.ALL", "SCOPE_TaskManager.list.READ")
-						.requestMatchers(HttpMethod.PATCH, "/api/v1/list/**")
-							.hasAnyAuthority("SCOPE_TaskManager.list.ALL", "SCOPE_TaskManager.list.UPDATE")
-
 					.anyRequest().authenticated();
 				})
 				.oauth2ResourceServer(oauth2 -> oauth2.jwt())
 				.build();
-	}
+	}	
 	@Bean
 	JwtDecoder jwtDecoder() {
 	    return JwtDecoders.fromIssuerLocation(authServerUrl);
 	}
 
-    @Bean
-	CorsConfigurationSource corsConfigurationSource() {
-		UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-		CorsConfiguration config = new CorsConfiguration();
-		config.setAllowCredentials(true);
-		config.setAllowedOrigins(Arrays.asList("*"));
-		config.setAllowedHeaders(Arrays.asList(
-					HttpHeaders.AUTHORIZATION,
-					HttpHeaders.CONTENT_TYPE,
-					HttpHeaders.ACCEPT
-				));
-		config.setAllowedMethods(Arrays.asList(
-					HttpMethod.GET.name(),
-					HttpMethod.POST.name(),
-					HttpMethod.PUT.name(),
-					HttpMethod.DELETE.name(),
-					HttpMethod.OPTIONS.name()
-				));
-		config.setMaxAge(MAX_AGE);
-		source.registerCorsConfiguration("/**", config);	
+    // @Bean
+	// CorsConfigurationSource corsConfigurationSource() {
+	// 	UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+	// 	CorsConfiguration config = new CorsConfiguration();
+	// 	config.setAllowCredentials(true);
+	// 	config.setAllowedOrigins(Arrays.asList("*"));
+	// 	config.setAllowedHeaders(Arrays.asList(
+	// 				HttpHeaders.AUTHORIZATION,
+	// 				HttpHeaders.CONTENT_TYPE,
+	// 				HttpHeaders.ACCEPT
+	// 			));
+	// 	config.setAllowedMethods(Arrays.asList(
+	// 				HttpMethod.GET.name(),
+	// 				HttpMethod.POST.name(),
+	// 				HttpMethod.PUT.name(),
+	// 				HttpMethod.DELETE.name(),
+	// 				HttpMethod.OPTIONS.name()
+	// 			));
+	// 	config.setMaxAge(MAX_AGE);
+	// 	source.registerCorsConfiguration("/**", config);	
 		
-		return source;
-	}
+	// 	return source;
+	// }
 }

@@ -25,7 +25,7 @@ public class SettingsServiceImpl implements SettingsService {
     @Override
     public Optional<SettingsDTO> getSettings(String userId) throws AppException {
         Optional<Settings> settings = settingsRepository.findByUserId(userId);
-        if(settings.isEmpty()) {
+        if (settings.isEmpty()) {
             LOGGER.error("Settings is not added for user {}", userId);
             throw new AppException("Settings is not added for user", HttpStatus.BAD_REQUEST.value());
         }
@@ -39,8 +39,8 @@ public class SettingsServiceImpl implements SettingsService {
 
         try {
             settingsRepository.save(settings);
-        }
-        catch(Exception e) {
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage(), e);
             LOGGER.error("Error while adding settings for user {}", userId);
             throw new AppException("Error while adding settings for user", HttpStatus.INTERNAL_SERVER_ERROR.value());
         }
@@ -49,13 +49,12 @@ public class SettingsServiceImpl implements SettingsService {
     @Override
     public Optional<SettingsDTO> updateSettings(String userId, SettingsDTO settingsDTO) throws AppException {
         settingsDTO.setUserId(userId);
-        try {   
+        try {
             return Optional.of(settingsRepository.save(Settings.toSettings(settingsDTO)).toSettingsDTO());
-        }
-        catch(Exception e) {
+        } catch (Exception e) {
             LOGGER.error("Error while updating settings for user {}", userId);
             throw new AppException("Error while updating settings for user", HttpStatus.INTERNAL_SERVER_ERROR.value());
         }
     }
-    
+
 }

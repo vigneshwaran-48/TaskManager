@@ -49,7 +49,7 @@ public class ListServiceImpl implements ListService {
 	
 	@Override
 	@TimeLogger
-	public Optional<ListDTO> findByListId(String userId, Long listId) {
+	public Optional<ListDTO> findByListId(String userId, String listId) {
 		Optional<List> list = listRepository.findByListIdAndUserId(listId, userId);
 		
 		if(list.isEmpty()) {
@@ -96,7 +96,7 @@ public class ListServiceImpl implements ListService {
 
 	@Override
 	@TimeLogger
-	public Long createList(ListDTO listDTO) throws Exception {
+	public String createList(ListDTO listDTO) throws Exception {
 		sanitizeInput(listDTO);
 		
 		if(listRepository.findByUserIdAndListName(listDTO.getUserId(), listDTO.getListName()).isPresent()) {
@@ -118,7 +118,7 @@ public class ListServiceImpl implements ListService {
 
 	@Override
 	@TimeLogger
-	public Long removeList(String userId, Long listId) {
+	public String removeList(String userId, String listId) {
 		taskListService.deleteAllRelationOfList(userId, listId);
 		
 		java.util.List<List> deletedLists = listRepository.deleteByUserIdAndListId(userId, listId);
@@ -157,7 +157,7 @@ public class ListServiceImpl implements ListService {
 
 	@Override
 	@TimeLogger
-	public Optional<java.util.List<ListDTO>> getListsOfTask(String userId, Long taskId, boolean safe) throws AppException {
+	public Optional<java.util.List<ListDTO>> getListsOfTask(String userId, String taskId, boolean safe) throws AppException {
 		if(!taskService.isTaskExists(userId, taskId)) {
 			if(safe) {
 				return Optional.empty();

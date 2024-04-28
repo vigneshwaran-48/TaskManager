@@ -50,8 +50,19 @@ public class RestControllerAdviceHandler {
 	@ExceptionHandler(Exception.class)
 	public ResponseEntity<?> handleException(Exception ex, HttpServletRequest request) {
 		ex.printStackTrace();
-		AppErrorResponse errorResponse = new AppErrorResponse(500, 
-												"Internal Server Error", 
+
+		int status = 500;
+		String message = "Internal Server Error";
+
+		// In Webclient global error handling the AppException is sent with the Exceptions.ReactiveException
+		// So extracting it here.
+		if(ex.getCause() instanceof AppException) {
+			AppException e = (AppException) ex.getCause();
+			status = e.getStatus();
+			message = e.getMessage();
+		}
+		AppErrorResponse errorResponse = new AppErrorResponse(status, 
+												message, 
 												LocalDateTime.now(),
 												request.getServletPath());
 		return ResponseEntity.internalServerError().body(errorResponse);

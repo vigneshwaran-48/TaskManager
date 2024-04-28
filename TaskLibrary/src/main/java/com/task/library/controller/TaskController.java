@@ -74,13 +74,13 @@ public class TaskController {
 			
 			List<ListDTO> lists = new ArrayList<>();
 
-			for(Long list : task.getLists()) {
+			for(String list : task.getLists()) {
 				lists.add(listService.findByListId(task.getUserId(), list).get());
 			}
 			taskDTO.setLists(lists);
 		}
 
-		Long taskId = taskService.createTask(taskDTO);
+		String taskId = taskService.createTask(taskDTO);
 		
 		TaskCreationResponse response = new TaskCreationResponse();
 		response.setMessage("Task created!");
@@ -93,7 +93,7 @@ public class TaskController {
 	}
 	
 	@GetMapping("{taskId}")
-	public ResponseEntity<?> getTaskById(@PathVariable Long taskId, Principal principal) throws AppException {
+	public ResponseEntity<?> getTaskById(@PathVariable String taskId, Principal principal) throws AppException {
 		
 		StringBuffer userId = new StringBuffer(principal != null ? principal.getName() : "");
 		if(!AuthUtil.getInstance().isValidUserId(userId)) {
@@ -163,14 +163,14 @@ public class TaskController {
 	}
 	
 	@DeleteMapping("{taskId}")
-	public ResponseEntity<?> deleteTaskById(@PathVariable Long taskId, Principal principal) throws AppException {
+	public ResponseEntity<?> deleteTaskById(@PathVariable String taskId, Principal principal) throws AppException {
 
 		StringBuffer userId = new StringBuffer(principal != null ? principal.getName() : "");
 		if(!AuthUtil.getInstance().isValidUserId(userId)) {
 			throw new AppException(NOT_AUTHENTICATED, HttpStatus.BAD_REQUEST.value());
 		}
 		
-		Long deletedTask = taskService.deleteTask(userId.toString(), taskId);
+		String deletedTask = taskService.deleteTask(userId.toString(), taskId);
 		
 		TaskDeletionResponse response = new TaskDeletionResponse();
 		response.setMessage("Deleted Task successfully!");
@@ -182,7 +182,7 @@ public class TaskController {
 	}
 	
 	@PatchMapping("{taskId}")
-	public ResponseEntity<?> patchUpdateTask(@PathVariable Long taskId, @RequestBody TaskDTO task, 
+	public ResponseEntity<?> patchUpdateTask(@PathVariable String taskId, @RequestBody TaskDTO task, 
 											 @RequestParam(
 												defaultValue = "false", 
 												required = false
@@ -209,7 +209,7 @@ public class TaskController {
 		return ResponseEntity.ok(response);
 	}
 	@PatchMapping("{taskId}/toggle")
-	public ResponseEntity<?> toggleTaskCompleted(@PathVariable Long taskId, Principal principal)
+	public ResponseEntity<?> toggleTaskCompleted(@PathVariable String taskId, Principal principal)
 			throws AppException {
 
 		StringBuffer userId = new StringBuffer(principal != null ? principal.getName() : "");
@@ -345,7 +345,7 @@ public class TaskController {
 
 	@GetMapping("list/{listId}")
 	public ResponseEntity<?> getAllTasksOfList(@RequestParam(required = false) Integer sortBy, 
-								@PathVariable Long listId, Principal principal) throws AppException {
+								@PathVariable String listId, Principal principal) throws AppException {
 
 		StringBuffer userId = new StringBuffer(principal != null ? principal.getName() : "");
 		if(!AuthUtil.getInstance().isValidUserId(userId)) {

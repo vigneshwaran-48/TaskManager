@@ -49,7 +49,7 @@ public class ListController {
 			throw new AppException(NOT_AUTHENTICATED, HttpStatus.BAD_REQUEST.value());
 		}
 		listDTO.setUserId(userId.toString());
-		Long listId = listService.createList(listDTO);
+		String listId = listService.createList(listDTO);
 		
 		ListCreationResponse response = new ListCreationResponse();
 		response.setMessage("success");
@@ -62,7 +62,7 @@ public class ListController {
 	}
 	
 	@GetMapping("{listId}")
-	public ResponseEntity<?> getListById(@PathVariable Long listId, Principal principal) throws AppException {
+	public ResponseEntity<?> getListById(@PathVariable String listId, Principal principal) throws AppException {
 		
 		StringBuffer userId = new StringBuffer(principal != null ? principal.getName() : "");
 		if(!AuthUtil.getInstance().isValidUserId(userId)) {
@@ -109,14 +109,14 @@ public class ListController {
 	}
 	
 	@DeleteMapping("{listId}")
-	public ResponseEntity<?> deleteByListId(@PathVariable Long listId, Principal principal) throws AppException {
+	public ResponseEntity<?> deleteByListId(@PathVariable String listId, Principal principal) throws AppException {
 		
 		StringBuffer userId = new StringBuffer(principal != null ? principal.getName() : "");
 		if(!AuthUtil.getInstance().isValidUserId(userId)) {
 			throw new AppException(NOT_AUTHENTICATED, HttpStatus.BAD_REQUEST.value());
 		}
 		
-		Long removedList = listService.removeList(userId.toString(), listId);
+		String removedList = listService.removeList(userId.toString(), listId);
 		ListDeletionResponse response = new ListDeletionResponse();
 		response.setMessage("success");
 		response.setStatus(removedList != null ? HttpStatus.OK.value() : HttpStatus.NO_CONTENT.value());
@@ -127,7 +127,7 @@ public class ListController {
 	}
 	
 	@GetMapping("/bytask/{taskId}")
-	public ResponseEntity<?> getListsByTaskId(@PathVariable Long taskId, Principal principal) throws AppException {
+	public ResponseEntity<?> getListsByTaskId(@PathVariable String taskId, Principal principal) throws AppException {
 		
 		StringBuffer userId = new StringBuffer(principal != null ? principal.getName() : "");
 		if(!AuthUtil.getInstance().isValidUserId(userId)) {
@@ -151,7 +151,7 @@ public class ListController {
 	}
 	
 	@PatchMapping("{listId}")
-	public ResponseEntity<?> patchUpdateList(@PathVariable Long listId, 
+	public ResponseEntity<?> patchUpdateList(@PathVariable String listId, 
 											 @RequestBody ListDTO listDTO, Principal principal) throws AppException {
 		
 		StringBuffer userId = new StringBuffer(principal != null ? principal.getName() : "");

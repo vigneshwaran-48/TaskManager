@@ -25,7 +25,7 @@ public class KafkaConsumerConfig {
     @Bean
     ConcurrentKafkaListenerContainerFactory<String, KafkaTaskMessage> concurrentKafkaListenerContainerFactory() {
         ConcurrentKafkaListenerContainerFactory<String, KafkaTaskMessage> factory = 
-        new ConcurrentKafkaListenerContainerFactory<>();
+    new ConcurrentKafkaListenerContainerFactory<>();
         factory.setConsumerFactory(consumerFactory());
         factory.setRecordMessageConverter(recordMessageConverter());
         return factory;
@@ -52,9 +52,9 @@ public class KafkaConsumerConfig {
         return converter;
     }
 
+    @Bean
     Map<String, Object> consumerConfigurations() {
         Map<String, Object> config = new HashMap<>();
-        config.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
         config.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
         config.put(ConsumerConfig.GROUP_ID_CONFIG, "kafka-consumers");
         config.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);

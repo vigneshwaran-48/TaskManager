@@ -8,7 +8,7 @@ public class TaskDeletionResponse {
 	private String message;
 	private int status;
 	private LocalDateTime time;
-	private List<Long> deletedTasks;
+	private List<String> deletedTasks;
 	
 	public String getMessage() {
 		return message;
@@ -29,10 +29,10 @@ public class TaskDeletionResponse {
 	public void setTime(LocalDateTime time) {
 		this.time = time;
 	}
-	public List<Long> getDeletedTasks() {
+	public List<String> getDeletedTasks() {
 		return deletedTasks;
 	}
-	public void setDeletedTasks(List<Long> deletedTasks) {
+	public void setDeletedTasks(List<String> deletedTasks) {
 		this.deletedTasks = deletedTasks;
 	}
 	@Override

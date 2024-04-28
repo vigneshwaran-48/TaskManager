@@ -2,11 +2,11 @@ package com.task.resource.repository;
 
 import java.util.Optional;
 
-import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.mongodb.repository.MongoRepository;
 
 import com.task.resource.model.Settings;
 
-public interface SettingsRepository extends JpaRepository<Settings, Long> {
+public interface SettingsRepository extends MongoRepository<Settings, String> {
     
     Optional<Settings> findByUserId(String userId);
 }
