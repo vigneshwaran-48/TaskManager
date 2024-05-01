@@ -2,10 +2,6 @@ server:
   servlet:
     session:
       timeout: 300m
-      cookie:
-        http-only: true
-      tracking-modes:
-      - cookie
 
 spring:
   security:
