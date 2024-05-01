@@ -4,6 +4,8 @@ import java.util.Arrays;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
+import org.springframework.http.HttpHeaders;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.web.SecurityFilterChain;
@@ -14,7 +16,6 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-import com.google.common.net.HttpHeaders;
 import com.task.client.controller.CsrfFilter;
 
 import io.netty.handler.codec.http.HttpMethod;
@@ -26,27 +27,30 @@ public class SecurityConfig {
 	private static final Long MAX_AGE = 3600L;
 
 	@Bean
+	@Profile("prod")
+	SecurityFilterChain productionSecurityFilterChain(HttpSecurity http) throws Exception {
+		return http.csrf().disable().authorizeHttpRequests(request -> {
+			try {
+				request.requestMatchers("/static/**", "/*.ico", "/*.json", "/*.png", "/ping", "/logout-success",
+						"/test").permitAll().anyRequest().authenticated().and().oauth2Login().permitAll().and().logout()
+						.clearAuthentication(true).deleteCookies().invalidateHttpSession(true);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}).build();
+	}
+
+	@Bean
+	@Profile("!prod")
 	SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 		return http.cors().configurationSource(corsConfigurationSource()).and()
 				.csrf((csrf) -> csrf.csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
 						.csrfTokenRequestHandler(new CsrfTokenRequestAttributeHandler()))
-				.addFilterAfter(new CsrfFilter(), BasicAuthenticationFilter.class)
-				.authorizeHttpRequests(request -> {
+				.addFilterAfter(new CsrfFilter(), BasicAuthenticationFilter.class).authorizeHttpRequests(request -> {
 					try {
-						request
-							.requestMatchers("/static/**", "/*.ico", "/*.json", "/*.png", "/ping", "/logout-success",
-								"/test")
-								.permitAll()
-							.anyRequest().authenticated()
-							.and()
-							.oauth2Login()
-								.permitAll()
-							.and()
-								.logout()
-									.clearAuthentication(true)
-									.deleteCookies()
-									.invalidateHttpSession(true);
-						// .logoutSuccessUrl("/logout-success");
+						request.requestMatchers("/static/**", "/*.ico", "/*.json", "/*.png", "/ping", "/logout-success",
+								"/test").permitAll().anyRequest().authenticated().and().oauth2Login().permitAll().and()
+								.logout().clearAuthentication(true).deleteCookies().invalidateHttpSession(true);
 					} catch (Exception e) {
 						e.printStackTrace();
 					}
@@ -63,7 +67,7 @@ public class SecurityConfig {
 		config.setAllowedHeaders(
 				Arrays.asList(HttpHeaders.AUTHORIZATION, HttpHeaders.CONTENT_TYPE, HttpHeaders.ACCEPT, "X-XSRF-TOKEN"));
 		config.setAllowedMethods(Arrays.asList(HttpMethod.GET.name(), HttpMethod.POST.name(), HttpMethod.PUT.name(),
-				HttpMethod.DELETE.name(), HttpMethod.OPTIONS.name()));
+				HttpMethod.DELETE.name(), HttpMethod.OPTIONS.name(), HttpMethod.PATCH.name()));
 		config.setMaxAge(MAX_AGE);
 		source.registerCorsConfiguration("/**", config);
 
