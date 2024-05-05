@@ -17,8 +17,8 @@ public class DatabasePopulatorListener {
     private ListService listService;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DatabasePopulatorListener.class);
-    private static final String PERSONAL_LIST_ID = "app-personal-list-1";
-    private static final String WORK_LIST_ID = "app-work-list-1";
+    private static final String PERSONAL_LIST_ID = "personal";
+    private static final String WORK_LIST_ID = "work";
     private static final String DEFAULT_USER = "-1";
     
     @EventListener(ContextRefreshedEvent.class)
