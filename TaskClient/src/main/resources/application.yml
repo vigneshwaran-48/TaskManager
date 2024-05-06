@@ -16,16 +16,23 @@ spring:
     oauth2:
       client:
         registration:
-          google:
-            client-id: ${GOOGLE_CLIENT_ID}
-            client-secret: ${GOOGLE_CLIENT_SECRET}
-            scope:
-            - openid
-            - profile
-            - email
+          # google:
+          #   client-id: ${GOOGLE_CLIENT_ID}
+          #   client-secret: ${GOOGLE_CLIENT_SECRET}
+          #   scope:
+          #   - openid
+          #   - profile
+          #   - email
+          #   redirect-uri: ${GOOGLE_REDIRECT_URI}
+          todo:
+            client-id: ${VAPPS_CLIENT_ID}
+            client-secret: ${VAPPS_CLIENT_SECRET}
+            scope: openid
         provider:
-          google:
-            issuer-uri: https://accounts.google.com
+          # google:
+          #   issuer-uri: https://accounts.google.com
+          todo:
+            issuer-uri: ${VAPPS_ISSUER_URI}
 
   servlet:
     multipart:
