@@ -24,14 +24,14 @@ spring:
           #   - profile
           #   - email
           #   redirect-uri: ${GOOGLE_REDIRECT_URI}
-          todo:
+          vapps:
             client-id: ${VAPPS_CLIENT_ID}
             client-secret: ${VAPPS_CLIENT_SECRET}
             scope: openid
         provider:
           # google:
           #   issuer-uri: https://accounts.google.com
-          todo:
+          vapps:
             issuer-uri: ${VAPPS_ISSUER_URI}
 
   servlet:

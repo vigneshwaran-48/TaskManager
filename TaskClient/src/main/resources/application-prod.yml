@@ -47,11 +47,6 @@ spring:
       websockets:
         enabled: false
 
-logging:
-  level:
-    org:
-      springframework:
-        security: trace
 app:
   resource:
     server:
