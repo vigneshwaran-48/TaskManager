@@ -6,7 +6,6 @@ import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.web.util.HtmlUtils;
 
@@ -28,188 +27,170 @@ import com.task.resource.repository.TaskListRepository;
 @Service
 public class ListServiceImpl implements ListService {
 
-	private final static String DEFAULT_COLOR = "#A8DF8E";
-	private final static String DEFAULT_USER = "-1";
-	private static final Logger LOGGER = LoggerFactory.getLogger(ListServiceImpl.class);
-	
-	@Autowired
-	private ListRepository listRepository;
-	
-	@Autowired
-	private TaskService taskService;
-	
-	@Autowired
-	private TaskListRepository taskListRepository;
+    private final static String DEFAULT_COLOR = "#A8DF8E";
+    private final static String DEFAULT_USER = "-1";
+    private static final Logger LOGGER = LoggerFactory.getLogger(ListServiceImpl.class);
 
-	@Autowired
-	private TaskListService taskListService;
+    @Autowired
+    private ListRepository listRepository;
 
-	@Autowired
-	private KafkaTemplate<String, Object> kafkaTemplate;
-	
-	@Override
-	@TimeLogger
-	public Optional<ListDTO> findByListId(String userId, String listId) {
-		Optional<List> list = listRepository.findByListIdAndUserId(listId, userId);
-		
-		if(list.isEmpty()) {
-			/**
-			 * This is for handling get request for default Personal, Work lists.
-			 */
-			list = listRepository.findByListIdAndUserId(listId, DEFAULT_USER);
+    @Autowired
+    private TaskService taskService;
 
-			if(list.isEmpty()) return Optional.empty(); 
-		}
-		Optional<java.util.List<TaskList>> taskLists = taskListRepository.findByListAndUserId(list.get(), userId);
+    @Autowired
+    private TaskListRepository taskListRepository;
 
-		ListDTO listDTO = list.get().toListDTO();
-		if(taskLists.isPresent()) {
-			listDTO.setTaskCount(taskLists.get().size());
-		}
-		return Optional.of(listDTO);
-	}
+    @Autowired
+    private TaskListService taskListService;
 
-	@Override
-	@TimeLogger
-	public Optional<java.util.List<ListDTO>> listAllListsOfUser(String userId) {
-		
-		Optional<java.util.List<List>> lists = listRepository.findByUserId(userId);
-		
-		if(lists.isEmpty()) {
-			lists = Optional.of(new ArrayList<>());
-		}
-		fillDefaultLists(lists.get());
+    @Override
+    @TimeLogger
+    public Optional<ListDTO> findByListId(String userId, String listId) {
+        Optional<List> list = listRepository.findByListIdAndUserId(listId, userId);
 
-		java.util.List<ListDTO> listDTOs = lists.get().stream()
-												.map(list -> {
-													ListDTO listDTO = list.toListDTO();
-													Optional<java.util.List<TaskList>> taskLists = 
-														taskListRepository.findByListAndUserId(list, userId);
-													if(taskLists.isPresent()) {
-														listDTO.setTaskCount(taskLists.get().size());
-													}
-													return listDTO;
-												})
-												.toList();
-		return Optional.of(listDTOs);
-	}
+        if (list.isEmpty()) {
+            /**
+             * This is for handling get request for default Personal, Work lists.
+             */
+            list = listRepository.findByListIdAndUserId(listId, DEFAULT_USER);
 
-	@Override
-	@TimeLogger
-	public String createList(ListDTO listDTO) throws Exception {
-		sanitizeInput(listDTO);
-		
-		if(listRepository.findByUserIdAndListName(listDTO.getUserId(), listDTO.getListName()).isPresent()) {
-			throw new AlreadyExistsException("List name already exists", 400);
-		}
-		List list =  List.toList(listDTO);
-		List createdList = listRepository.save(list);
-		
-		if(createdList == null) {
-			throw new Exception("Error while creating list");
-		}
-		LOGGER.info("Created list {}", createdList.getListId());
+            if (list.isEmpty())
+                return Optional.empty();
+        }
+        Optional<java.util.List<TaskList>> taskLists = taskListRepository.findByListAndUserId(list.get(), userId);
 
-		KafkaListMessage kafkaListMessage = new KafkaListMessage(KafkaAppEvent.CREATE, createdList.toListDTO());
-		kafkaTemplate.send(KafkaTopics.LIST, kafkaListMessage);
-		
-		return createdList.getListId();
-	}
+        ListDTO listDTO = list.get().toListDTO();
+        if (taskLists.isPresent()) {
+            listDTO.setTaskCount(taskLists.get().size());
+        }
+        return Optional.of(listDTO);
+    }
 
-	@Override
-	@TimeLogger
-	public String removeList(String userId, String listId) {
-		taskListService.deleteAllRelationOfList(userId, listId);
-		
-		java.util.List<List> deletedLists = listRepository.deleteByUserIdAndListId(userId, listId);
-		
-		if(deletedLists != null && deletedLists.size() > 0) {
-			LOGGER.info("Removed list {}", deletedLists.get(0).getListId());
+    @Override
+    @TimeLogger
+    public Optional<java.util.List<ListDTO>> listAllListsOfUser(String userId) {
 
-			KafkaListMessage kafkaListMessage = new KafkaListMessage(KafkaAppEvent.DELETE, deletedLists.get(0).toListDTO());
-			kafkaTemplate.send(KafkaTopics.LIST, kafkaListMessage);
-			return deletedLists.get(0).getListId();
-		}
-		return null;
-	}
+        Optional<java.util.List<List>> lists = listRepository.findByUserId(userId);
 
-	@Override
-	@TimeLogger
-	public Optional<ListDTO> updateList(ListDTO listDTO) {
-		Optional<List> existingList = listRepository.findByListIdAndUserId(listDTO.getListId(), listDTO.getUserId());
-		
-		if(existingList.isEmpty()) {
-			throw new IllegalArgumentException("No list exists with listId => " + listDTO.getListId());
-		}
-		List newList = List.toList(listDTO);
+        if (lists.isEmpty()) {
+            lists = Optional.of(new ArrayList<>());
+        }
+        fillDefaultLists(lists.get());
 
-		checkAndUpdateList(existingList.get(), newList);
-		
-		List updatedList = listRepository.save(newList);
+        java.util.List<ListDTO> listDTOs = lists.get().stream().map(list -> {
+            ListDTO listDTO = list.toListDTO();
+            Optional<java.util.List<TaskList>> taskLists = taskListRepository.findByListAndUserId(list, userId);
+            if (taskLists.isPresent()) {
+                listDTO.setTaskCount(taskLists.get().size());
+            }
+            return listDTO;
+        }).toList();
+        return Optional.of(listDTOs);
+    }
 
-		LOGGER.info("Updated list {}", updatedList.getListId());
+    @Override
+    @TimeLogger
+    public String createList(ListDTO listDTO) throws Exception {
+        sanitizeInput(listDTO);
 
-		KafkaListMessage kafkaListMessage = new KafkaListMessage(KafkaAppEvent.UPDATE, updatedList.toListDTO());
-		kafkaTemplate.send(KafkaTopics.LIST, kafkaListMessage);
-		
-		return Optional.of(updatedList.toListDTO());
-	}
+        if (listRepository.findByUserIdAndListName(listDTO.getUserId(), listDTO.getListName()).isPresent()) {
+            throw new AlreadyExistsException("List name already exists", 400);
+        }
+        List list = List.toList(listDTO);
+        List createdList = listRepository.save(list);
 
-	@Override
-	@TimeLogger
-	public Optional<java.util.List<ListDTO>> getListsOfTask(String userId, String taskId, boolean safe) throws AppException {
-		if(!taskService.isTaskExists(userId, taskId)) {
-			if(safe) {
-				return Optional.empty();
-			}
-			throw new IllegalArgumentException("No task found with the given taskId => " + taskId);
-		}
-		
-		Optional<java.util.List<TaskList>> taskList = taskListRepository.findByTaskTaskIdAndUserId(taskId, userId);
-		if(taskList.isEmpty()) {
-			Optional.empty();
-		}
-		java.util.List<ListDTO> lists = taskList.get()
-												.stream()
-												.map(tList -> tList.getList().toListDTO())
-												.toList();
-		return Optional.of(lists);
-	}
+        if (createdList == null) {
+            throw new Exception("Error while creating list");
+        }
+        LOGGER.info("Created list {}", createdList.getListId());
 
-	private void sanitizeInput(ListDTO listDTO) {
-		if(listDTO.getListName() != null) {
-			listDTO.setListName(listDTO.getListName().trim());
-			
-			if(listDTO.getListName().length() < 3) {
-				throw new IllegalArgumentException("List name should be greater than or equal to 3");
-			}
-			if(listDTO.getListName().length() > 15) {
-				throw new IllegalArgumentException("List name length should be lesser than or equal to 15");
-			}
-			listDTO.setListName(HtmlUtils.htmlEscape(listDTO.getListName()));
-		}
-		if(listDTO.getListColor() == null) {
-			listDTO.setListColor(DEFAULT_COLOR);
-		}
-		else {
-			listDTO.setListColor(listDTO.getListColor().trim());
-		}
-	}
-	
-	private void checkAndUpdateList(List existingList, List newList) {
-		if(newList.getListColor() == null) {
-			//Not checking for color check in existing list
-			//because list has a default value when inserting into DB.
-			newList.setListColor(existingList.getListColor());
-		}
-		if(newList.getListName() == null) {
-			newList.setListName(existingList.getListName());
-		}
-	}
+        return createdList.getListId();
+    }
 
-	private void fillDefaultLists(java.util.List<List> lists) {
-		Optional<java.util.List<List>> defaultLists =  listRepository.findByUserId(DEFAULT_USER);
+    @Override
+    @TimeLogger
+    public String removeList(String userId, String listId) {
+        taskListService.deleteAllRelationOfList(userId, listId);
 
-		lists.addAll(0, defaultLists.get());
-	}
+        java.util.List<List> deletedLists = listRepository.deleteByUserIdAndListId(userId, listId);
+
+        if (deletedLists != null && deletedLists.size() > 0) {
+            LOGGER.info("Removed list {}", deletedLists.get(0).getListId());
+            return deletedLists.get(0).getListId();
+        }
+        return null;
+    }
+
+    @Override
+    @TimeLogger
+    public Optional<ListDTO> updateList(ListDTO listDTO) {
+        Optional<List> existingList = listRepository.findByListIdAndUserId(listDTO.getListId(), listDTO.getUserId());
+
+        if (existingList.isEmpty()) {
+            throw new IllegalArgumentException("No list exists with listId => " + listDTO.getListId());
+        }
+        List newList = List.toList(listDTO);
+
+        checkAndUpdateList(existingList.get(), newList);
+
+        List updatedList = listRepository.save(newList);
+
+        LOGGER.info("Updated list {}", updatedList.getListId());
+        return Optional.of(updatedList.toListDTO());
+    }
+
+    @Override
+    @TimeLogger
+    public Optional<java.util.List<ListDTO>> getListsOfTask(String userId, String taskId, boolean safe)
+            throws AppException {
+        if (!taskService.isTaskExists(userId, taskId)) {
+            if (safe) {
+                return Optional.empty();
+            }
+            throw new IllegalArgumentException("No task found with the given taskId => " + taskId);
+        }
+
+        Optional<java.util.List<TaskList>> taskList = taskListRepository.findByTaskTaskIdAndUserId(taskId, userId);
+        if (taskList.isEmpty()) {
+            Optional.empty();
+        }
+        java.util.List<ListDTO> lists = taskList.get().stream().map(tList -> tList.getList().toListDTO()).toList();
+        return Optional.of(lists);
+    }
+
+    private void sanitizeInput(ListDTO listDTO) {
+        if (listDTO.getListName() != null) {
+            listDTO.setListName(listDTO.getListName().trim());
+
+            if (listDTO.getListName().length() < 3) {
+                throw new IllegalArgumentException("List name should be greater than or equal to 3");
+            }
+            if (listDTO.getListName().length() > 15) {
+                throw new IllegalArgumentException("List name length should be lesser than or equal to 15");
+            }
+            listDTO.setListName(HtmlUtils.htmlEscape(listDTO.getListName()));
+        }
+        if (listDTO.getListColor() == null) {
+            listDTO.setListColor(DEFAULT_COLOR);
+        } else {
+            listDTO.setListColor(listDTO.getListColor().trim());
+        }
+    }
+
+    private void checkAndUpdateList(List existingList, List newList) {
+        if (newList.getListColor() == null) {
+            //Not checking for color check in existing list
+            //because list has a default value when inserting into DB.
+            newList.setListColor(existingList.getListColor());
+        }
+        if (newList.getListName() == null) {
+            newList.setListName(existingList.getListName());
+        }
+    }
+
+    private void fillDefaultLists(java.util.List<List> lists) {
+        Optional<java.util.List<List>> defaultLists = listRepository.findByUserId(DEFAULT_USER);
+
+        lists.addAll(0, defaultLists.get());
+    }
 }

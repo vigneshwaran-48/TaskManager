@@ -11,7 +11,6 @@ import java.util.stream.Collectors;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.web.util.HtmlUtils;
 
@@ -34,344 +33,305 @@ import com.task.resource.repository.TaskRepository;
 @Service
 public class TaskServiceImpl implements TaskService {
 
-	private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(TaskServiceImpl.class);
+    private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(TaskServiceImpl.class);
 
-	@Autowired
-	private TaskRepository taskRepository;
-	
-	@Autowired
-	private ListService listService;
+    @Autowired
+    private TaskRepository taskRepository;
 
-	@Autowired
-	private TaskListService taskListService;
+    @Autowired
+    private ListService listService;
 
-	@Autowired
-	private KafkaTemplate<String, Object> kafkaTemplate;
-	
-	@Override
-	public Optional<TaskDTO> findTaskById(String userId, String taskId) {
-		
-		Task task = taskRepository.findByTaskIdAndUserId(taskId, userId).orElse(null);
-		
-		if(task == null) {
-			return Optional.empty();
-		}
-		TaskDTO taskDTO = toTaskDTO(task);
-		decodeData(taskDTO);
-		return Optional.of(taskDTO);
-	}
+    @Autowired
+    private TaskListService taskListService;
 
-	@TimeLogger
-	@Override
-	public Optional<List<TaskDTO>> listTaskOfUser(String userId) throws AppException {
-		List<Task> tasks = taskRepository.findByUserId(userId).orElse(null);
-		
-		if(tasks == null) {
-			return Optional.empty();
-		}
-		List<TaskDTO> taskDTOs = tasks
-									.stream()
-									.map(this::toTaskDTO)
-									.collect(Collectors.toList());
-		taskDTOs.forEach(this::decodeData);
-		return Optional.of(taskDTOs);
-	}
+    @Override
+    public Optional<TaskDTO> findTaskById(String userId, String taskId) {
 
-	@Override
-	@TimeLogger
-	public String createTask(TaskDTO taskDTO) throws Exception {
-		
-		if(taskRepository.findByTaskNameAndUserId(taskDTO.getTaskName(),
-				taskDTO.getUserId()).isPresent()) {
-			throw new AlreadyExistsException("Task with this name already exists", 400);
-		}
+        Task task = taskRepository.findByTaskIdAndUserId(taskId, userId).orElse(null);
 
-		sanitizeInputs(taskDTO);
-		Task taskPayload = Task.toTask(taskDTO);
-		
-		if(taskPayload.getDueDate() == null) {
-			taskPayload.setDueDate(LocalDate.now());
-		}
-		taskPayload.setCreatedTime(LocalDateTime.now());
+        if (task == null) {
+            return Optional.empty();
+        }
+        TaskDTO taskDTO = toTaskDTO(task);
+        decodeData(taskDTO);
+        return Optional.of(taskDTO);
+    }
 
-		Task createdTask = taskRepository.save(taskPayload);
+    @TimeLogger
+    @Override
+    public Optional<List<TaskDTO>> listTaskOfUser(String userId) throws AppException {
+        List<Task> tasks = taskRepository.findByUserId(userId).orElse(null);
 
-		if(taskDTO.getLists() != null && !taskDTO.getLists().isEmpty()) {
-			taskListService.addListsToTask(createdTask.getUserId(),
-							 createdTask.toTaskDTO(), taskDTO.getLists(), false);
-		
-			LOGGER.info("Saved Lists related to task => " + createdTask.getTaskId());
-		}
-		
-		if(createdTask != null) {
+        if (tasks == null) {
+            return Optional.empty();
+        }
+        List<TaskDTO> taskDTOs = tasks.stream().map(this::toTaskDTO).collect(Collectors.toList());
+        taskDTOs.forEach(this::decodeData);
+        return Optional.of(taskDTOs);
+    }
 
-			LOGGER.info("Created task, TaskId => {}", createdTask.getTaskId());
-		
-			sendDataToKafka(toTaskDTO(createdTask), KafkaAppEvent.CREATE);
-			
-			return createdTask.getTaskId();
-		}
-		LOGGER.error("Unable to create task!");
-		throw new Exception("Error while creating task");
-	}
+    @Override
+    @TimeLogger
+    public String createTask(TaskDTO taskDTO) throws Exception {
 
-	@Override
-	@TimeLogger
-	public TaskDTO updateTask(TaskDTO taskDTO, boolean removeList)
-			throws AppException {
-		Optional<Task> existingTask = taskRepository
-									  .findByTaskIdAndUserId(taskDTO.getTaskId(),
-											  				 taskDTO.getUserId());
-		if(existingTask.isEmpty()) {
-			LOGGER.error("Task Not found with the give taskId {}", taskDTO.getTaskId());
-			throw new TaskNotFoundException("No task found with the given taskId");
-		}
-		sanitizeInputs(taskDTO);
-		Task newTask = Task.toTask(taskDTO);
+        if (taskRepository.findByTaskNameAndUserId(taskDTO.getTaskName(), taskDTO.getUserId()).isPresent()) {
+            throw new AlreadyExistsException("Task with this name already exists", 400);
+        }
 
-		checkUpdateTaskDetails(existingTask.get(), newTask, taskDTO.getIsCompleted() != null);
-		if(!existingTask.get().getTaskName().equals(newTask.getTaskName())) {
-			checkSameTaskName(newTask);
-		}
-		
-		Task task = taskRepository.save(newTask);
-		LOGGER.info("Updated task => {}", task.getTaskId());
+        sanitizeInputs(taskDTO);
+        Task taskPayload = Task.toTask(taskDTO);
 
-		List<ListDTO> lists = taskDTO.getLists();
-		TaskDTO updatedTask = toTaskDTO(task);
-		
-		if(removeList || !lists.isEmpty()) {
-			List<ListDTO> updatedLists = taskListService.addListsToTask(taskDTO.getUserId(),
-												 updatedTask, lists, removeList);
-		
-			updatedTask.setLists(updatedLists);
-			LOGGER.info("Saved Lists related to task => {}", updatedTask.getTaskId());
-		}
-		decodeData(updatedTask);
+        if (taskPayload.getDueDate() == null) {
+            taskPayload.setDueDate(LocalDate.now());
+        }
+        taskPayload.setCreatedTime(LocalDateTime.now());
 
-		sendDataToKafka(updatedTask, KafkaAppEvent.UPDATE);
-		
-		return updatedTask;
-	}
+        Task createdTask = taskRepository.save(taskPayload);
 
-	@Override
-	@TimeLogger
-	public String deleteTask(String userId, String taskId) {
-		taskListService.deleteAllRelationOfTask(userId, taskId);
-		List<Task> task = taskRepository.deleteByUserIdAndTaskId(userId, taskId);
-		
-		if(task != null && task.size() > 0) {
+        if (taskDTO.getLists() != null && !taskDTO.getLists().isEmpty()) {
+            taskListService.addListsToTask(createdTask.getUserId(), createdTask.toTaskDTO(), taskDTO.getLists(), false);
 
-			LOGGER.info("Deleted task => {}", task.get(0).getTaskId());
-			sendDataToKafka(toTaskDTO(task.get(0)), KafkaAppEvent.DELETE);
+            LOGGER.info("Saved Lists related to task => " + createdTask.getTaskId());
+        }
 
-			return task.get(0).getTaskId();
-		}
-		return null;
-	}
+        if (createdTask != null) {
 
-	@Override
-	@TimeLogger
-	public boolean isTaskExists(String userId, String taskId) {
-		if(taskId == null || userId == null) {
-			throw new IllegalArgumentException("Invalid Input");
-		}
-		return taskRepository.existsByUserIdAndTaskId(userId, taskId);
-	}
+            LOGGER.info("Created task, TaskId => {}", createdTask.getTaskId());
+            return createdTask.getTaskId();
+        }
+        LOGGER.error("Unable to create task!");
+        throw new Exception("Error while creating task");
+    }
 
-	@Override
-	@TimeLogger
-	public boolean toggleTask(String userId, String taskId) throws TaskNotFoundException {
-		if(taskId == null || userId == null) {
-			throw new IllegalArgumentException("Invalid Input");
-		}
-		Optional<Task> existingTask = taskRepository
-				.findByTaskIdAndUserId(taskId, userId);
-		if(existingTask.isEmpty()) {
-			throw new TaskNotFoundException("No task found with the given taskId");
-		}
+    @Override
+    @TimeLogger
+    public TaskDTO updateTask(TaskDTO taskDTO, boolean removeList) throws AppException {
+        Optional<Task> existingTask = taskRepository.findByTaskIdAndUserId(taskDTO.getTaskId(), taskDTO.getUserId());
+        if (existingTask.isEmpty()) {
+            LOGGER.error("Task Not found with the give taskId {}", taskDTO.getTaskId());
+            throw new TaskNotFoundException("No task found with the given taskId");
+        }
+        sanitizeInputs(taskDTO);
+        Task newTask = Task.toTask(taskDTO);
 
-		existingTask.get().setIsCompleted(!existingTask.get().getIsCompleted());
-		Task task = taskRepository.save(existingTask.get());
+        checkUpdateTaskDetails(existingTask.get(), newTask, taskDTO.getIsCompleted() != null);
+        if (!existingTask.get().getTaskName().equals(newTask.getTaskName())) {
+            checkSameTaskName(newTask);
+        }
 
-		LOGGER.info("Toggled task status to {}", task.getIsCompleted() ? "Completed" : "Yet2Finish");
+        Task task = taskRepository.save(newTask);
+        LOGGER.info("Updated task => {}", task.getTaskId());
 
-		sendDataToKafka(toTaskDTO(task), KafkaAppEvent.UPDATE);
-		return task.getIsCompleted();
-	}
+        List<ListDTO> lists = taskDTO.getLists();
+        TaskDTO updatedTask = toTaskDTO(task);
 
-	@Override
-	@TimeLogger
-	public Optional<List<TaskDTO>> findByDate(String userId, LocalDate date) {
-		if(date == null || userId == null) {
-			throw new IllegalArgumentException("Invalid Input");
-		}
-		Optional<List<Task>> tasks =  taskRepository.findByUserIdAndDueDate(userId, date);
-		if(tasks.isEmpty()) {
-			return Optional.empty();
-		}
-		List<TaskDTO> taskDTOS = tasks.get().stream().map(this::toTaskDTO).collect(Collectors.toList());
-		taskDTOS.forEach(this::decodeData);
-		return Optional.of(taskDTOS);
-	}
+        if (removeList || !lists.isEmpty()) {
+            List<ListDTO> updatedLists =
+                    taskListService.addListsToTask(taskDTO.getUserId(), updatedTask, lists, removeList);
 
-	@Override
-	@TimeLogger
-	public Optional<List<TaskDTO>> getUpcomingTasks(String userId) {
-		if(userId == null) {
-			throw new IllegalArgumentException("User id is empty");
-		}
-		Optional<List<Task>> tasks =
-				taskRepository.findByUserIdAndDueDateGreaterThanEqual(userId, LocalDate.now());
-		if(tasks.isEmpty()) {
-			return Optional.empty();
-		}
-		List<TaskDTO> taskDTOS = tasks.get().stream().map(this::toTaskDTO).collect(Collectors.toList());
-		taskDTOS.forEach(this::decodeData);
-		return Optional.of(taskDTOS);
-	}
+            updatedTask.setLists(updatedLists);
+            LOGGER.info("Saved Lists related to task => {}", updatedTask.getTaskId());
+        }
+        decodeData(updatedTask);
+        return updatedTask;
+    }
 
-	@Override
-	@TimeLogger
-	public Optional<List<TaskDTO>> getThisWeekTasks(String userId) {
-		LocalDate today = LocalDate.now();
-		LocalDate nextSaturday = today.with(TemporalAdjusters.nextOrSame(DayOfWeek.SATURDAY));
+    @Override
+    @TimeLogger
+    public String deleteTask(String userId, String taskId) {
+        taskListService.deleteAllRelationOfTask(userId, taskId);
+        List<Task> task = taskRepository.deleteByUserIdAndTaskId(userId, taskId);
 
-		Optional<List<Task>> tasks =
-				taskRepository.findByUserIdAndDueDateBetween(userId,
-								today, nextSaturday);
-		if(tasks.isEmpty()) {
-			return Optional.empty();
-		}
-		List<TaskDTO> taskDTOS = tasks.get().stream()
-											.map(this::toTaskDTO)
-											.collect(Collectors.toList());
-		taskDTOS.forEach(this::decodeData);
-		return Optional.of(taskDTOS);
-	}
+        if (task != null && task.size() > 0) {
 
-	@Override
-	@TimeLogger
-	public Optional<List<TaskDTO>> getTasksOfList(String userId, String listId) throws AppException {
+            LOGGER.info("Deleted task => {}", task.get(0).getTaskId());
+            return task.get(0).getTaskId();
+        }
+        return null;
+    }
 
-		Optional<ListDTO> list = listService.findByListId(userId, listId);
-		if(list.isEmpty()) {
-			throw new AppException("List not found", HttpStatus.BAD_REQUEST.value());
-		}
-		Optional<List<TaskListDTO>> taskLists = taskListService.findByList(userId, list.get());
-		if(taskLists.isPresent()) {
-			List<TaskDTO> tasks = taskLists.get()
-											.stream()
-											.map(taskList -> {
-												return findTaskById(userId, taskList.getTaskDTO().getTaskId()).orElse(null);
-											})
-											.collect(Collectors.toList());
-			tasks.forEach(this::decodeData);
-			return Optional.of(tasks);
-		}
-		return Optional.empty();
-	}
+    @Override
+    @TimeLogger
+    public boolean isTaskExists(String userId, String taskId) {
+        if (taskId == null || userId == null) {
+            throw new IllegalArgumentException("Invalid Input");
+        }
+        return taskRepository.existsByUserIdAndTaskId(userId, taskId);
+    }
 
-	@Override
-	@TimeLogger
-	public Optional<List<TaskDTO>> getTasksLessThanDate(String userId, LocalDate date) {
-		Optional<List<Task>> tasks = taskRepository.findByUserIdAndDueDateLessThan(userId, date);
-		if(tasks.isEmpty()) {
-			return Optional.empty();
-		}
-		List<TaskDTO> taskDTOs = tasks.get().stream().map(this::toTaskDTO).collect(Collectors.toList());
-		taskDTOs.forEach(this::decodeData);
-		return Optional.of(taskDTOs);
-	}
+    @Override
+    @TimeLogger
+    public boolean toggleTask(String userId, String taskId) throws TaskNotFoundException {
+        if (taskId == null || userId == null) {
+            throw new IllegalArgumentException("Invalid Input");
+        }
+        Optional<Task> existingTask = taskRepository.findByTaskIdAndUserId(taskId, userId);
+        if (existingTask.isEmpty()) {
+            throw new TaskNotFoundException("No task found with the given taskId");
+        }
 
-	private TaskDTO toTaskDTO(Task task) {
-		TaskDTO taskDTO = new TaskDTO();
-		taskDTO.setUserId(task.getUserId());
-		taskDTO.setDescription(task.getDescription());
-		taskDTO.setTaskId(task.getTaskId());
-		taskDTO.setTaskName(task.getTaskName());
-		taskDTO.setDueDate(task.getDueDate());
-		taskDTO.setIsCompleted(task.getIsCompleted());
-		taskDTO.setCreatedTime(task.getCreatedTime());
-				
-		try {
-			Optional<List<ListDTO>> lists = listService.getListsOfTask(task.getUserId(),
-																		task.getTaskId(), true);
-			taskDTO.setLists(lists.isPresent() ? lists.get() : null);
-		} 
-		catch (AppException e) {
-			e.printStackTrace();
-		}
-		
-		return taskDTO;
-	}
-	
-	private void checkUpdateTaskDetails(Task existingTask, Task newTask, boolean isNewCompletedValue) {
-		
-		if(newTask.getDescription() == null && existingTask.getDescription() != null) {
-			newTask.setDescription(existingTask.getDescription());
-		}
-		if(newTask.getTaskName() == null && existingTask.getTaskName() != null) {
-			newTask.setTaskName(existingTask.getTaskName());
-		}
-		if(newTask.getDueDate() == null && existingTask.getDueDate() != null) {
-			newTask.setDueDate(existingTask.getDueDate());
-		}
-		if(!isNewCompletedValue) {
-			newTask.setIsCompleted(existingTask.getIsCompleted());
-		}
-	}
+        existingTask.get().setIsCompleted(!existingTask.get().getIsCompleted());
+        Task task = taskRepository.save(existingTask.get());
 
-	private void checkSameTaskName(Task task) throws AlreadyExistsException {
-		Optional<Task> resultTask = taskRepository
-				.findByTaskNameAndUserId(task.getTaskName(), task.getUserId());
+        LOGGER.info("Toggled task status to {}", task.getIsCompleted() ? "Completed" : "Yet2Finish");
+        return task.getIsCompleted();
+    }
 
-		if(resultTask.isEmpty()) {
-			return;
-		}
-		if(resultTask.get().getTaskId() != task.getTaskId()) {
-			throw new AlreadyExistsException("Task Name already exists", 400);
-		}
-	}
-	
-	private void sanitizeInputs(TaskDTO taskDTO) {
-		if(taskDTO.getTaskName() != null) {
-			
-			taskDTO.setTaskName(taskDTO.getTaskName().trim());
-			
-			if(taskDTO.getTaskName().length() < 3) {
-				throw new IllegalArgumentException("Task name length should be greater than or equal to 3");
-			}
-			if(taskDTO.getTaskName().length() > 50) {
-				throw new IllegalArgumentException("Task name length should be lesser than or equal to 50");
-			}
+    @Override
+    @TimeLogger
+    public Optional<List<TaskDTO>> findByDate(String userId, LocalDate date) {
+        if (date == null || userId == null) {
+            throw new IllegalArgumentException("Invalid Input");
+        }
+        Optional<List<Task>> tasks = taskRepository.findByUserIdAndDueDate(userId, date);
+        if (tasks.isEmpty()) {
+            return Optional.empty();
+        }
+        List<TaskDTO> taskDTOS = tasks.get().stream().map(this::toTaskDTO).collect(Collectors.toList());
+        taskDTOS.forEach(this::decodeData);
+        return Optional.of(taskDTOS);
+    }
 
-			taskDTO.setTaskName(HtmlUtils.htmlEscape(taskDTO.getTaskName()));
-		}
-		
-		if(taskDTO.getDescription() != null) {
+    @Override
+    @TimeLogger
+    public Optional<List<TaskDTO>> getUpcomingTasks(String userId) {
+        if (userId == null) {
+            throw new IllegalArgumentException("User id is empty");
+        }
+        Optional<List<Task>> tasks = taskRepository.findByUserIdAndDueDateGreaterThanEqual(userId, LocalDate.now());
+        if (tasks.isEmpty()) {
+            return Optional.empty();
+        }
+        List<TaskDTO> taskDTOS = tasks.get().stream().map(this::toTaskDTO).collect(Collectors.toList());
+        taskDTOS.forEach(this::decodeData);
+        return Optional.of(taskDTOS);
+    }
 
-			if(taskDTO.getDescription().trim().length() > 200) {
-				throw new IllegalArgumentException("Task description length should be lesser than or equal to 200");
-			}
-			taskDTO.setDescription(taskDTO.getDescription().trim());
-			taskDTO.setDescription(HtmlUtils.htmlEscape(taskDTO.getDescription()));
-		}
-	}
-	private void decodeData(TaskDTO taskDTO) {
-		if(taskDTO.getTaskName() != null) {
-			taskDTO.setTaskName(HtmlUtils.htmlUnescape(taskDTO.getTaskName()));
-		}
-		if(taskDTO.getDescription() != null) {
-			taskDTO.setDescription(HtmlUtils.htmlUnescape(taskDTO.getDescription()));
-		}
-	}
+    @Override
+    @TimeLogger
+    public Optional<List<TaskDTO>> getThisWeekTasks(String userId) {
+        LocalDate today = LocalDate.now();
+        LocalDate nextSaturday = today.with(TemporalAdjusters.nextOrSame(DayOfWeek.SATURDAY));
 
-	private void sendDataToKafka(TaskDTO task, KafkaAppEvent event) {
-		KafkaTaskMessage kafkaTaskMessage = new KafkaTaskMessage(event, task);
-		kafkaTemplate.send(KafkaTopics.TASK, kafkaTaskMessage);
+        Optional<List<Task>> tasks = taskRepository.findByUserIdAndDueDateBetween(userId, today, nextSaturday);
+        if (tasks.isEmpty()) {
+            return Optional.empty();
+        }
+        List<TaskDTO> taskDTOS = tasks.get().stream().map(this::toTaskDTO).collect(Collectors.toList());
+        taskDTOS.forEach(this::decodeData);
+        return Optional.of(taskDTOS);
+    }
 
-		LOGGER.info("Task change event {} pushed to Kafka Topic => {}", event, KafkaTopics.TASK);
-	}
-	
+    @Override
+    @TimeLogger
+    public Optional<List<TaskDTO>> getTasksOfList(String userId, String listId) throws AppException {
+
+        Optional<ListDTO> list = listService.findByListId(userId, listId);
+        if (list.isEmpty()) {
+            throw new AppException("List not found", HttpStatus.BAD_REQUEST.value());
+        }
+        Optional<List<TaskListDTO>> taskLists = taskListService.findByList(userId, list.get());
+        if (taskLists.isPresent()) {
+            List<TaskDTO> tasks = taskLists.get().stream().map(taskList -> {
+                return findTaskById(userId, taskList.getTaskDTO().getTaskId()).orElse(null);
+            }).collect(Collectors.toList());
+            tasks.forEach(this::decodeData);
+            return Optional.of(tasks);
+        }
+        return Optional.empty();
+    }
+
+    @Override
+    @TimeLogger
+    public Optional<List<TaskDTO>> getTasksLessThanDate(String userId, LocalDate date) {
+        Optional<List<Task>> tasks = taskRepository.findByUserIdAndDueDateLessThan(userId, date);
+        if (tasks.isEmpty()) {
+            return Optional.empty();
+        }
+        List<TaskDTO> taskDTOs = tasks.get().stream().map(this::toTaskDTO).collect(Collectors.toList());
+        taskDTOs.forEach(this::decodeData);
+        return Optional.of(taskDTOs);
+    }
+
+    private TaskDTO toTaskDTO(Task task) {
+        TaskDTO taskDTO = new TaskDTO();
+        taskDTO.setUserId(task.getUserId());
+        taskDTO.setDescription(task.getDescription());
+        taskDTO.setTaskId(task.getTaskId());
+        taskDTO.setTaskName(task.getTaskName());
+        taskDTO.setDueDate(task.getDueDate());
+        taskDTO.setIsCompleted(task.getIsCompleted());
+        taskDTO.setCreatedTime(task.getCreatedTime());
+
+        try {
+            Optional<List<ListDTO>> lists = listService.getListsOfTask(task.getUserId(), task.getTaskId(), true);
+            taskDTO.setLists(lists.isPresent() ? lists.get() : null);
+        } catch (AppException e) {
+            e.printStackTrace();
+        }
+
+        return taskDTO;
+    }
+
+    private void checkUpdateTaskDetails(Task existingTask, Task newTask, boolean isNewCompletedValue) {
+
+        if (newTask.getDescription() == null && existingTask.getDescription() != null) {
+            newTask.setDescription(existingTask.getDescription());
+        }
+        if (newTask.getTaskName() == null && existingTask.getTaskName() != null) {
+            newTask.setTaskName(existingTask.getTaskName());
+        }
+        if (newTask.getDueDate() == null && existingTask.getDueDate() != null) {
+            newTask.setDueDate(existingTask.getDueDate());
+        }
+        if (!isNewCompletedValue) {
+            newTask.setIsCompleted(existingTask.getIsCompleted());
+        }
+    }
+
+    private void checkSameTaskName(Task task) throws AlreadyExistsException {
+        Optional<Task> resultTask = taskRepository.findByTaskNameAndUserId(task.getTaskName(), task.getUserId());
+
+        if (resultTask.isEmpty()) {
+            return;
+        }
+        if (resultTask.get().getTaskId() != task.getTaskId()) {
+            throw new AlreadyExistsException("Task Name already exists", 400);
+        }
+    }
+
+    private void sanitizeInputs(TaskDTO taskDTO) {
+        if (taskDTO.getTaskName() != null) {
+
+            taskDTO.setTaskName(taskDTO.getTaskName().trim());
+
+            if (taskDTO.getTaskName().length() < 3) {
+                throw new IllegalArgumentException("Task name length should be greater than or equal to 3");
+            }
+            if (taskDTO.getTaskName().length() > 50) {
+                throw new IllegalArgumentException("Task name length should be lesser than or equal to 50");
+            }
+
+            taskDTO.setTaskName(HtmlUtils.htmlEscape(taskDTO.getTaskName()));
+        }
+
+        if (taskDTO.getDescription() != null) {
+
+            if (taskDTO.getDescription().trim().length() > 200) {
+                throw new IllegalArgumentException("Task description length should be lesser than or equal to 200");
+            }
+            taskDTO.setDescription(taskDTO.getDescription().trim());
+            taskDTO.setDescription(HtmlUtils.htmlEscape(taskDTO.getDescription()));
+        }
+    }
+
+    private void decodeData(TaskDTO taskDTO) {
+        if (taskDTO.getTaskName() != null) {
+            taskDTO.setTaskName(HtmlUtils.htmlUnescape(taskDTO.getTaskName()));
+        }
+        if (taskDTO.getDescription() != null) {
+            taskDTO.setDescription(HtmlUtils.htmlUnescape(taskDTO.getDescription()));
+        }
+    }
+
 }
